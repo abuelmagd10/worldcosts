@@ -1,18 +1,19 @@
-let userConfig = undefined
-try {
-  // try to import ESM first
-  userConfig = await import('./v0-user-next.config.mjs')
-} catch (e) {
-  try {
-    // fallback to CJS import
-    userConfig = await import("./v0-user-next.config");
-  } catch (innerError) {
-    // ignore error
-  }
-}
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Simplificar la configuración de PWA
+  async rewrites() {
+    return [
+      {
+        source: '/manifest.json',
+        destination: '/api/manifest',
+      }
+    ];
+  },
+  // Eliminar la configuración de webpack التي قد تكون تسبب مشاكل
+  webpack: (config, { isServer }) => {
+    return config;
+  },
+  // إضافة الإعدادات الجديدة لتجاوز أخطاء البناء
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -22,30 +23,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    webpackBuildWorker: true,
-    parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
-  },
-}
+};
 
-if (userConfig) {
-  // ESM imports will have a "default" property
-  const config = userConfig.default || userConfig
-
-  for (const key in config) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
-        ...config[key],
-      }
-    } else {
-      nextConfig[key] = config[key]
-    }
-  }
-}
-
-export default nextConfig
+export default nextConfig;
