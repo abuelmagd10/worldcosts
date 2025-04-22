@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Simplificar la configuración de PWA
+  // تكوين PWA المبسط
   async rewrites() {
     return [
       {
@@ -9,19 +9,56 @@ const nextConfig = {
       }
     ];
   },
-  // Eliminar la configuración de webpack التي قد تكون تسبب مشاكل
-  webpack: (config, { isServer }) => {
+  // تكوين webpack المحسن
+  webpack: (config) => {
     return config;
   },
-  // إضافة الإعدادات الجديدة لتجاوز أخطاء البناء
+  // إعدادات لتجاوز أخطاء البناء
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  // إعدادات الصور
   images: {
     unoptimized: true,
+    domains: ['v0.blob.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+  // تعطيل التحليل التلقائي للروابط الخارجية
+  experimental: {
+    scrollRestoration: true,
+  },
+  // تحسين الأداء
+  swcMinify: true,
+  reactStrictMode: true,
+  // تكوين الوسائط
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ];
   },
 };
 

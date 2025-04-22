@@ -1,4 +1,4 @@
-// Service Worker básico para PWA
+// Service Worker أساسي لـ PWA
 self.addEventListener("install", (event) => {
   console.log("Service Worker installed")
   self.skipWaiting()
@@ -9,8 +9,8 @@ self.addEventListener("activate", (event) => {
   return self.clients.claim()
 })
 
-// Estrategia simple de caché
-const CACHE_NAME = "currency-calculator-v1"
+// استراتيجية التخزين المؤقت
+const CACHE_NAME = "currency-calculator-v2" // تحديث رقم الإصدار
 const URLS_TO_CACHE = [
   "/",
   "/offline",
@@ -18,6 +18,8 @@ const URLS_TO_CACHE = [
   "/icons/icon-192x192.png",
   "/icons/icon-384x384.png",
   "/icons/icon-512x512.png",
+  "/fonts/Amiri-Regular.ttf",
+  "/fonts/Amiri-Bold.ttf",
 ]
 
 self.addEventListener("install", (event) => {
@@ -29,22 +31,36 @@ self.addEventListener("install", (event) => {
 })
 
 self.addEventListener("fetch", (event) => {
+  // تحسين استراتيجية التخزين المؤقت
+  const requestUrl = new URL(event.request.url)
+
+  // تجاهل طلبات التحليلات وطلبات الإعلانات
+  if (
+    requestUrl.pathname.includes("/api/") ||
+    requestUrl.hostname.includes("google-analytics") ||
+    requestUrl.hostname.includes("googletagmanager") ||
+    requestUrl.hostname.includes("googlesyndication") ||
+    requestUrl.hostname.includes("pagead2.googlesyndication")
+  ) {
+    return
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Devolver desde caché si está disponible
+      // إذا كان موجودًا في التخزين المؤقت، أعد الاستجابة
       if (response) {
         return response
       }
 
-      // Si no está en caché, intentar obtenerlo de la red
+      // إذا لم يكن موجودًا، حاول الحصول عليه من الشبكة
       return fetch(event.request)
         .then((response) => {
-          // No almacenar en caché si la respuesta no es válida
+          // لا تخزن الاستجابة إذا لم تكن صالحة
           if (!response || response.status !== 200 || response.type !== "basic") {
             return response
           }
 
-          // Clonar la respuesta para almacenarla en caché
+          // استنساخ الاستجابة للتخزين المؤقت
           const responseToCache = response.clone()
 
           caches.open(CACHE_NAME).then((cache) => {
@@ -54,12 +70,12 @@ self.addEventListener("fetch", (event) => {
           return response
         })
         .catch(() => {
-          // Si falla la red y es una solicitud de página, mostrar página offline
+          // إذا فشلت الشبكة وكان طلب صفحة، أظهر صفحة عدم الاتصال
           if (event.request.mode === "navigate") {
             return caches.match("/offline")
           }
 
-          // Para otros recursos, simplemente devolver un error
+          // بالنسبة للموارد الأخرى، أعد خطأ الشبكة
           return new Response("Network error", {
             status: 408,
             headers: new Headers({
@@ -67,6 +83,22 @@ self.addEventListener("fetch", (event) => {
             }),
           })
         })
+    }),
+  )
+})
+
+// إضافة حدث تنظيف التخزين المؤقت
+self.addEventListener("activate", (event) => {
+  const cacheWhitelist = [CACHE_NAME]
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName)
+          }
+        }),
+      )
     }),
   )
 })

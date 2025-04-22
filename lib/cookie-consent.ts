@@ -1,7 +1,3 @@
-/**
- * مكتبة للتعامل مع موافقة المستخدم على ملفات تعريف الارتباط
- */
-
 // أنواع ملفات تعريف الارتباط
 export enum CookieType {
   NECESSARY = "necessary",
@@ -33,39 +29,42 @@ const CONSENT_STORAGE_KEY = "cookie_consent"
 
 // الحصول على حالة الموافقة الحالية
 export const getConsent = (): ConsentState => {
-  if (typeof window === "undefined") return DEFAULT_CONSENT
-
   try {
-    const storedConsent = localStorage.getItem(CONSENT_STORAGE_KEY)
-    if (storedConsent) {
-      return JSON.parse(storedConsent) as ConsentState
+    // استخدام localStorage مباشرة لتجنب مشاكل SSR
+    if (typeof window !== "undefined" && window.localStorage) {
+      const storedConsent = localStorage.getItem(CONSENT_STORAGE_KEY)
+      if (storedConsent) {
+        return JSON.parse(storedConsent) as ConsentState
+      }
     }
-  } catch (error) {
-    console.error("Error loading consent data:", error)
+    return DEFAULT_CONSENT
+  } catch (e) {
+    console.error("Error getting consent:", e)
+    return DEFAULT_CONSENT
   }
-
-  return DEFAULT_CONSENT
 }
 
 // تحديث موافقة المستخدم
 export const updateConsent = (consent: Partial<ConsentState>): ConsentState => {
-  const currentConsent = getConsent()
-  const newConsent: ConsentState = {
-    ...currentConsent,
-    ...consent,
-    [CookieType.NECESSARY]: true, // دائمًا صحيح
-    timestamp: Date.now(),
-  }
-
   try {
-    if (typeof window !== "undefined") {
+    const currentConsent = getConsent()
+    const newConsent: ConsentState = {
+      ...currentConsent,
+      ...consent,
+      [CookieType.NECESSARY]: true, // دائمًا صحيح
+      timestamp: Date.now(),
+    }
+
+    // استخدام localStorage مباشرة
+    if (typeof window !== "undefined" && window.localStorage) {
       localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(newConsent))
     }
-  } catch (error) {
-    console.error("Error saving consent data:", error)
-  }
 
-  return newConsent
+    return newConsent
+  } catch (e) {
+    console.error("Error updating consent:", e)
+    return getConsent()
+  }
 }
 
 // قبول جميع ملفات تعريف الارتباط

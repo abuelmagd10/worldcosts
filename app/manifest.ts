@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "حساب القيم بعملات متعددة بسهولة",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#1e40af", // Cambiado a azul para coincidir con el logo
+    background_color: "#1c1e22",
+    theme_color: "#0e9bef", // تحديث لون السمة ليتطابق مع تصميم التطبيق
     icons: [
       {
         src: "/icons/icon-192x192.png",
@@ -34,5 +34,19 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: "rtl",
     prefer_related_applications: false,
     categories: ["finance", "utilities"],
+    screenshots: [
+      {
+        src: "/screenshots/screenshot1.png",
+        sizes: "1280x720",
+        type: "image/png",
+        form_factor: "wide",
+      },
+      {
+        src: "/screenshots/screenshot2.png",
+        sizes: "1280x720",
+        type: "image/png",
+        form_factor: "wide",
+      },
+    ],
   }
 }

@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
+    userScalable: false,
   },
   manifest: "/manifest.json",
   themeColor: [
@@ -33,12 +34,17 @@ export const metadata: Metadata = {
       { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [{ url: "/icons/icon-192x192.png" }, { url: "/icons/icon-512x512.png" }],
+    shortcut: [{ url: "/icons/icon-192x192.png" }],
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes",
   },
     generator: 'v0.dev'
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // Determinar si estamos en un entorno de producción
+  // تحديد ما إذا كنا في بيئة إنتاج
   const isProduction =
     process.env.NODE_ENV === "production" &&
     typeof window !== "undefined" &&
@@ -60,7 +66,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
         <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
 
-        {/* Solo cargar el script de AdSense en producción */}
+        {/* تحميل سكريبت AdSense فقط في الإنتاج */}
         {isProduction && (
           <Script
             async
@@ -91,6 +97,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             // تمكين المحتوى المختلط (مع الحفاظ على الأمان)
             if (window.location.protocol === 'https:') {
               console.log('Secure context - mixed content will be upgraded');
+            }
+
+            // تسجيل Service Worker
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(
+                  function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                  },
+                  function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  }
+                );
+              });
             }
           `}
         </Script>
