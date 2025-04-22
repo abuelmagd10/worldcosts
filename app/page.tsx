@@ -386,11 +386,24 @@ export default function CurrencyCalculator() {
 
   // تعديل وظيفة handleDownloadPDF
   const handleDownloadPDF = async () => {
-    if (items.length === 0 || !rates) return
+    if (items.length === 0 || !rates) {
+      toast({
+        title: t.fileDownloadError,
+        description: t.noItemsToExport || "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
+        variant: "destructive",
+      })
+      return
+    }
 
     setIsGeneratingPDF(true)
     try {
-      // استخدام طريقة واحدة فقط لإنشاء PDF
+      // عرض رسالة بدء التوليد
+      toast({
+        title: t.generatingPDF || "جاري إنشاء ملف PDF",
+        description: t.pleaseWait || "يرجى الانتظار...",
+      })
+
+      // استخدام وظيفة إنشاء PDF
       await generatePDF({
         items,
         totals,
@@ -402,15 +415,18 @@ export default function CurrencyCalculator() {
         dir,
       })
 
+      // عرض رسالة نجاح
       toast({
         title: t.fileDownloadSuccess,
         description: t.fileDownloadSuccessDesc,
       })
     } catch (error) {
       console.error("Error generating PDF:", error)
+
+      // عرض رسالة خطأ مفصلة
       toast({
         title: t.fileDownloadError,
-        description: t.fileDownloadErrorDesc,
+        description: `${t.fileDownloadErrorDesc} ${error instanceof Error ? error.message : ""}`,
         variant: "destructive",
       })
     } finally {
@@ -586,6 +602,56 @@ export default function CurrencyCalculator() {
     setNextId(Math.max(...historyItems.map((item) => item.id)) + 1)
   }
 
+  // إضافة وظيفة لتصدير البيانات بتنسيق CSV
+  const handleExportCSV = () => {
+    if (items.length === 0) {
+      toast({
+        title: t.fileDownloadError,
+        description: t.noItemsToExport || "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      // إنشاء محتوى CSV
+      const headers = [t.itemName, t.inputValue, t.calculatedValue, t.currency]
+      const rows = items.map((item) => [
+        item.name,
+        item.originalValue,
+        formatNumber(item.value, "en", true),
+        getCurrencyName(item.currency),
+      ])
+
+      // تحويل البيانات إلى نص CSV
+      let csvContent = headers.join(",") + "\n"
+      csvContent += rows.map((row) => row.join(",")).join("\n")
+
+      // إنشاء رابط تنزيل
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.setAttribute("href", url)
+      link.setAttribute("download", `WorldCosts_${new Date().toISOString().slice(0, 10)}.csv`)
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      toast({
+        title: t.fileDownloadSuccess,
+        description: t.csvDownloadSuccessDesc || "تم تنزيل ملف CSV بنجاح.",
+      })
+    } catch (error) {
+      console.error("Error exporting CSV:", error)
+      toast({
+        title: t.fileDownloadError,
+        description: t.csvDownloadErrorDesc || "حدث خطأ أثناء تصدير البيانات. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
       <div className="container mx-auto py-8 px-4">
@@ -759,6 +825,10 @@ export default function CurrencyCalculator() {
                           }`}
                         />
                         {t.downloadPDF}
+                      </TeslaButton>
+                      <TeslaButton variant="secondary" size="sm" onClick={handleExportCSV}>
+                        <FileDown className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"}`} />
+                        {t.exportCSV || "تصدير CSV"}
                       </TeslaButton>
                     </div>
                   </div>

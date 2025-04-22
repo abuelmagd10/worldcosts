@@ -251,6 +251,11 @@ export type Translation = {
   showDetails: string
   hideDetails: string
   savePreferences: string
+  generatingPDF: string
+  pleaseWait: string
+  noItemsToExport: string
+  pdfGenerationFailed: string
+  tryAgainLater: string
 }
 
 // Arabic translations
@@ -509,6 +514,11 @@ export const ar: Translation = {
   clearHistory: "مسح السجل",
   items: "العناصر",
   total: "المجموع",
+  generatingPDF: "جاري إنشاء ملف PDF",
+  pleaseWait: "يرجى الانتظار...",
+  noItemsToExport: "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
+  pdfGenerationFailed: "فشل إنشاء ملف PDF",
+  tryAgainLater: "يرجى المحاولة مرة أخرى لاحقاً",
 }
 
 // English translations
@@ -771,6 +781,11 @@ export const en: Translation = {
   clearHistory: "Clear History",
   items: "Items",
   total: "Total",
+  generatingPDF: "Generating PDF",
+  pleaseWait: "Please wait...",
+  noItemsToExport: "No items to export. Please add items first.",
+  pdfGenerationFailed: "PDF generation failed",
+  tryAgainLater: "Please try again later",
 }
 
 // German translations
@@ -1041,6 +1056,11 @@ export const de: Translation = {
   clearHistory: "Verlauf löschen",
   items: "Elemente",
   total: "Gesamt",
+  generatingPDF: "PDF wird generiert",
+  pleaseWait: "Bitte warten...",
+  noItemsToExport: "Keine Elemente zum Exportieren. Bitte fügen Sie zuerst Elemente hinzu.",
+  pdfGenerationFailed: "PDF-Generierung fehlgeschlagen",
+  tryAgainLater: "Bitte versuchen Sie es später erneut",
 }
 
 // تحديث الترجمات الفرنسية
@@ -1312,6 +1332,11 @@ export const fr: Translation = {
   clearHistory: "Effacer l'historique",
   items: "Éléments",
   total: "Total",
+  generatingPDF: "Génération du PDF",
+  pleaseWait: "Veuillez patienter...",
+  noItemsToExport: "Aucun élément à exporter. Veuillez d'abord ajouter des éléments.",
+  pdfGenerationFailed: "Échec de la génération du PDF",
+  tryAgainLater: "Veuillez réessayer plus tard",
 }
 
 // Export all translations
