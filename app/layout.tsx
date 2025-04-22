@@ -44,13 +44,6 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // تحديد ما إذا كنا في بيئة إنتاج
-  const isProduction =
-    process.env.NODE_ENV === "production" &&
-    typeof window !== "undefined" &&
-    !window.location.hostname.includes("vusercontent.net") &&
-    !window.location.hostname.includes("vercel.app")
-
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
@@ -58,29 +51,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="icon" href="/icons/icon-192x192.png" />
-
         <meta name="google-site-verification" content="googlef73da8a61c68dbf7" />
-
-        {/* تمكين ميزات إضافية */}
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
         <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
         <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
+      </head>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ThemeProvider>
 
-        {/* تحميل سكريبت AdSense فقط في الإنتاج */}
-        {isProduction && (
-          <Script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"
-            crossOrigin="anonymous"
-            data-ad-client="ca-pub-3799584967407983"
-            strategy="afterInteractive"
-          />
-        )}
-
-        {/* إضافة سكريبت لتمكين ميزات إضافية */}
-        <Script id="enable-features" strategy="beforeInteractive">
+        {/* Move scripts to the end of body to avoid blocking rendering */}
+        <Script id="enable-features" strategy="afterInteractive">
           {`
-            // تمكين تخزين DOM
+            // Enable DOM storage
             try {
               if (typeof localStorage !== 'undefined') {
                 localStorage.setItem('dom_storage_test', 'enabled');
@@ -91,15 +75,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               console.warn('DOM Storage not available:', e);
             }
             
-            // تمكين ملفات تعريف الارتباط
+            // Enable cookies
             document.cookie = "cookies_enabled=true; max-age=86400; path=/; SameSite=Lax";
             
-            // تمكين المحتوى المختلط (مع الحفاظ على الأمان)
+            // Enable mixed content (while maintaining security)
             if (window.location.protocol === 'https:') {
               console.log('Secure context - mixed content will be upgraded');
             }
 
-            // تسجيل Service Worker
+            // Register Service Worker
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').then(
@@ -114,11 +98,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             }
           `}
         </Script>
-      </head>
-      <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LanguageProvider>{children}</LanguageProvider>
-        </ThemeProvider>
+
+        {/* Only load AdSense in production */}
+        {process.env.NODE_ENV === "production" && (
+          <Script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"
+            crossOrigin="anonymous"
+            data-ad-client="ca-pub-3799584967407983"
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   )

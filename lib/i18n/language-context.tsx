@@ -25,15 +25,15 @@ export const useLanguage = () => useContext(LanguageContext)
 
 // Language provider component
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Get initial language from localStorage or default to Arabic
+  // Initialize with a default language to avoid hydration mismatch
   const [language, setLanguageState] = useState<LanguageCode>("ar")
-  const [isClient, setIsClient] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
-  // Set isClient to true when component mounts
+  // Set mounted to true when component mounts
   useEffect(() => {
-    setIsClient(true)
+    setMounted(true)
 
-    // Usar localStorage directamente para evitar problemas con SSR
+    // Only access localStorage after component is mounted
     try {
       const savedLanguage = localStorage.getItem("language") as LanguageCode
       if (savedLanguage && translations[savedLanguage]) {
@@ -47,7 +47,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Function to change language
   const setLanguage = (lang: LanguageCode) => {
     setLanguageState(lang)
-    if (isClient) {
+    if (mounted) {
       try {
         localStorage.setItem("language", lang)
       } catch (e) {

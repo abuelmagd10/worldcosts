@@ -1,16 +1,15 @@
 "use client"
 
 import type React from "react"
-
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface AdBannerProps {
   adSlot: string
   adFormat?: string
   style?: React.CSSProperties
   className?: string
-  minContentLength?: number // إضافة خاصية للتحكم في الحد الأدنى لطول المحتوى
-  items?: any[] // إضافة خاصية لتتبع العناصر في الصفحة
+  minContentLength?: number
+  items?: any[]
 }
 
 export function AdBanner({
@@ -18,34 +17,37 @@ export function AdBanner({
   adFormat = "auto",
   style = {},
   className = "",
-  minContentLength = 500, // الحد الأدنى الافتراضي لطول المحتوى
+  minContentLength = 500,
   items = [],
 }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
   const isLoaded = useRef(false)
   const adAttempts = useRef(0)
+  const [mounted, setMounted] = useState(false)
 
-  // التحقق من وجود محتوى كافٍ في الصفحة لعرض الإعلانات
-  const hasEnoughContent = useRef<boolean>(false)
+  // Set mounted to true when component mounts
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  // تحسين وظيفة التحقق من كمية المحتوى
+  // Check if there's enough content
   const checkContentAmount = () => {
     if (typeof document === "undefined") return false
 
-    // التحقق من كمية النص في الصفحة
+    // Check text content
     const textContent = document.body.innerText || ""
     const wordCount = textContent.split(/\s+/).filter(Boolean).length
 
-    // التحقق من وجود عناصر تفاعلية (نماذج، جداول، إلخ)
+    // Check for interactive elements
     const hasInteractiveElements = document.querySelectorAll("form, table, [role='grid']").length > 0
 
-    // التحقق من وجود عناصر محتوى مهمة
+    // Check for content elements
     const hasContentElements = document.querySelectorAll("article, section, main, .card-content").length > 0
 
-    // التحقق من عدد الصور
+    // Check for images
     const hasImages = document.querySelectorAll("img").length > 0
 
-    // التحقق من أن الصفحة ليست صفحة خطأ أو تسجيل دخول أو شكر
+    // Check if page is a special page
     const isSpecialPage =
       document.title.toLowerCase().includes("error") ||
       document.title.toLowerCase().includes("login") ||
@@ -53,24 +55,10 @@ export function AdBanner({
       document.title.toLowerCase().includes("offline") ||
       window.location.pathname.includes("offline")
 
-    // التحقق من أن الصفحة ليست فارغة
+    // Check if page is empty
     const isEmptyPage = document.querySelectorAll(".empty-state").length > 0
 
-    console.log("Content check:", {
-      wordCount,
-      hasInteractiveElements,
-      hasContentElements,
-      hasImages,
-      isSpecialPage,
-      isEmptyPage,
-    })
-
-    // اعتبار أن هناك محتوى كافٍ إذا:
-    // 1. كان عدد الكلمات أكبر من الحد الأدنى المطلوب، أو
-    // 2. كان هناك عناصر تفاعلية وعناصر محتوى وصور
-    // 3. وليست صفحة خاصة (خطأ، تسجيل دخول، شكر)
-    // 4. وليست صفحة فارغة
-    // تحسين معايير عرض الإعلانات للسماح بعرضها في المزيد من الحالات
+    // Consider there's enough content if:
     return (
       (wordCount > minContentLength || hasInteractiveElements || hasContentElements || items?.length > 0) &&
       !isSpecialPage &&
@@ -78,51 +66,32 @@ export function AdBanner({
     )
   }
 
-  // تحقق من دعم ملفات تعريف الارتباط
-  const checkCookiesEnabled = () => {
-    try {
-      document.cookie = "cookietest=1; SameSite=Lax"
-      const result = document.cookie.indexOf("cookietest=") !== -1
-      document.cookie = "cookietest=1; SameSite=Lax; expires=Thu, 01-Jan-1970 00:00:01 GMT"
-      return result
-    } catch (e) {
-      return false
-    }
-  }
-
   useEffect(() => {
-    // التنفيذ مرة واحدة فقط لكل مكون
-    if (isLoaded.current) return
+    // Only run once per component
+    if (isLoaded.current || !mounted) return
 
-    // التأكد من أن DOM محمل بالكامل
+    // Make sure DOM is fully loaded
     if (!adRef.current || typeof window === "undefined") return
 
-    // التحقق من وجود محتوى كافٍ قبل عرض الإعلانات
-    hasEnoughContent.current = checkContentAmount()
-
-    if (!hasEnoughContent.current) {
-      console.log("لا يوجد محتوى كافٍ لعرض الإعلانات")
+    // Check if there's enough content before showing ads
+    const hasEnoughContent = checkContentAmount()
+    if (!hasEnoughContent) {
+      console.log("Not enough content to display ads")
       return
-    }
-
-    // التحقق من دعم ملفات تعريف الارتباط
-    const cookiesEnabled = checkCookiesEnabled()
-    if (!cookiesEnabled) {
-      console.warn("Cookies are disabled. Ads may not work properly.")
     }
 
     const loadAd = () => {
       try {
-        // تحديد أبعاد صريحة للحاوية
+        // Set explicit dimensions for container
         const adContainer = adRef.current
         if (!adContainer) return
 
         if (adContainer.offsetWidth === 0) {
           adContainer.style.width = "100%"
-          adContainer.style.minHeight = "280px" // الحد الأدنى للارتفاع لضمان الرؤية
+          adContainer.style.minHeight = "280px"
         }
 
-        // إنشاء عنصر ins للإعلان
+        // Create ins element for ad
         const adElement = document.createElement("ins")
         adElement.className = "adsbygoogle"
         adElement.style.display = "block"
@@ -133,39 +102,42 @@ export function AdBanner({
         adElement.setAttribute("data-ad-format", adFormat)
         adElement.setAttribute("data-full-width-responsive", "true")
 
-        // تنظيف الحاوية وإضافة العنصر الجديد
+        // Clean container and add new element
         while (adContainer.firstChild) {
           adContainer.removeChild(adContainer.firstChild)
         }
         adContainer.appendChild(adElement)
 
-        // تهيئة الإعلان
+        // Initialize ad
         try {
-          ;(window.adsbygoogle = window.adsbygoogle || []).push({})
-          isLoaded.current = true
-          console.log("Ad initialized successfully")
+          if (window.adsbygoogle) {
+            ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+            isLoaded.current = true
+            console.log("Ad initialized successfully")
+          } else {
+            console.warn("adsbygoogle not available yet")
+            // Retry if initialization fails (up to 3 attempts)
+            if (adAttempts.current < 3) {
+              adAttempts.current++
+              setTimeout(loadAd, 1000)
+            }
+          }
         } catch (error) {
           console.error("Error initializing adsbygoogle:", error)
-
-          // إعادة المحاولة إذا فشلت التهيئة (حتى 3 محاولات)
-          if (adAttempts.current < 3) {
-            adAttempts.current++
-            setTimeout(loadAd, 1000)
-          }
         }
       } catch (error) {
         console.error("Error setting up AdSense:", error)
       }
     }
 
-    // الانتظار لحظة للتأكد من أن DOM مستقر
+    // Wait a moment to ensure DOM is stable
     const timer = setTimeout(loadAd, 100)
 
     return () => clearTimeout(timer)
-  }, [adSlot, adFormat, minContentLength, items])
+  }, [adSlot, adFormat, minContentLength, items, mounted])
 
-  // إذا لم يكن هناك محتوى كافٍ، لا تعرض الإعلان على الإطلاق
-  if (typeof window !== "undefined" && !checkContentAmount()) {
+  // If there's not enough content, don't render ad at all
+  if (mounted && typeof window !== "undefined" && !checkContentAmount()) {
     return null
   }
 
