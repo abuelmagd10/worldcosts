@@ -2,11 +2,8 @@
 
 import Link from "next/link"
 import { TableCell } from "@/components/ui/table"
-import { TableBody } from "@/components/ui/table"
-import { TableHead } from "@/components/ui/table"
 import { TableRow } from "@/components/ui/table"
-import { TableHeader } from "@/components/ui/table"
-import { Table } from "@/components/ui/table"
+import { Table, TableBody, TableHeader, TableHead } from "@/components/ui/table"
 import { SelectContent } from "@/components/ui/select"
 import { SelectValue } from "@/components/ui/select"
 import { SelectTrigger } from "@/components/ui/select"
@@ -40,6 +37,11 @@ import { ItemsChart } from "@/components/items-chart"
 import { ThemeToggle } from "@/components/theme-toggle"
 // أضف استيراد مكون FeaturesShowcase
 import { FeaturesShowcase } from "@/components/features-showcase"
+// استيراد مكون موافقة ملفات تعريف الارتباط
+import { CookieConsentBanner } from "@/components/cookie-consent-banner"
+import { formatNumber } from "@/lib/utils"
+// Importar el componente de historial de cálculos
+import { CalculationHistory } from "@/components/calculation-history"
 
 type Currency =
   | "USD"
@@ -60,6 +62,14 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
+  | "ILS"
+  | "JOD"
+  | "LBP"
+  | "MAD"
+  | "OMR"
+  | "BHD"
+  | "DZD"
+  | "TND"
 type Item = {
   id: number
   name: string
@@ -92,10 +102,68 @@ export default function CurrencyCalculator() {
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now())
 
-  // Fetch exchange rates on component mount
+  // استرجاع البيانات المحفوظة عند تحميل الصفحة
   useEffect(() => {
+    // استرجاع العناصر المحفوظة
+    try {
+      const savedItemsStr = localStorage.getItem("saved_items")
+      if (savedItemsStr) {
+        const savedItems = JSON.parse(savedItemsStr) as Item[]
+        if (savedItems && savedItems.length > 0) {
+          setItems(savedItems)
+          setNextId(Math.max(...savedItems.map((item) => item.id)) + 1)
+        }
+      }
+
+      // استرجاع العملة المحددة
+      const savedCurrency = localStorage.getItem("selected_currency") as Currency
+      if (savedCurrency) {
+        setTotalCurrency(savedCurrency)
+      }
+
+      // استرجاع معلومات الشركة
+      const savedCompanyInfoStr = localStorage.getItem("company_info")
+      if (savedCompanyInfoStr) {
+        const savedCompanyInfo = JSON.parse(savedCompanyInfoStr) as CompanyInfo
+        if (savedCompanyInfo && savedCompanyInfo.name) {
+          setCompanyInfo(savedCompanyInfo)
+        }
+      }
+    } catch (e) {
+      console.error("Error loading saved data:", e)
+    }
+
     fetchRates()
   }, [])
+
+  // حفظ البيانات عند تغييرها
+  useEffect(() => {
+    if (items.length > 0) {
+      try {
+        localStorage.setItem("saved_items", JSON.stringify(items))
+      } catch (e) {
+        console.error("Error saving items:", e)
+      }
+    }
+  }, [items])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("selected_currency", totalCurrency)
+    } catch (e) {
+      console.error("Error saving currency:", e)
+    }
+  }, [totalCurrency])
+
+  useEffect(() => {
+    if (companyInfo.name) {
+      try {
+        localStorage.setItem("company_info", JSON.stringify(companyInfo))
+      } catch (e) {
+        console.error("Error saving company info:", e)
+      }
+    }
+  }, [companyInfo])
 
   const fetchRates = async (forceRefresh = false) => {
     try {
@@ -194,6 +262,12 @@ export default function CurrencyCalculator() {
     setValue("")
     setCurrency("USD")
     setNextId(1)
+    // حذف البيانات المحفوظة
+    try {
+      localStorage.removeItem("saved_items")
+    } catch (e) {
+      console.error("Error removing saved items:", e)
+    }
   }
 
   // Calculate totals in different currencies
@@ -218,6 +292,15 @@ export default function CurrencyCalculator() {
         KWD: 0,
         QAR: 0,
         MYR: 0,
+        // Nuevas divisas
+        ILS: 0,
+        JOD: 0,
+        LBP: 0,
+        MAD: 0,
+        OMR: 0,
+        BHD: 0,
+        DZD: 0,
+        TND: 0,
       }
 
     const totalInUSD = items.reduce((sum, item) => {
@@ -244,6 +327,15 @@ export default function CurrencyCalculator() {
       KWD: totalInUSD * rates.KWD,
       QAR: totalInUSD * rates.QAR,
       MYR: totalInUSD * rates.MYR,
+      // Nuevas divisas
+      ILS: totalInUSD * rates.ILS,
+      JOD: totalInUSD * rates.JOD,
+      LBP: totalInUSD * rates.LBP,
+      MAD: totalInUSD * rates.MAD,
+      OMR: totalInUSD * rates.OMR,
+      BHD: totalInUSD * rates.BHD,
+      DZD: totalInUSD * rates.DZD,
+      TND: totalInUSD * rates.TND,
     }
   }
 
@@ -329,6 +421,11 @@ export default function CurrencyCalculator() {
   // Handle saving company info
   const handleSaveCompanyInfo = (info: CompanyInfo) => {
     setCompanyInfo(info)
+    try {
+      localStorage.setItem("company_info", JSON.stringify(info))
+    } catch (e) {
+      console.error("Error saving company info:", e)
+    }
     toast({
       title: t.companyInfoSaved,
       description: t.companyInfoSavedDesc,
@@ -400,6 +497,23 @@ export default function CurrencyCalculator() {
         return "ر.ق"
       case "MYR":
         return "RM"
+      // Nuevas divisas
+      case "ILS":
+        return "₪"
+      case "JOD":
+        return "د.أ"
+      case "LBP":
+        return "ل.ل"
+      case "MAD":
+        return "د.م."
+      case "OMR":
+        return "ر.ع."
+      case "BHD":
+        return "د.ب"
+      case "DZD":
+        return "د.ج"
+      case "TND":
+        return "د.ت"
       default:
         return ""
     }
@@ -409,7 +523,7 @@ export default function CurrencyCalculator() {
   const currencyGroups = [
     {
       label: "الشرق الأوسط وشمال أفريقيا",
-      currencies: ["EGP", "AED", "SAR", "KWD", "QAR"],
+      currencies: ["EGP", "AED", "SAR", "KWD", "QAR", "ILS", "JOD", "LBP", "MAD", "OMR", "BHD", "DZD", "TND"],
     },
     {
       label: "أمريكا وأوروبا",
@@ -446,6 +560,15 @@ export default function CurrencyCalculator() {
       KWD: t.kwd,
       QAR: t.qar,
       MYR: t.myr,
+      // Nuevas divisas
+      ILS: t.ils,
+      JOD: t.jod,
+      LBP: t.lbp,
+      MAD: t.mad,
+      OMR: t.omr,
+      BHD: t.bhd,
+      DZD: t.dzd,
+      TND: t.tnd,
     }
     return names[code]
   }
@@ -456,10 +579,17 @@ export default function CurrencyCalculator() {
     }
   }, [lastUpdateTime, rates])
 
+  // Añadir una función para cargar el historial
+  const loadHistoryItems = (historyItems: Item[], historyCurrency: Currency) => {
+    setItems(historyItems)
+    setTotalCurrency(historyCurrency)
+    setNextId(Math.max(...historyItems.map((item) => item.id)) + 1)
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
       <div className="container mx-auto py-8 px-4">
-        {items.length >= 3 && <AdBanner adSlot="7996815600" className="mb-6" minContentLength={300} />}
+        <AdBanner adSlot="7996815600" className="mb-6 mt-2" minContentLength={300} items={items} />
 
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-between w-full mb-4">
@@ -602,7 +732,9 @@ export default function CurrencyCalculator() {
             </TeslaCardContent>
           </TeslaCard>
 
-          {!isLoading && items.length >= 5 && <AdBanner adSlot="7996815600" className="my-4" minContentLength={300} />}
+          {!isLoading && items.length >= 5 && (
+            <AdBanner adSlot="7996815600" className="my-4" minContentLength={300} items={items} />
+          )}
 
           {!isLoading && items.length > 0 ? (
             <>
@@ -661,7 +793,7 @@ export default function CurrencyCalculator() {
                               {item.originalValue}
                             </TableCell>
                             <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
-                              {item.value.toFixed(2)}
+                              {formatNumber(item.value, language)}
                             </TableCell>
                             <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
                               {getCurrencyName(item.currency)}
@@ -711,7 +843,7 @@ export default function CurrencyCalculator() {
                   <div className="bg-muted rounded-xl p-6 text-center">
                     <p className="text-muted-foreground mb-2">{t[`in${totalCurrency}` as keyof typeof t]}</p>
                     <p className="text-4xl font-bold text-tesla-blue">
-                      {totals[totalCurrency].toFixed(2)} {getCurrencySymbol(totalCurrency)}
+                      {formatNumber(totals[totalCurrency], language)} {getCurrencySymbol(totalCurrency)}
                     </p>
                   </div>
                 </TeslaCardContent>
@@ -749,6 +881,10 @@ export default function CurrencyCalculator() {
                 </TeslaCardFooter>
               </TeslaCard>
 
+              {items.length > 0 && (
+                <AdBanner adSlot="1234567890" className="my-6" adFormat="fluid" minContentLength={200} items={items} />
+              )}
+
               <TeslaCard>
                 <TeslaCardHeader>
                   <TeslaCardTitle className="text-xl font-medium">{t.chartTitle}</TeslaCardTitle>
@@ -757,6 +893,15 @@ export default function CurrencyCalculator() {
                   <ItemsChart items={items} getCurrencyName={(code) => getCurrencyName(code as Currency)} />
                 </TeslaCardContent>
               </TeslaCard>
+
+              <CalculationHistory
+                currentItems={items}
+                totalCurrency={totalCurrency}
+                totalValue={totals[totalCurrency]}
+                onLoadHistory={loadHistoryItems}
+                getCurrencyName={getCurrencyName}
+                getCurrencySymbol={getCurrencySymbol}
+              />
             </>
           ) : (
             !isLoading && (
@@ -800,7 +945,15 @@ export default function CurrencyCalculator() {
           </Link>
         </div>
 
-        {items.length >= 3 && <AdBanner adSlot="7996815600" className="mt-8" minContentLength={300} />}
+        <div className="mt-8 mb-4">
+          <AdBanner
+            adSlot="7996815600"
+            className="rounded-xl shadow-lg"
+            style={{ minHeight: "250px" }}
+            minContentLength={200}
+            items={items}
+          />
+        </div>
       </div>
 
       <CompanyInfoDialog
@@ -810,6 +963,7 @@ export default function CurrencyCalculator() {
         onSave={handleSaveCompanyInfo}
       />
 
+      <CookieConsentBanner />
       <RegisterSW />
       <OfflineAlert />
     </div>

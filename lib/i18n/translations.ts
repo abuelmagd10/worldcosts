@@ -36,6 +36,16 @@ export type Translation = {
   qar: string
   myr: string
 
+  // Nuevas divisas
+  ils: string
+  jod: string
+  lbp: string
+  mad: string
+  omr: string
+  bhd: string
+  dzd: string
+  tnd: string
+
   // Totals section
   totalAmount: string
   inUSD: string
@@ -218,6 +228,15 @@ export type Translation = {
   feature2Description: string
   feature3Description: string
   feature4Description: string
+
+  // Historial de cálculos
+  calculationHistory: string
+  saveCalculation: string
+  noCalculationHistory: string
+  load: string
+  clearHistory: string
+  items: string
+  total: string
 }
 
 // Arabic translations
@@ -253,6 +272,16 @@ export const ar: Translation = {
   kwd: "دينار كويتي",
   qar: "ريال قطري",
   myr: "رينجيت ماليزي",
+
+  // Nuevas divisas
+  ils: "شيكل إسرائيلي",
+  jod: "دينار أردني",
+  lbp: "ليرة لبنانية",
+  mad: "درهم مغربي",
+  omr: "ريال عماني",
+  bhd: "دينار بحريني",
+  dzd: "دينار جزائري",
+  tnd: "دينار تونسي",
 
   totalAmount: "المجموع الكلي",
   inUSD: "بالدولار الأمريكي",
@@ -442,6 +471,15 @@ export const ar: Translation = {
   feature2Description: "تحويل العملات في الوقت الفعلي باستخدام أحدث أسعار الصرف",
   feature3Description: "تصميم التقارير المهنية وتحميلها كملف PDF مع إمكانية إضافة شعار الشركة ومعلوماتها",
   feature4Description: "واجهة سهلة الاستخدام ومتوفرة بلغات متعددة",
+
+  // Historial de cálculos
+  calculationHistory: "سجل الحسابات",
+  saveCalculation: "حفظ الحساب الحالي",
+  noCalculationHistory: "لا يوجد سجل حسابات حتى الآن",
+  load: "تحميل",
+  clearHistory: "مسح السجل",
+  items: "العناصر",
+  total: "المجموع",
 }
 
 // English translations
@@ -477,6 +515,16 @@ export const en: Translation = {
   kwd: "Kuwaiti Dinar",
   qar: "Qatari Riyal",
   myr: "Malaysian Ringgit",
+
+  // Nuevas divisas
+  ils: "Israeli Shekel",
+  jod: "Jordanian Dinar",
+  lbp: "Lebanese Pound",
+  mad: "Moroccan Dirham",
+  omr: "Omani Rial",
+  bhd: "Bahraini Dinar",
+  dzd: "Algerian Dinar",
+  tnd: "Tunisian Dinar",
 
   totalAmount: "Total Amount",
   inUSD: "In USD",
@@ -669,6 +717,15 @@ export const en: Translation = {
   feature2Description: "Real-time currency conversion using the latest exchange rates",
   feature3Description: "Design professional reports and download them as PDF with company logo and information",
   feature4Description: "User-friendly interface available in multiple languages",
+
+  // Historial de cálculos
+  calculationHistory: "Calculation History",
+  saveCalculation: "Save Current Calculation",
+  noCalculationHistory: "No calculation history yet",
+  load: "Load",
+  clearHistory: "Clear History",
+  items: "Items",
+  total: "Total",
 }
 
 // German translations
@@ -704,6 +761,16 @@ export const de: Translation = {
   kwd: "Kuwaitischer Dinar",
   qar: "Katar-Riyal",
   myr: "Malaysischer Ringgit",
+
+  // Nuevas divisas
+  ils: "Israelischer Schekel",
+  jod: "Jordanischer Dinar",
+  lbp: "Libanesisches Pfund",
+  mad: "Marokkanischer Dirham",
+  omr: "Omanischer Rial",
+  bhd: "Bahrain-Dinar",
+  dzd: "Algerischer Dinar",
+  tnd: "Tunesischer Dinar",
 
   totalAmount: "Gesamtbetrag",
   inUSD: "In USD",
@@ -903,6 +970,15 @@ export const de: Translation = {
   feature3Description:
     "Entwerfen Sie professionelle Berichte und laden Sie sie als PDF mit Firmenlogo und Informationen herunter",
   feature4Description: "Benutzerfreundliche Oberfläche in mehreren Sprachen verfügbar",
+
+  // Historial de cálculos
+  calculationHistory: "Berechnungsverlauf",
+  saveCalculation: "Aktuelle Berechnung speichern",
+  noCalculationHistory: "Noch kein Berechnungsverlauf",
+  load: "Laden",
+  clearHistory: "Verlauf löschen",
+  items: "Elemente",
+  total: "Gesamt",
 }
 
 // تحديث الترجمات الفرنسية
@@ -938,6 +1014,16 @@ export const fr: Translation = {
   kwd: "Dinar koweïtien",
   qar: "Riyal qatari",
   myr: "Ringgit malaisien",
+
+  // Nuevas divisas
+  ils: "Shekel israélien",
+  jod: "Dinar jordanien",
+  lbp: "Livre libanaise",
+  mad: "Dirham marocain",
+  omr: "Rial omanais",
+  bhd: "Dinar bahreïni",
+  dzd: "Dinar algérien",
+  tnd: "Dinar tunisien",
 
   totalAmount: "Montant total",
   inUSD: "En USD",
@@ -1138,6 +1224,15 @@ export const fr: Translation = {
   feature3Description:
     "Concevez des rapports professionnels et téléchargez-les au format PDF avec le logo et les informations de l'entreprise",
   feature4Description: "Interface conviviale disponible en plusieurs langues",
+
+  // Historial de cálculos
+  calculationHistory: "Historique des calculs",
+  saveCalculation: "Enregistrer le calcul actuel",
+  noCalculationHistory: "Pas encore d'historique de calcul",
+  load: "Charger",
+  clearHistory: "Effacer l'historique",
+  items: "Éléments",
+  total: "Total",
 }
 
 // Export all translations

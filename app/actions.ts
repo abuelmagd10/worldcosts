@@ -2,7 +2,7 @@
 
 import { unstable_cache } from "next/cache"
 
-// Define the structure of our exchange rates
+// Añadir más divisas a la estructura ExchangeRates
 export type ExchangeRates = {
   USD: number
   EGP: number
@@ -22,10 +22,19 @@ export type ExchangeRates = {
   KWD: number
   QAR: number
   MYR: number
+  // Nuevas divisas añadidas
+  ILS: number // Shekel israelí
+  JOD: number // Dinar jordano
+  LBP: number // Libra libanesa
+  MAD: number // Dirham marroquí
+  OMR: number // Rial omaní
+  BHD: number // Dinar bareiní
+  DZD: number // Dinar argelino
+  TND: number // Dinar tunecino
   lastUpdated: string
 }
 
-// Initial fallback rates in case the API fails
+// Actualizar las tasas de cambio predeterminadas
 const FALLBACK_RATES: ExchangeRates = {
   USD: 1,
   EGP: 49.28,
@@ -45,16 +54,25 @@ const FALLBACK_RATES: ExchangeRates = {
   KWD: 0.31,
   QAR: 3.64,
   MYR: 4.7,
+  // Nuevas divisas añadidas
+  ILS: 3.68,
+  JOD: 0.71,
+  LBP: 90000,
+  MAD: 9.95,
+  OMR: 0.385,
+  BHD: 0.376,
+  DZD: 134.5,
+  TND: 3.12,
   lastUpdated: new Date().toISOString(),
 }
 
-// Function to fetch the latest exchange rates
+// Actualizar la función fetchExchangeRates para incluir las nuevas divisas
 async function fetchExchangeRates(forceRefresh = false): Promise<ExchangeRates> {
   try {
-    // Using ExchangeRate-API's free endpoint with a cache-busting parameter
+    // Usar ExchangeRate-API con un parámetro para evitar caché
     const cacheBuster = forceRefresh ? `?_=${Date.now()}` : ""
     const response = await fetch(`https://open.er-api.com/v6/latest/USD${cacheBuster}`, {
-      next: { revalidate: forceRefresh ? 0 : 86400 }, // Revalidate immediately if forced, otherwise once per day
+      next: { revalidate: forceRefresh ? 0 : 86400 }, // Revalidar inmediatamente si se fuerza, de lo contrario una vez al día
       cache: forceRefresh ? "no-store" : "default",
     })
 
@@ -86,7 +104,16 @@ async function fetchExchangeRates(forceRefresh = false): Promise<ExchangeRates> 
       KWD: data.rates.KWD || FALLBACK_RATES.KWD,
       QAR: data.rates.QAR || FALLBACK_RATES.QAR,
       MYR: data.rates.MYR || FALLBACK_RATES.MYR,
-      lastUpdated: now.toISOString(), // Usar la fecha actual
+      // Nuevas divisas añadidas
+      ILS: data.rates.ILS || FALLBACK_RATES.ILS,
+      JOD: data.rates.JOD || FALLBACK_RATES.JOD,
+      LBP: data.rates.LBP || FALLBACK_RATES.LBP,
+      MAD: data.rates.MAD || FALLBACK_RATES.MAD,
+      OMR: data.rates.OMR || FALLBACK_RATES.OMR,
+      BHD: data.rates.BHD || FALLBACK_RATES.BHD,
+      DZD: data.rates.DZD || FALLBACK_RATES.DZD,
+      TND: data.rates.TND || FALLBACK_RATES.TND,
+      lastUpdated: now.toISOString(),
     }
   } catch (error) {
     console.error("Error fetching exchange rates:", error)

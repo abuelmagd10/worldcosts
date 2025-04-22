@@ -203,22 +203,54 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
 }
 
-/* Ad container styles */
+/* Ad container styles - تحسين مظهر الإعلانات */
 .ad-container {
-  @apply w-full max-w-full overflow-hidden my-4 text-center rounded-2xl transition-colors duration-300;
+  @apply w-full max-w-full overflow-hidden my-4 text-center rounded-2xl transition-all duration-300;
   @apply bg-card;
   min-height: 90px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dark .ad-container {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), 0 3px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.ad-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.dark .ad-container:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* تحسين مظهر الإعلانات على الأجهزة المختلفة */
 @media (min-width: 768px) {
   .ad-container {
     min-height: 280px;
   }
+}
+
+@media (max-width: 767px) {
+  .ad-container {
+    min-height: 250px;
+  }
+}
+
+/* إضافة تأثير لجذب الانتباه للإعلانات */
+.ad-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(65, 187, 255, 0.5), transparent);
+  z-index: 2;
 }
 
 /* Custom theme classes */

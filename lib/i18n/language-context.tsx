@@ -31,9 +31,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Set isClient to true when component mounts
   useEffect(() => {
     setIsClient(true)
-    const savedLanguage = localStorage.getItem("language") as LanguageCode
-    if (savedLanguage && translations[savedLanguage]) {
-      setLanguageState(savedLanguage)
+
+    // Usar localStorage directamente para evitar problemas con SSR
+    try {
+      const savedLanguage = localStorage.getItem("language") as LanguageCode
+      if (savedLanguage && translations[savedLanguage]) {
+        setLanguageState(savedLanguage)
+      }
+    } catch (e) {
+      console.error("Error accessing localStorage:", e)
     }
   }, [])
 
@@ -41,7 +47,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const setLanguage = (lang: LanguageCode) => {
     setLanguageState(lang)
     if (isClient) {
-      localStorage.setItem("language", lang)
+      try {
+        localStorage.setItem("language", lang)
+      } catch (e) {
+        console.error("Error saving to localStorage:", e)
+      }
     }
   }
 

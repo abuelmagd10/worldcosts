@@ -22,6 +22,14 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
+  | "ILS"
+  | "JOD"
+  | "LBP"
+  | "MAD"
+  | "OMR"
+  | "BHD"
+  | "DZD"
+  | "TND"
 type Item = {
   id: number
   name: string
@@ -82,6 +90,23 @@ const getCurrencySymbol = (currency: Currency): string => {
       return "ر.ق"
     case "MYR":
       return "RM"
+    // Nuevas divisas
+    case "ILS":
+      return "₪"
+    case "JOD":
+      return "د.أ"
+    case "LBP":
+      return "ل.ل"
+    case "MAD":
+      return "د.م."
+    case "OMR":
+      return "ر.ع."
+    case "BHD":
+      return "د.ب"
+    case "DZD":
+      return "د.ج"
+    case "TND":
+      return "د.ت"
     default:
       return ""
   }
@@ -126,6 +151,23 @@ function getCurrencyName(currency: Currency, t: Translation): string {
       return t.qar
     case "MYR":
       return t.myr
+    // Nuevas divisas
+    case "ILS":
+      return t.ils
+    case "JOD":
+      return t.jod
+    case "LBP":
+      return t.lbp
+    case "MAD":
+      return t.mad
+    case "OMR":
+      return t.omr
+    case "BHD":
+      return t.bhd
+    case "DZD":
+      return t.dzd
+    case "TND":
+      return t.tnd
     default:
       return currency
   }
@@ -142,28 +184,40 @@ export const generatePDF = async (data: PDFData): Promise<void> => {
   }
 }
 
-// طريقة بديلة لإنشاء PDF باستخدام HTML2Canvas كاحتياطي
+// Mejorar la función generatePDFWithHTML2Canvas para manejar mejor el texto en árabe
 export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
   try {
-    // استيراد المكتبات اللازمة
+    // Importar las bibliotecas necesarias
     const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([import("jspdf"), import("html2canvas")])
 
-    // تحديد اسم الملف
+    // Cargar la fuente Amiri para el árabe si el idioma es árabe
+    if (data.dir === "rtl") {
+      const amiriNormal = await fetch("/fonts/Amiri-Regular.ttf").then((res) => res.arrayBuffer())
+      const amiriBold = await fetch("/fonts/Amiri-Bold.ttf").then((res) => res.arrayBuffer())
+
+      // Añadir las fuentes a jsPDF
+      jsPDF.API.addFileToVFS("Amiri-Regular.ttf", Buffer.from(amiriNormal).toString("base64"))
+      jsPDF.API.addFileToVFS("Amiri-Bold.ttf", Buffer.from(amiriBold).toString("base64"))
+      jsPDF.API.addFont("Amiri-Regular.ttf", "Amiri", "normal")
+      jsPDF.API.addFont("Amiri-Bold.ttf", "Amiri", "bold")
+    }
+
+    // Determinar el nombre del archivo
     const pdfTitle = data.companyInfo?.pdfFileName || "WorldCosts"
 
-    // إنشاء عنصر مؤقت لعرض المحتوى
+    // Crear un elemento temporal para mostrar el contenido
     const container = document.createElement("div")
     container.style.position = "absolute"
     container.style.left = "-9999px"
     container.style.top = "-9999px"
-    container.style.width = "794px" // عرض A4 بالبكسل عند 96 DPI
+    container.style.width = "794px" // Ancho A4 en píxeles a 96 DPI
     container.style.direction = data.dir
-    container.style.fontFamily = "Arial, sans-serif" // استخدام خطوط النظام
-    container.style.color = "#000000" // تأكد من أن النص أسود
-    container.style.backgroundColor = "#FFFFFF" // تأكد من أن الخلفية بيضاء
+    container.style.fontFamily = data.dir === "rtl" ? "Amiri, Arial, sans-serif" : "Arial, sans-serif"
+    container.style.color = "#000000"
+    container.style.backgroundColor = "#FFFFFF"
     document.body.appendChild(container)
 
-    // تنسيق التاريخ
+    // Formatear la fecha
     const formatDate = (dateString: string): string => {
       const date = new Date(dateString)
       return date.toLocaleDateString(data.dir === "rtl" ? "ar-EG" : "en-US", {
@@ -175,7 +229,7 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
       })
     }
 
-    // إنشاء قسم معلومات الشركة إذا كانت متوفرة
+    // Crear la sección de información de la empresa si está disponible
     const companyInfoHTML = data.companyInfo?.name
       ? `
       <div style="display: flex; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
@@ -211,7 +265,7 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
       </div>
     `
 
-    // إنشاء محتوى PDF باستخدام HTML
+    // Crear el contenido del PDF usando HTML
     container.innerHTML = `
       <div style="padding: 20px; width: 100%; background-color: white; color: black;">
         ${companyInfoHTML}
@@ -256,7 +310,7 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
                 }; border: 1px solid #ddd; color: #000000;">${item.originalValue}</td>
                 <td style="padding: 8px; text-align: ${
                   data.dir === "rtl" ? "right" : "left"
-                }; border: 1px solid #ddd; color: #000000;">${formatNumber(item.value, "en")}</td>
+                }; border: 1px solid #ddd; color: #000000;">${formatNumber(item.value, "en", true)}</td>
                 <td style="padding: 8px; text-align: ${
                   data.dir === "rtl" ? "right" : "left"
                 }; border: 1px solid #ddd; color: #000000;">${getCurrencyName(item.currency, data.t)}</td>
@@ -280,6 +334,7 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
             <p style="margin: 5px 0 0; font-size: 18px; font-weight: bold; color: #000000;">${formatNumber(
               data.totals[data.selectedTotalCurrency],
               "en",
+              true,
             )} ${getCurrencySymbol(data.selectedTotalCurrency)}</p>
           </div>
         </div>
@@ -291,17 +346,17 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
     `
 
     try {
-      // تحويل HTML إلى canvas
+      // Convertir HTML a canvas con opciones mejoradas
       const canvas = await html2canvas(container, {
-        scale: 2, // جودة أعلى
+        scale: 2, // Mayor calidad
         useCORS: true,
         logging: false,
-        backgroundColor: "#FFFFFF", // تأكد من أن الخلفية بيضاء
-        allowTaint: true, // السماح بتلوين الكانفاس للصور من مصادر مختلفة
-        foreignObjectRendering: false, // تعطيل استخدام foreignObject لتحسين التوافق
+        backgroundColor: "#FFFFFF",
+        allowTaint: true,
+        foreignObjectRendering: false,
       })
 
-      // إنشاء PDF من canvas
+      // Crear PDF a partir del canvas
       const imgData = canvas.toDataURL("image/png")
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -309,17 +364,22 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
         format: "a4",
       })
 
-      // حساب الأبعاد لتناسب الصورة بشكل صحيح على الصفحة
-      const imgWidth = 210 // عرض A4 بالملم
+      // Si el idioma es árabe, configurar la fuente Amiri
+      if (data.dir === "rtl") {
+        pdf.setFont("Amiri")
+      }
+
+      // Calcular dimensiones para ajustar la imagen correctamente en la página
+      const imgWidth = 210 // Ancho A4 en mm
       const imgHeight = (canvas.height * imgWidth) / canvas.width
 
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
 
-      // إضافة المزيد من الصفحات إذا كان المحتوى طويلاً جدًا
+      // Añadir más páginas si el contenido es demasiado largo
       if (imgHeight > 297) {
-        // ارتفاع A4 بالملم
+        // Altura A4 en mm
         let remainingHeight = imgHeight
-        let position = -297 // موضع البداية للصفحة الثانية
+        let position = -297 // Posición inicial para la segunda página
 
         while (remainingHeight > 297) {
           pdf.addPage()
@@ -329,14 +389,14 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
         }
       }
 
-      // استخدام اسم الملف المخصص للملف المحفوظ
+      // Usar nombre de archivo personalizado
       const filename = `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`
       pdf.save(filename)
     } catch (error) {
       console.error("Error generating PDF with HTML2Canvas:", error)
       throw error
     } finally {
-      // تنظيف العنصر المؤقت
+      // Limpiar el elemento temporal
       document.body.removeChild(container)
     }
   } catch (error) {

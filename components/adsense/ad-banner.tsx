@@ -10,6 +10,7 @@ interface AdBannerProps {
   style?: React.CSSProperties
   className?: string
   minContentLength?: number // إضافة خاصية للتحكم في الحد الأدنى لطول المحتوى
+  items?: any[] // إضافة خاصية لتتبع العناصر في الصفحة
 }
 
 export function AdBanner({
@@ -18,9 +19,11 @@ export function AdBanner({
   style = {},
   className = "",
   minContentLength = 500, // الحد الأدنى الافتراضي لطول المحتوى
+  items = [],
 }: AdBannerProps) {
   const adRef = useRef<HTMLDivElement>(null)
   const isLoaded = useRef(false)
+  const adAttempts = useRef(0)
 
   // التحقق من وجود محتوى كافٍ في الصفحة لعرض الإعلانات
   const hasEnoughContent = useRef<boolean>(false)
@@ -67,11 +70,24 @@ export function AdBanner({
     // 2. كان هناك عناصر تفاعلية وعناصر محتوى وصور
     // 3. وليست صفحة خاصة (خطأ، تسجيل دخول، شكر)
     // 4. وليست صفحة فارغة
+    // تحسين معايير عرض الإعلانات للسماح بعرضها في المزيد من الحالات
     return (
-      (wordCount > minContentLength || (hasInteractiveElements && hasContentElements && hasImages)) &&
+      (wordCount > minContentLength || hasInteractiveElements || hasContentElements || items?.length > 0) &&
       !isSpecialPage &&
       !isEmptyPage
     )
+  }
+
+  // تحقق من دعم ملفات تعريف الارتباط
+  const checkCookiesEnabled = () => {
+    try {
+      document.cookie = "cookietest=1; SameSite=Lax"
+      const result = document.cookie.indexOf("cookietest=") !== -1
+      document.cookie = "cookietest=1; SameSite=Lax; expires=Thu, 01-Jan-1970 00:00:01 GMT"
+      return result
+    } catch (e) {
+      return false
+    }
   }
 
   useEffect(() => {
@@ -89,16 +105,23 @@ export function AdBanner({
       return
     }
 
-    try {
-      // تحديد أبعاد صريحة للحاوية
-      const adContainer = adRef.current
-      if (adContainer.offsetWidth === 0) {
-        adContainer.style.width = "100%"
-        adContainer.style.minHeight = "280px" // الحد الأدنى للارتفاع لضمان الرؤية
-      }
+    // التحقق من دعم ملفات تعريف الارتباط
+    const cookiesEnabled = checkCookiesEnabled()
+    if (!cookiesEnabled) {
+      console.warn("Cookies are disabled. Ads may not work properly.")
+    }
 
-      // الانتظار لحظة للتأكد من أن DOM مستقر
-      const timer = setTimeout(() => {
+    const loadAd = () => {
+      try {
+        // تحديد أبعاد صريحة للحاوية
+        const adContainer = adRef.current
+        if (!adContainer) return
+
+        if (adContainer.offsetWidth === 0) {
+          adContainer.style.width = "100%"
+          adContainer.style.minHeight = "280px" // الحد الأدنى للارتفاع لضمان الرؤية
+        }
+
         // إنشاء عنصر ins للإعلان
         const adElement = document.createElement("ins")
         adElement.className = "adsbygoogle"
@@ -120,16 +143,26 @@ export function AdBanner({
         try {
           ;(window.adsbygoogle = window.adsbygoogle || []).push({})
           isLoaded.current = true
+          console.log("Ad initialized successfully")
         } catch (error) {
           console.error("Error initializing adsbygoogle:", error)
-        }
-      }, 100) // تأخير صغير للتأكد من أن DOM جاهز
 
-      return () => clearTimeout(timer)
-    } catch (error) {
-      console.error("Error setting up AdSense:", error)
+          // إعادة المحاولة إذا فشلت التهيئة (حتى 3 محاولات)
+          if (adAttempts.current < 3) {
+            adAttempts.current++
+            setTimeout(loadAd, 1000)
+          }
+        }
+      } catch (error) {
+        console.error("Error setting up AdSense:", error)
+      }
     }
-  }, [adSlot, adFormat, minContentLength])
+
+    // الانتظار لحظة للتأكد من أن DOM مستقر
+    const timer = setTimeout(loadAd, 100)
+
+    return () => clearTimeout(timer)
+  }, [adSlot, adFormat, minContentLength, items])
 
   // إذا لم يكن هناك محتوى كافٍ، لا تعرض الإعلان على الإطلاق
   if (typeof window !== "undefined" && !checkContentAmount()) {
@@ -139,14 +172,16 @@ export function AdBanner({
   return (
     <div
       ref={adRef}
-      className={`ad-container ${className}`}
+      className={`ad-container ${className} transition-all duration-300 hover:shadow-xl`}
       style={{
         display: "block",
-        minHeight: "280px",
+        minHeight: adFormat === "fluid" ? "100px" : "280px",
         width: "100%",
         overflow: "hidden",
+        borderRadius: "0.75rem",
         ...style,
       }}
+      data-ad-status="not-loaded"
     />
   )
 }

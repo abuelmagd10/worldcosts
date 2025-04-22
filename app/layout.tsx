@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "@/app/globals.css"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import Script from "next/script"
 
 export const metadata: Metadata = {
   title: "WorldCosts",
@@ -54,15 +55,45 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <meta name="google-site-verification" content="googlef73da8a61c68dbf7" />
 
+        {/* تمكين ميزات إضافية */}
+        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+        <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
+        <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
+
         {/* Solo cargar el script de AdSense en producción */}
         {isProduction && (
-          <script
+          <Script
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"
             crossOrigin="anonymous"
             data-ad-client="ca-pub-3799584967407983"
-          ></script>
+            strategy="afterInteractive"
+          />
         )}
+
+        {/* إضافة سكريبت لتمكين ميزات إضافية */}
+        <Script id="enable-features" strategy="beforeInteractive">
+          {`
+            // تمكين تخزين DOM
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('dom_storage_test', 'enabled');
+                localStorage.removeItem('dom_storage_test');
+                console.log('DOM Storage enabled');
+              }
+            } catch (e) {
+              console.warn('DOM Storage not available:', e);
+            }
+            
+            // تمكين ملفات تعريف الارتباط
+            document.cookie = "cookies_enabled=true; max-age=86400; path=/; SameSite=Lax";
+            
+            // تمكين المحتوى المختلط (مع الحفاظ على الأمان)
+            if (window.location.protocol === 'https:') {
+              console.log('Secure context - mixed content will be upgraded');
+            }
+          `}
+        </Script>
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
