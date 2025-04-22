@@ -12,7 +12,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useRef, useEffect } from "react"
-import { RefreshCw, FileDown, Building2, Pencil, Trash2, Info, Shield, FileText, Plus, Calculator } from "lucide-react"
+import {
+  RefreshCw,
+  FileDown,
+  Building2,
+  Pencil,
+  Trash2,
+  Info,
+  Shield,
+  FileText,
+  Plus,
+  Calculator,
+  AlertTriangle,
+} from "lucide-react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
   TeslaCard,
@@ -42,6 +54,8 @@ import { CookieConsentBanner } from "@/components/cookie-consent-banner"
 import { formatNumber } from "@/lib/utils"
 // Importar el componente de historial de cálculos
 import { CalculationHistory } from "@/components/calculation-history"
+import { ExchangeRateManager } from "@/components/exchange-rate-manager"
+import { isUsingFallbackRate, getCustomRates, saveCustomRates } from "@/lib/exchange-rates"
 
 type Currency =
   | "USD"
@@ -129,11 +143,18 @@ export default function CurrencyCalculator() {
           setCompanyInfo(savedCompanyInfo)
         }
       }
+
+      // استرجاع أسعار الصرف المخصصة
+      const customRates = getCustomRates()
+      if (customRates) {
+        setRates(customRates)
+      } else {
+        fetchRates()
+      }
     } catch (e) {
       console.error("Error loading saved data:", e)
+      fetchRates()
     }
-
-    fetchRates()
   }, [])
 
   // حفظ البيانات عند تغييرها
@@ -670,6 +691,11 @@ export default function CurrencyCalculator() {
     }
   }
 
+  const handleCustomRatesUpdate = (updatedRates: ExchangeRates) => {
+    setRates(updatedRates)
+    saveCustomRates(updatedRates)
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
       <div className="container mx-auto py-8 px-4">
@@ -698,18 +724,26 @@ export default function CurrencyCalculator() {
                     <span className="text-sm text-muted-foreground mb-2">
                       {t.lastUpdated}: {formatLastUpdated(rates.lastUpdated)}
                     </span>
-                    <TeslaButton
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleRefreshRates}
-                      disabled={isRefreshing}
-                      className="h-8 px-2"
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"} ${isRefreshing ? "animate-spin" : ""}`}
+                    <div className="flex gap-2">
+                      <TeslaButton
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleRefreshRates}
+                        disabled={isRefreshing}
+                        className="h-8 px-2"
+                      >
+                        <RefreshCw
+                          className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"} ${isRefreshing ? "animate-spin" : ""}`}
+                        />
+                        {t.updateRates}
+                      </TeslaButton>
+                      <ExchangeRateManager
+                        rates={rates}
+                        onRatesUpdate={handleCustomRatesUpdate}
+                        isRefreshing={isRefreshing}
+                        onRefresh={handleRefreshRates}
                       />
-                      {t.updateRates}
-                    </TeslaButton>
+                    </div>
                   </div>
                 )}
               </div>
@@ -788,6 +822,9 @@ export default function CurrencyCalculator() {
                                   className="text-foreground focus:bg-[#282b2e]"
                                 >
                                   {getCurrencyName(code as Currency)} ({getCurrencySymbol(code as Currency)})
+                                  {rates && isUsingFallbackRate(code as keyof ExchangeRates, rates) && (
+                                    <AlertTriangle className="h-3 w-3 text-amber-500 inline-block ml-1" />
+                                  )}
                                 </SelectItemComponent>
                               ))}
                               {group !== currencyGroups[currencyGroups.length - 1] && (
@@ -885,6 +922,9 @@ export default function CurrencyCalculator() {
                             </TableCell>
                             <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
                               {getCurrencyName(item.currency)}
+                              {rates && isUsingFallbackRate(item.currency, rates) && (
+                                <AlertTriangle className="h-3 w-3 text-amber-500 inline-block mr-1" />
+                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
