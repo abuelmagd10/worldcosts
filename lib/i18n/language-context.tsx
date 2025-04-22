@@ -2,7 +2,8 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { translations, type LanguageCode, type Translation } from "./translations"
+import { translations, type LanguageCode } from "./translations"
+import type { Translation } from "./translations"
 
 type LanguageContextType = {
   language: LanguageCode

@@ -184,6 +184,9 @@ export default function CurrencyCalculator() {
     }
   }
 
+  // إضافة تنبيه عند استخدام أسعار صرف افتراضية
+  // أضف هذا الكود في وظيفة handleRefreshRates بعد محاولة تحديث الأسعار
+
   const handleRefreshRates = async () => {
     setIsRefreshing(true)
     try {
@@ -191,10 +194,25 @@ export default function CurrencyCalculator() {
       setRates({ ...updatedRates })
       setLastUpdateTime(Date.now())
 
-      toast({
-        title: t.ratesUpdated || "تم تحديث الأسعار",
-        description: t.ratesUpdatedDesc || "تم تحديث أسعار الصرف بنجاح",
-      })
+      // التحقق مما إذا كان هناك عملات تستخدم قيمًا افتراضية
+      if (updatedRates) {
+        // تحقق مما إذا كانت البيانات تم جلبها من API أم من القيم الافتراضية
+        const fetchedFromDefaultValues =
+          updatedRates.lastUpdated && new Date(updatedRates.lastUpdated).getTime() < Date.now() - 86400000 // أكثر من يوم
+
+        if (fetchedFromDefaultValues) {
+          toast({
+            title: t.usingFallbackRates || "جاري استخدام أسعار صرف افتراضية",
+            description: t.someRatesMayBeOutdated || "بعض أسعار الصرف قد تكون قديمة أو غير دقيقة بسبب مشاكل في الاتصال",
+            variant: "warning",
+          })
+        } else {
+          toast({
+            title: t.ratesUpdated || "تم تحديث الأسعار",
+            description: t.ratesUpdatedDesc || "تم تحديث أسعار الصرف بنجاح",
+          })
+        }
+      }
     } catch (error) {
       console.error("Error al actualizar las tasas:", error)
       toast({

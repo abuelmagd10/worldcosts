@@ -256,10 +256,21 @@ export type Translation = {
   noItemsToExport: string
   pdfGenerationFailed: string
   tryAgainLater: string
+
+  // CSV Export
+  exportCSV: string
+  csvDownloadSuccessDesc: string
+  csvDownloadErrorDesc: string
+
+  // Exchange Rate Fallbacks
+  usingFallbackRates: string
+  usingFallbackRatesDesc: string
+  someRatesUnavailable: string
+  someRatesUnavailableDesc: string
 }
 
 // Arabic translations
-export const ar: Translation = {
+const ar: Translation = {
   // Cookie Consent
   cookieConsentTitle: "إعدادات الخصوصية وملفات تعريف الارتباط",
   cookieConsentDescription:
@@ -519,10 +530,21 @@ export const ar: Translation = {
   noItemsToExport: "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
   pdfGenerationFailed: "فشل إنشاء ملف PDF",
   tryAgainLater: "يرجى المحاولة مرة أخرى لاحقاً",
+
+  // CSV Export
+  exportCSV: "تصدير CSV",
+  csvDownloadSuccessDesc: "تم تنزيل ملف CSV بنجاح.",
+  csvDownloadErrorDesc: "حدث خطأ أثناء تصدير البيانات. يرجى المحاولة مرة أخرى.",
+
+  // Exchange Rate Fallbacks
+  usingFallbackRates: "استخدام أسعار صرف افتراضية",
+  usingFallbackRatesDesc: "تعذر الحصول على أسعار الصرف المحدثة. يتم استخدام الأسعار الافتراضية.",
+  someRatesUnavailable: "بعض أسعار الصرف غير متوفرة",
+  someRatesUnavailableDesc: "بعض العملات تستخدم أسعار صرف افتراضية. قد لا تكون دقيقة تمامًا.",
 }
 
 // English translations
-export const en: Translation = {
+const en: Translation = {
   // Cookie Consent
   cookieConsentTitle: "Privacy and Cookie Settings",
   cookieConsentDescription:
@@ -786,10 +808,21 @@ export const en: Translation = {
   noItemsToExport: "No items to export. Please add items first.",
   pdfGenerationFailed: "PDF generation failed",
   tryAgainLater: "Please try again later",
+
+  // CSV Export
+  exportCSV: "Export CSV",
+  csvDownloadSuccessDesc: "CSV file has been downloaded successfully.",
+  csvDownloadErrorDesc: "An error occurred while exporting data. Please try again.",
+
+  // Exchange Rate Fallbacks
+  usingFallbackRates: "Using Fallback Exchange Rates",
+  usingFallbackRatesDesc: "Could not retrieve updated exchange rates. Using default rates instead.",
+  someRatesUnavailable: "Some Exchange Rates Unavailable",
+  someRatesUnavailableDesc: "Some currencies are using fallback exchange rates. They may not be completely accurate.",
 }
 
 // German translations
-export const de: Translation = {
+const de: Translation = {
   // Cookie Consent
   cookieConsentTitle: "Datenschutz- und Cookie-Einstellungen",
   cookieConsentDescription:
@@ -1061,10 +1094,22 @@ export const de: Translation = {
   noItemsToExport: "Keine Elemente zum Exportieren. Bitte fügen Sie zuerst Elemente hinzu.",
   pdfGenerationFailed: "PDF-Generierung fehlgeschlagen",
   tryAgainLater: "Bitte versuchen Sie es später erneut",
+
+  // CSV Export
+  exportCSV: "CSV exportieren",
+  csvDownloadSuccessDesc: "CSV-Datei wurde erfolgreich heruntergeladen.",
+  csvDownloadErrorDesc: "Beim Exportieren der Daten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+
+  // Exchange Rate Fallbacks
+  usingFallbackRates: "Verwendung von Fallback-Wechselkursen",
+  usingFallbackRatesDesc: "Aktualisierte Wechselkurse konnten nicht abgerufen werden. Standardkurse werden verwendet.",
+  someRatesUnavailable: "Einige Wechselkurse nicht verfügbar",
+  someRatesUnavailableDesc:
+    "Einige Währungen verwenden Fallback-Wechselkurse. Diese sind möglicherweise nicht vollständig genau.",
 }
 
 // تحديث الترجمات الفرنسية
-export const fr: Translation = {
+const fr: Translation = {
   // Cookie Consent
   cookieConsentTitle: "Paramètres de confidentialité et de cookies",
   cookieConsentDescription:
@@ -1076,7 +1121,7 @@ export const fr: Translation = {
     "Permettent au site de mémoriser des informations qui modifient le comportement ou l'apparence du site.",
   analyticsCookies: "Cookies d'analyse",
   analyticsCookiesDescription: "Nous aident à comprendre comment les visiteurs interagissent avec le site.",
-  marketingCookies: "Cookies de marketing",
+  marketingCookies: "Cookies marketing",
   marketingCookiesDescription:
     "Utilisés pour suivre les visiteurs sur les sites web et afficher des publicités pertinentes.",
   acceptAllCookies: "Tout accepter",
@@ -1337,14 +1382,18 @@ export const fr: Translation = {
   noItemsToExport: "Aucun élément à exporter. Veuillez d'abord ajouter des éléments.",
   pdfGenerationFailed: "Échec de la génération du PDF",
   tryAgainLater: "Veuillez réessayer plus tard",
-}
 
-// Export all translations
-export const translations = {
-  ar,
-  en,
-  de,
-  fr,
+  // CSV Export
+  exportCSV: "Exporter CSV",
+  csvDownloadSuccessDesc: "Le fichier CSV a été téléchargé avec succès.",
+  csvDownloadErrorDesc: "Une erreur s'est produite lors de l'exportation des données. Veuillez réessayer.",
+
+  // Exchange Rate Fallbacks
+  usingFallbackRates: "Utilisation des taux de change par défaut",
+  usingFallbackRatesDesc: "Impossible de récupérer les taux de change mis à jour. Utilisation des taux par défaut.",
+  someRatesUnavailable: "Certains taux de change indisponibles",
+  someRatesUnavailableDesc:
+    "Certaines devises utilisent des taux de change par défaut. Ils peuvent ne pas être totalement précis.",
 }
 
 // Export language metadata
@@ -1357,3 +1406,11 @@ export const languages = [
 
 // Export language codes type
 export type LanguageCode = keyof typeof translations
+
+// Export all translations
+export const translations = {
+  ar,
+  en,
+  de,
+  fr,
+}
