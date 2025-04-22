@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import "@/app/globals.css"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ErrorBoundary } from "@/components/error-boundary"
 import Script from "next/script"
 
 export const metadata: Metadata = {
@@ -57,9 +58,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
       </head>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <LanguageProvider>{children}</LanguageProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <LanguageProvider>{children}</LanguageProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
 
         {/* Move scripts to the end of body to avoid blocking rendering */}
         <Script id="enable-features" strategy="afterInteractive">
@@ -77,12 +80,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             
             // Enable cookies
             document.cookie = "cookies_enabled=true; max-age=86400; path=/; SameSite=Lax";
-            
-            // Enable mixed content (while maintaining security)
-            if (window.location.protocol === 'https:') {
-              console.log('Secure context - mixed content will be upgraded');
-            }
+          `}
+        </Script>
 
+        {/* Service Worker registration */}
+        <Script id="register-sw" strategy="afterInteractive">
+          {`
             // Register Service Worker
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
