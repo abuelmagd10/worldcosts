@@ -3,8 +3,9 @@ import type { Metadata } from "next"
 import "@/app/globals.css"
 import { LanguageProvider } from "@/lib/i18n/language-context"
 import { ThemeProvider } from "@/components/theme-provider"
-import { ErrorBoundary } from "@/components/error-boundary"
+import { CookieConsent } from "@/components/cookie-consent"
 import Script from "next/script"
+import { CookieConsentReset } from "@/components/cookie-consent-reset"
 
 export const metadata: Metadata = {
   title: "WorldCosts",
@@ -22,7 +23,6 @@ export const metadata: Metadata = {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
-    userScalable: false,
   },
   manifest: "/manifest.json",
   themeColor: [
@@ -35,16 +35,18 @@ export const metadata: Metadata = {
       { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [{ url: "/icons/icon-192x192.png" }, { url: "/icons/icon-512x512.png" }],
-    shortcut: [{ url: "/icons/icon-192x192.png" }],
-  },
-  other: {
-    "apple-mobile-web-app-capable": "yes",
-    "mobile-web-app-capable": "yes",
   },
     generator: 'v0.dev'
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // Determinar si estamos en un entorno de producción
+  const isProduction =
+    process.env.NODE_ENV === "production" &&
+    typeof window !== "undefined" &&
+    !window.location.hostname.includes("vusercontent.net") &&
+    !window.location.hostname.includes("vercel.app")
+
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
@@ -53,57 +55,27 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="icon" href="/icons/icon-192x192.png" />
         <meta name="google-site-verification" content="googlef73da8a61c68dbf7" />
+
+        {/* السماح بالمحتوى المختلط */}
         <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
-        <meta httpEquiv="Accept-CH" content="DPR, Viewport-Width, Width" />
-        <meta httpEquiv="Permissions-Policy" content="interest-cohort=()" />
+
+        {/* تمكين ملفات تعريف الارتباط وتخزين DOM */}
+        <meta
+          httpEquiv="Accept-CH"
+          content="Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Platform, Sec-CH-UA-Arch, Sec-CH-UA-Full-Version-List, Sec-CH-UA-Model, Sec-CH-Device-Memory, Sec-CH-DPR, Sec-CH-Viewport-Width, Sec-CH-Viewport-Height"
+        />
       </head>
       <body>
-        <ErrorBoundary>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <LanguageProvider>{children}</LanguageProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <LanguageProvider>
+            {children}
+            <CookieConsentReset />
+            <CookieConsent />
+          </LanguageProvider>
+        </ThemeProvider>
 
-        {/* Move scripts to the end of body to avoid blocking rendering */}
-        <Script id="enable-features" strategy="afterInteractive">
-          {`
-            // Enable DOM storage
-            try {
-              if (typeof localStorage !== 'undefined') {
-                localStorage.setItem('dom_storage_test', 'enabled');
-                localStorage.removeItem('dom_storage_test');
-                console.log('DOM Storage enabled');
-              }
-            } catch (e) {
-              console.warn('DOM Storage not available:', e);
-            }
-            
-            // Enable cookies
-            document.cookie = "cookies_enabled=true; max-age=86400; path=/; SameSite=Lax";
-          `}
-        </Script>
-
-        {/* Service Worker registration */}
-        <Script id="register-sw" strategy="afterInteractive">
-          {`
-            // Register Service Worker
-            if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(
-                  function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  },
-                  function(err) {
-                    console.log('ServiceWorker registration failed: ', err);
-                  }
-                );
-              });
-            }
-          `}
-        </Script>
-
-        {/* Only load AdSense in production */}
-        {process.env.NODE_ENV === "production" && (
+        {/* Solo cargar el script de AdSense en producción */}
+        {isProduction && (
           <Script
             async
             src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"

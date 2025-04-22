@@ -1,9 +1,8 @@
 "use server"
 
 import { unstable_cache } from "next/cache"
-import { FALLBACK_RATES } from "@/lib/exchange-rates"
 
-// Añadir más divisas a la estructura ExchangeRates
+// Define the structure of our exchange rates
 export type ExchangeRates = {
   USD: number
   EGP: number
@@ -23,101 +22,80 @@ export type ExchangeRates = {
   KWD: number
   QAR: number
   MYR: number
-  // Nuevas divisas añadidas
-  ILS: number // Shekel israelí
-  JOD: number // Dinar jordano
-  LBP: number // Libra libanesa
-  MAD: number // Dirham marroquí
-  OMR: number // Rial omaní
-  BHD: number // Dinar bareiní
-  DZD: number // Dinar argelino
-  TND: number // Dinar tunecino
   lastUpdated: string
 }
 
-// تحديث وظيفة fetchExchangeRates لتحسين عملية الحصول على أسعار الصرف
-// تعديل وظيفة fetchExchangeRates لاستخدام مصادر إضافية وتحسين معالجة الأخطاء
+// Initial fallback rates in case the API fails
+const FALLBACK_RATES: ExchangeRates = {
+  USD: 1,
+  EGP: 49.28,
+  AED: 3.67,
+  EUR: 0.92,
+  GBP: 0.79,
+  SAR: 3.75,
+  JPY: 151.72,
+  CNY: 7.23,
+  CAD: 1.36,
+  AUD: 1.51,
+  CHF: 0.9,
+  INR: 83.5,
+  RUB: 92.5,
+  TRY: 32.15,
+  BRL: 5.05,
+  KWD: 0.31,
+  QAR: 3.64,
+  MYR: 4.7,
+  lastUpdated: new Date().toISOString(),
+}
+
+// Function to fetch the latest exchange rates
 async function fetchExchangeRates(forceRefresh = false): Promise<ExchangeRates> {
-  // قائمة بمصادر API لأسعار الصرف
-  const apiSources = [
-    {
-      name: "ExchangeRate-API",
-      url: "https://open.er-api.com/v6/latest/USD",
-      extractRates: (data: any) => data.rates,
-    },
-    {
-      name: "ExchangeRate.host",
-      url: "https://api.exchangerate.host/latest?base=USD",
-      extractRates: (data: any) => data.rates,
-    },
-    {
-      name: "Frankfurter",
-      url: "https://api.frankfurter.app/latest?from=USD",
-      extractRates: (data: any) => data.rates,
-    },
-    {
-      name: "CurrencyFreaks",
-      url: "https://api.currencyfreaks.com/v2.0/rates/latest?apikey=e8b2e1c5a3f44e2c9f8d7b6a5c4b3e2d1&base=USD",
-      extractRates: (data: any) => data.rates,
-    },
-  ]
+  try {
+    // Using ExchangeRate-API's free endpoint with a cache-busting parameter
+    const cacheBuster = forceRefresh ? `?_=${Date.now()}` : ""
+    const response = await fetch(`https://open.er-api.com/v6/latest/USD${cacheBuster}`, {
+      next: { revalidate: forceRefresh ? 0 : 86400 }, // Revalidate immediately if forced, otherwise once per day
+      cache: forceRefresh ? "no-store" : "default",
+    })
 
-  // نتيجة نهائية مع دمج البيانات من جميع المصادر
-  const result: ExchangeRates = { ...FALLBACK_RATES, lastUpdated: new Date().toISOString() }
-  let successfulSources = 0
+    if (!response.ok) {
+      throw new Error("Failed to fetch exchange rates")
+    }
 
-  // تجربة كل مصدر API
-  for (const source of apiSources) {
-    try {
-      const cacheBuster = forceRefresh ? `&_=${Date.now()}` : ""
-      const response = await fetch(`${source.url}${cacheBuster}`, {
-        next: { revalidate: forceRefresh ? 0 : 86400 },
-        cache: forceRefresh ? "no-store" : "default",
-      })
+    const data = await response.json()
 
-      if (!response.ok) {
-        console.warn(`${source.name} failed with status: ${response.status}`)
-        continue
-      }
+    // Crear una nueva fecha actual para la última actualización
+    const now = new Date()
 
-      const data = await response.json()
-      const rates = source.extractRates(data)
-
-      if (!rates) {
-        console.warn(`Invalid data format from ${source.name}`)
-        continue
-      }
-
-      console.log(`Exchange rates fetched successfully from ${source.name}`)
-      successfulSources++
-
-      // دمج البيانات من هذا المصدر مع النتيجة
-      for (const [key, value] of Object.entries(result)) {
-        if (key !== "lastUpdated" && key !== "USD") {
-          const currencyKey = key as keyof ExchangeRates
-          // إذا كان المصدر يوفر سعر صرف لهذه العملة، استخدمه
-          if (rates[currencyKey] && typeof rates[currencyKey] === "number" && rates[currencyKey] > 0) {
-            result[currencyKey] = rates[currencyKey]
-          }
-        }
-      }
-    } catch (error) {
-      console.error(`Error with ${source.name}:`, error)
+    return {
+      USD: 1,
+      EGP: data.rates.EGP || FALLBACK_RATES.EGP,
+      AED: data.rates.AED || FALLBACK_RATES.AED,
+      EUR: data.rates.EUR || FALLBACK_RATES.EUR,
+      GBP: data.rates.GBP || FALLBACK_RATES.GBP,
+      SAR: data.rates.SAR || FALLBACK_RATES.SAR,
+      JPY: data.rates.JPY || FALLBACK_RATES.JPY,
+      CNY: data.rates.CNY || FALLBACK_RATES.CNY,
+      CAD: data.rates.CAD || FALLBACK_RATES.CAD,
+      AUD: data.rates.AUD || FALLBACK_RATES.AUD,
+      CHF: data.rates.CHF || FALLBACK_RATES.CHF,
+      INR: data.rates.INR || FALLBACK_RATES.INR,
+      RUB: data.rates.RUB || FALLBACK_RATES.RUB,
+      TRY: data.rates.TRY || FALLBACK_RATES.TRY,
+      BRL: data.rates.BRL || FALLBACK_RATES.BRL,
+      KWD: data.rates.KWD || FALLBACK_RATES.KWD,
+      QAR: data.rates.QAR || FALLBACK_RATES.QAR,
+      MYR: data.rates.MYR || FALLBACK_RATES.MYR,
+      lastUpdated: now.toISOString(), // Usar la fecha actual
+    }
+  } catch (error) {
+    console.error("Error fetching exchange rates:", error)
+    // Asegurarse de que incluso en caso de error, la fecha de última actualización sea la actual
+    return {
+      ...FALLBACK_RATES,
+      lastUpdated: new Date().toISOString(),
     }
   }
-
-  // التحقق من صحة البيانات قبل إرجاعها
-  for (const [key, value] of Object.entries(result)) {
-    if (key !== "lastUpdated" && (typeof value !== "number" || isNaN(value) || value <= 0)) {
-      console.warn(`Invalid exchange rate for ${key}: ${value}, using fallback value`)
-      result[key as keyof ExchangeRates] = FALLBACK_RATES[key as keyof ExchangeRates]
-    }
-  }
-
-  // إضافة معلومات عن مصادر البيانات
-  console.log(`Successfully fetched data from ${successfulSources} out of ${apiSources.length} sources`)
-
-  return result
 }
 
 // Function to get exchange rates (without caching for force refresh)

@@ -2,8 +2,11 @@
 
 import Link from "next/link"
 import { TableCell } from "@/components/ui/table"
+import { TableBody } from "@/components/ui/table"
+import { TableHead } from "@/components/ui/table"
 import { TableRow } from "@/components/ui/table"
-import { Table, TableBody, TableHeader, TableHead } from "@/components/ui/table"
+import { TableHeader } from "@/components/ui/table"
+import { Table } from "@/components/ui/table"
 import { SelectContent } from "@/components/ui/select"
 import { SelectValue } from "@/components/ui/select"
 import { SelectTrigger } from "@/components/ui/select"
@@ -12,19 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useRef, useEffect } from "react"
-import {
-  RefreshCw,
-  FileDown,
-  Building2,
-  Pencil,
-  Trash2,
-  Info,
-  Shield,
-  FileText,
-  Plus,
-  Calculator,
-  AlertTriangle,
-} from "lucide-react"
+import { RefreshCw, FileDown, Building2, Pencil, Trash2, Info, Shield, FileText, Plus, Calculator } from "lucide-react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
   TeslaCard,
@@ -49,13 +40,6 @@ import { ItemsChart } from "@/components/items-chart"
 import { ThemeToggle } from "@/components/theme-toggle"
 // أضف استيراد مكون FeaturesShowcase
 import { FeaturesShowcase } from "@/components/features-showcase"
-// استيراد مكون موافقة ملفات تعريف الارتباط
-import { CookieConsentBanner } from "@/components/cookie-consent-banner"
-import { formatNumber } from "@/lib/utils"
-// Importar el componente de historial de cálculos
-import { CalculationHistory } from "@/components/calculation-history"
-import { ExchangeRateManager } from "@/components/exchange-rate-manager"
-import { isUsingFallbackRate, getCustomRates, saveCustomRates } from "@/lib/exchange-rates"
 
 type Currency =
   | "USD"
@@ -76,14 +60,6 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
-  | "ILS"
-  | "JOD"
-  | "LBP"
-  | "MAD"
-  | "OMR"
-  | "BHD"
-  | "DZD"
-  | "TND"
 type Item = {
   id: number
   name: string
@@ -116,75 +92,10 @@ export default function CurrencyCalculator() {
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now())
 
-  // استرجاع البيانات المحفوظة عند تحميل الصفحة
+  // Fetch exchange rates on component mount
   useEffect(() => {
-    // استرجاع العناصر المحفوظة
-    try {
-      const savedItemsStr = localStorage.getItem("saved_items")
-      if (savedItemsStr) {
-        const savedItems = JSON.parse(savedItemsStr) as Item[]
-        if (savedItems && savedItems.length > 0) {
-          setItems(savedItems)
-          setNextId(Math.max(...savedItems.map((item) => item.id)) + 1)
-        }
-      }
-
-      // استرجاع العملة المحددة
-      const savedCurrency = localStorage.getItem("selected_currency") as Currency
-      if (savedCurrency) {
-        setTotalCurrency(savedCurrency)
-      }
-
-      // استرجاع معلومات الشركة
-      const savedCompanyInfoStr = localStorage.getItem("company_info")
-      if (savedCompanyInfoStr) {
-        const savedCompanyInfo = JSON.parse(savedCompanyInfoStr) as CompanyInfo
-        if (savedCompanyInfo && savedCompanyInfo.name) {
-          setCompanyInfo(savedCompanyInfo)
-        }
-      }
-
-      // استرجاع أسعار الصرف المخصصة
-      const customRates = getCustomRates()
-      if (customRates) {
-        setRates(customRates)
-      } else {
-        fetchRates()
-      }
-    } catch (e) {
-      console.error("Error loading saved data:", e)
-      fetchRates()
-    }
+    fetchRates()
   }, [])
-
-  // حفظ البيانات عند تغييرها
-  useEffect(() => {
-    if (items.length > 0) {
-      try {
-        localStorage.setItem("saved_items", JSON.stringify(items))
-      } catch (e) {
-        console.error("Error saving items:", e)
-      }
-    }
-  }, [items])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("selected_currency", totalCurrency)
-    } catch (e) {
-      console.error("Error saving currency:", e)
-    }
-  }, [totalCurrency])
-
-  useEffect(() => {
-    if (companyInfo.name) {
-      try {
-        localStorage.setItem("company_info", JSON.stringify(companyInfo))
-      } catch (e) {
-        console.error("Error saving company info:", e)
-      }
-    }
-  }, [companyInfo])
 
   const fetchRates = async (forceRefresh = false) => {
     try {
@@ -205,9 +116,6 @@ export default function CurrencyCalculator() {
     }
   }
 
-  // إضافة تنبيه عند استخدام أسعار صرف افتراضية
-  // أضف هذا الكود في وظيفة handleRefreshRates بعد محاولة تحديث الأسعار
-
   const handleRefreshRates = async () => {
     setIsRefreshing(true)
     try {
@@ -215,25 +123,10 @@ export default function CurrencyCalculator() {
       setRates({ ...updatedRates })
       setLastUpdateTime(Date.now())
 
-      // التحقق مما إذا كان هناك عملات تستخدم قيمًا افتراضية
-      if (updatedRates) {
-        // تحقق مما إذا كانت البيانات تم جلبها من API أم من القيم الافتراضية
-        const fetchedFromDefaultValues =
-          updatedRates.lastUpdated && new Date(updatedRates.lastUpdated).getTime() < Date.now() - 86400000 // أكثر من يوم
-
-        if (fetchedFromDefaultValues) {
-          toast({
-            title: t.usingFallbackRates || "جاري استخدام أسعار صرف افتراضية",
-            description: t.someRatesMayBeOutdated || "بعض أسعار الصرف قد تكون قديمة أو غير دقيقة بسبب مشاكل في الاتصال",
-            variant: "warning",
-          })
-        } else {
-          toast({
-            title: t.ratesUpdated || "تم تحديث الأسعار",
-            description: t.ratesUpdatedDesc || "تم تحديث أسعار الصرف بنجاح",
-          })
-        }
-      }
+      toast({
+        title: t.ratesUpdated || "تم تحديث الأسعار",
+        description: t.ratesUpdatedDesc || "تم تحديث أسعار الصرف بنجاح",
+      })
     } catch (error) {
       console.error("Error al actualizar las tasas:", error)
       toast({
@@ -301,12 +194,6 @@ export default function CurrencyCalculator() {
     setValue("")
     setCurrency("USD")
     setNextId(1)
-    // حذف البيانات المحفوظة
-    try {
-      localStorage.removeItem("saved_items")
-    } catch (e) {
-      console.error("Error removing saved items:", e)
-    }
   }
 
   // Calculate totals in different currencies
@@ -331,15 +218,6 @@ export default function CurrencyCalculator() {
         KWD: 0,
         QAR: 0,
         MYR: 0,
-        // Nuevas divisas
-        ILS: 0,
-        JOD: 0,
-        LBP: 0,
-        MAD: 0,
-        OMR: 0,
-        BHD: 0,
-        DZD: 0,
-        TND: 0,
       }
 
     const totalInUSD = items.reduce((sum, item) => {
@@ -366,15 +244,6 @@ export default function CurrencyCalculator() {
       KWD: totalInUSD * rates.KWD,
       QAR: totalInUSD * rates.QAR,
       MYR: totalInUSD * rates.MYR,
-      // Nuevas divisas
-      ILS: totalInUSD * rates.ILS,
-      JOD: totalInUSD * rates.JOD,
-      LBP: totalInUSD * rates.LBP,
-      MAD: totalInUSD * rates.MAD,
-      OMR: totalInUSD * rates.OMR,
-      BHD: totalInUSD * rates.BHD,
-      DZD: totalInUSD * rates.DZD,
-      TND: totalInUSD * rates.TND,
     }
   }
 
@@ -425,24 +294,11 @@ export default function CurrencyCalculator() {
 
   // تعديل وظيفة handleDownloadPDF
   const handleDownloadPDF = async () => {
-    if (items.length === 0 || !rates) {
-      toast({
-        title: t.fileDownloadError,
-        description: t.noItemsToExport || "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
-        variant: "destructive",
-      })
-      return
-    }
+    if (items.length === 0 || !rates) return
 
     setIsGeneratingPDF(true)
     try {
-      // عرض رسالة بدء التوليد
-      toast({
-        title: t.generatingPDF || "جاري إنشاء ملف PDF",
-        description: t.pleaseWait || "يرجى الانتظار...",
-      })
-
-      // استخدام وظيفة إنشاء PDF
+      // استخدام طريقة واحدة فقط لإنشاء PDF
       await generatePDF({
         items,
         totals,
@@ -454,18 +310,15 @@ export default function CurrencyCalculator() {
         dir,
       })
 
-      // عرض رسالة نجاح
       toast({
         title: t.fileDownloadSuccess,
         description: t.fileDownloadSuccessDesc,
       })
     } catch (error) {
       console.error("Error generating PDF:", error)
-
-      // عرض رسالة خطأ مفصلة
       toast({
         title: t.fileDownloadError,
-        description: `${t.fileDownloadErrorDesc} ${error instanceof Error ? error.message : ""}`,
+        description: t.fileDownloadErrorDesc,
         variant: "destructive",
       })
     } finally {
@@ -476,11 +329,6 @@ export default function CurrencyCalculator() {
   // Handle saving company info
   const handleSaveCompanyInfo = (info: CompanyInfo) => {
     setCompanyInfo(info)
-    try {
-      localStorage.setItem("company_info", JSON.stringify(info))
-    } catch (e) {
-      console.error("Error saving company info:", e)
-    }
     toast({
       title: t.companyInfoSaved,
       description: t.companyInfoSavedDesc,
@@ -552,23 +400,6 @@ export default function CurrencyCalculator() {
         return "ر.ق"
       case "MYR":
         return "RM"
-      // Nuevas divisas
-      case "ILS":
-        return "₪"
-      case "JOD":
-        return "د.أ"
-      case "LBP":
-        return "ل.ل"
-      case "MAD":
-        return "د.م."
-      case "OMR":
-        return "ر.ع."
-      case "BHD":
-        return "د.ب"
-      case "DZD":
-        return "د.ج"
-      case "TND":
-        return "د.ت"
       default:
         return ""
     }
@@ -578,7 +409,7 @@ export default function CurrencyCalculator() {
   const currencyGroups = [
     {
       label: "الشرق الأوسط وشمال أفريقيا",
-      currencies: ["EGP", "AED", "SAR", "KWD", "QAR", "ILS", "JOD", "LBP", "MAD", "OMR", "BHD", "DZD", "TND"],
+      currencies: ["EGP", "AED", "SAR", "KWD", "QAR"],
     },
     {
       label: "أمريكا وأوروبا",
@@ -615,15 +446,6 @@ export default function CurrencyCalculator() {
       KWD: t.kwd,
       QAR: t.qar,
       MYR: t.myr,
-      // Nuevas divisas
-      ILS: t.ils,
-      JOD: t.jod,
-      LBP: t.lbp,
-      MAD: t.mad,
-      OMR: t.omr,
-      BHD: t.bhd,
-      DZD: t.dzd,
-      TND: t.tnd,
     }
     return names[code]
   }
@@ -634,72 +456,10 @@ export default function CurrencyCalculator() {
     }
   }, [lastUpdateTime, rates])
 
-  // Añadir una función para cargar el historial
-  const loadHistoryItems = (historyItems: Item[], historyCurrency: Currency) => {
-    setItems(historyItems)
-    setTotalCurrency(historyCurrency)
-    setNextId(Math.max(...historyItems.map((item) => item.id)) + 1)
-  }
-
-  // إضافة وظيفة لتصدير البيانات بتنسيق CSV
-  const handleExportCSV = () => {
-    if (items.length === 0) {
-      toast({
-        title: t.fileDownloadError,
-        description: t.noItemsToExport || "لا توجد عناصر لتصديرها. يرجى إضافة عناصر أولاً.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    try {
-      // إنشاء محتوى CSV
-      const headers = [t.itemName, t.inputValue, t.calculatedValue, t.currency]
-      const rows = items.map((item) => [
-        item.name,
-        item.originalValue,
-        formatNumber(item.value, "en", true),
-        getCurrencyName(item.currency),
-      ])
-
-      // تحويل البيانات إلى نص CSV
-      let csvContent = headers.join(",") + "\n"
-      csvContent += rows.map((row) => row.join(",")).join("\n")
-
-      // إنشاء رابط تنزيل
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.setAttribute("href", url)
-      link.setAttribute("download", `WorldCosts_${new Date().toISOString().slice(0, 10)}.csv`)
-      link.style.visibility = "hidden"
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast({
-        title: t.fileDownloadSuccess,
-        description: t.csvDownloadSuccessDesc || "تم تنزيل ملف CSV بنجاح.",
-      })
-    } catch (error) {
-      console.error("Error exporting CSV:", error)
-      toast({
-        title: t.fileDownloadError,
-        description: t.csvDownloadErrorDesc || "حدث خطأ أثناء تصدير البيانات. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleCustomRatesUpdate = (updatedRates: ExchangeRates) => {
-    setRates(updatedRates)
-    saveCustomRates(updatedRates)
-  }
-
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
       <div className="container mx-auto py-8 px-4">
-        <AdBanner adSlot="7996815600" className="mb-6 mt-2" minContentLength={300} items={items} />
+        {items.length >= 3 && <AdBanner adSlot="7996815600" className="mb-6" minContentLength={300} />}
 
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-between w-full mb-4">
@@ -724,26 +484,18 @@ export default function CurrencyCalculator() {
                     <span className="text-sm text-muted-foreground mb-2">
                       {t.lastUpdated}: {formatLastUpdated(rates.lastUpdated)}
                     </span>
-                    <div className="flex gap-2">
-                      <TeslaButton
-                        variant="secondary"
-                        size="sm"
-                        onClick={handleRefreshRates}
-                        disabled={isRefreshing}
-                        className="h-8 px-2"
-                      >
-                        <RefreshCw
-                          className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"} ${isRefreshing ? "animate-spin" : ""}`}
-                        />
-                        {t.updateRates}
-                      </TeslaButton>
-                      <ExchangeRateManager
-                        rates={rates}
-                        onRatesUpdate={handleCustomRatesUpdate}
-                        isRefreshing={isRefreshing}
-                        onRefresh={handleRefreshRates}
+                    <TeslaButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleRefreshRates}
+                      disabled={isRefreshing}
+                      className="h-8 px-2"
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"} ${isRefreshing ? "animate-spin" : ""}`}
                       />
-                    </div>
+                      {t.updateRates}
+                    </TeslaButton>
                   </div>
                 )}
               </div>
@@ -822,9 +574,6 @@ export default function CurrencyCalculator() {
                                   className="text-foreground focus:bg-[#282b2e]"
                                 >
                                   {getCurrencyName(code as Currency)} ({getCurrencySymbol(code as Currency)})
-                                  {rates && isUsingFallbackRate(code as keyof ExchangeRates, rates) && (
-                                    <AlertTriangle className="h-3 w-3 text-amber-500 inline-block ml-1" />
-                                  )}
                                 </SelectItemComponent>
                               ))}
                               {group !== currencyGroups[currencyGroups.length - 1] && (
@@ -853,9 +602,7 @@ export default function CurrencyCalculator() {
             </TeslaCardContent>
           </TeslaCard>
 
-          {!isLoading && items.length >= 5 && (
-            <AdBanner adSlot="7996815600" className="my-4" minContentLength={300} items={items} />
-          )}
+          {!isLoading && items.length >= 5 && <AdBanner adSlot="7996815600" className="my-4" minContentLength={300} />}
 
           {!isLoading && items.length > 0 ? (
             <>
@@ -880,10 +627,6 @@ export default function CurrencyCalculator() {
                           }`}
                         />
                         {t.downloadPDF}
-                      </TeslaButton>
-                      <TeslaButton variant="secondary" size="sm" onClick={handleExportCSV}>
-                        <FileDown className={`h-4 w-4 ${dir === "rtl" ? "ml-1" : "mr-1"}`} />
-                        {t.exportCSV || "تصدير CSV"}
                       </TeslaButton>
                     </div>
                   </div>
@@ -918,13 +661,10 @@ export default function CurrencyCalculator() {
                               {item.originalValue}
                             </TableCell>
                             <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
-                              {formatNumber(item.value, language)}
+                              {item.value.toFixed(2)}
                             </TableCell>
                             <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
                               {getCurrencyName(item.currency)}
-                              {rates && isUsingFallbackRate(item.currency, rates) && (
-                                <AlertTriangle className="h-3 w-3 text-amber-500 inline-block mr-1" />
-                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
@@ -971,7 +711,7 @@ export default function CurrencyCalculator() {
                   <div className="bg-muted rounded-xl p-6 text-center">
                     <p className="text-muted-foreground mb-2">{t[`in${totalCurrency}` as keyof typeof t]}</p>
                     <p className="text-4xl font-bold text-tesla-blue">
-                      {formatNumber(totals[totalCurrency], language)} {getCurrencySymbol(totalCurrency)}
+                      {totals[totalCurrency].toFixed(2)} {getCurrencySymbol(totalCurrency)}
                     </p>
                   </div>
                 </TeslaCardContent>
@@ -1009,10 +749,6 @@ export default function CurrencyCalculator() {
                 </TeslaCardFooter>
               </TeslaCard>
 
-              {items.length > 0 && (
-                <AdBanner adSlot="1234567890" className="my-6" adFormat="fluid" minContentLength={200} items={items} />
-              )}
-
               <TeslaCard>
                 <TeslaCardHeader>
                   <TeslaCardTitle className="text-xl font-medium">{t.chartTitle}</TeslaCardTitle>
@@ -1021,15 +757,6 @@ export default function CurrencyCalculator() {
                   <ItemsChart items={items} getCurrencyName={(code) => getCurrencyName(code as Currency)} />
                 </TeslaCardContent>
               </TeslaCard>
-
-              <CalculationHistory
-                currentItems={items}
-                totalCurrency={totalCurrency}
-                totalValue={totals[totalCurrency]}
-                onLoadHistory={loadHistoryItems}
-                getCurrencyName={getCurrencyName}
-                getCurrencySymbol={getCurrencySymbol}
-              />
             </>
           ) : (
             !isLoading && (
@@ -1073,15 +800,7 @@ export default function CurrencyCalculator() {
           </Link>
         </div>
 
-        <div className="mt-8 mb-4">
-          <AdBanner
-            adSlot="7996815600"
-            className="rounded-xl shadow-lg"
-            style={{ minHeight: "250px" }}
-            minContentLength={200}
-            items={items}
-          />
-        </div>
+        {items.length >= 3 && <AdBanner adSlot="7996815600" className="mt-8" minContentLength={300} />}
       </div>
 
       <CompanyInfoDialog
@@ -1091,7 +810,6 @@ export default function CurrencyCalculator() {
         onSave={handleSaveCompanyInfo}
       />
 
-      <CookieConsentBanner />
       <RegisterSW />
       <OfflineAlert />
     </div>

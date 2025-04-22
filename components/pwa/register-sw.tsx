@@ -13,9 +13,9 @@ export function RegisterSW() {
   const { t } = useLanguage()
 
   useEffect(() => {
-    // التحقق مما إذا كنا في بيئة معاينة أو sandbox
+    // Verificar si estamos en un entorno de vista previa o sandbox
     const isPreviewEnvironment = () => {
-      // التحقق مما إذا كنا في بيئة معاينة v0
+      // Comprobar si estamos en un entorno de vista previa de v0
       if (typeof window !== "undefined") {
         const hostname = window.location.hostname
         return (
@@ -28,8 +28,8 @@ export function RegisterSW() {
       return false
     }
 
-    // تسجيل Service Worker في جميع البيئات لضمان عمله في الإنتاج
-    if ("serviceWorker" in navigator) {
+    // Solo intentar registrar el Service Worker si no estamos en un entorno de vista previa
+    if ("serviceWorker" in navigator && !isPreviewEnvironment()) {
       window.addEventListener("load", () => {
         try {
           navigator.serviceWorker
@@ -45,49 +45,51 @@ export function RegisterSW() {
         }
       })
     } else {
-      console.log("Service Worker not supported in this browser")
+      console.log("Service Worker registration skipped in preview/development environment")
     }
 
-    // التعامل مع أحداث التثبيت
-    // إزالة التحقق من بيئة المعاينة لضمان عمل التثبيت في الإنتاج
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-      setIsInstallable(true)
-      console.log("App is installable, showing install button")
-    }
-
-    // الاستماع لحدث appinstalled
-    const handleAppInstalled = () => {
-      setIsInstallable(false)
-      setDeferredPrompt(null)
-      console.log("PWA was installed")
-      toast({
-        title: t.installApp || "تم تثبيت التطبيق",
-        description: "تم تثبيت التطبيق بنجاح على جهازك",
-      })
-    }
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
-    window.addEventListener("appinstalled", handleAppInstalled)
-
-    // التحقق مما إذا كان التطبيق مثبتًا بالفعل
-    const checkIfInstalled = () => {
-      if (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true) {
-        console.log("App is already installed")
-        setIsInstallable(false)
+    // Manejar eventos de instalación solo si no estamos en un entorno de vista previa
+    if (!isPreviewEnvironment()) {
+      // Escuchar evento beforeinstallprompt
+      const handleBeforeInstallPrompt = (e: any) => {
+        e.preventDefault()
+        setDeferredPrompt(e)
+        setIsInstallable(true)
+        console.log("App is installable, showing install button")
       }
-    }
 
-    checkIfInstalled()
+      // Escuchar evento appinstalled
+      const handleAppInstalled = () => {
+        setIsInstallable(false)
+        setDeferredPrompt(null)
+        console.log("PWA was installed")
+        toast({
+          title: t.installApp || "تم تثبيت التطبيق",
+          description: "تم تثبيت التطبيق بنجاح على جهازك",
+        })
+      }
 
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
-      window.removeEventListener("appinstalled", handleAppInstalled)
+      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      window.addEventListener("appinstalled", handleAppInstalled)
+
+      // Verificar si la aplicación ya está instalada
+      const checkIfInstalled = () => {
+        if (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true) {
+          console.log("App is already installed")
+          setIsInstallable(false)
+        }
+      }
+
+      checkIfInstalled()
+
+      return () => {
+        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+        window.removeEventListener("appinstalled", handleAppInstalled)
+      }
     }
   }, [toast, t])
 
-  // التعامل مع النقر على زر التثبيت
+  // Manejar clic en el botón de instalación
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       console.log("No deferred prompt available")

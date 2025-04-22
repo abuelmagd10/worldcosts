@@ -22,14 +22,6 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
-  | "ILS"
-  | "JOD"
-  | "LBP"
-  | "MAD"
-  | "OMR"
-  | "BHD"
-  | "DZD"
-  | "TND"
 type Item = {
   id: number
   name: string
@@ -90,23 +82,6 @@ const getCurrencySymbol = (currency: Currency): string => {
       return "ر.ق"
     case "MYR":
       return "RM"
-    // Nuevas divisas
-    case "ILS":
-      return "₪"
-    case "JOD":
-      return "د.أ"
-    case "LBP":
-      return "ل.ل"
-    case "MAD":
-      return "د.م."
-    case "OMR":
-      return "ر.ع."
-    case "BHD":
-      return "د.ب"
-    case "DZD":
-      return "د.ج"
-    case "TND":
-      return "د.ت"
     default:
       return ""
   }
@@ -151,56 +126,27 @@ function getCurrencyName(currency: Currency, t: Translation): string {
       return t.qar
     case "MYR":
       return t.myr
-    // Nuevas divisas
-    case "ILS":
-      return t.ils
-    case "JOD":
-      return t.jod
-    case "LBP":
-      return t.lbp
-    case "MAD":
-      return t.mad
-    case "OMR":
-      return t.omr
-    case "BHD":
-      return t.bhd
-    case "DZD":
-      return t.dzd
-    case "TND":
-      return t.tnd
     default:
       return currency
   }
 }
 
-// الوظيفة الرئيسية لإنشاء PDF
+// طريقة جديدة لإنشاء PDF باستخدام jsPDF مباشرة
 export const generatePDF = async (data: PDFData): Promise<void> => {
   try {
-    console.log("Starting PDF generation")
-
-    // محاولة استخدام طريقة HTML2Canvas أولاً
-    try {
-      await generatePDFWithHTML2Canvas(data)
-      return
-    } catch (error) {
-      console.error("HTML2Canvas method failed, trying direct jsPDF method:", error)
-      await generatePDFWithJSPDF(data)
-    }
+    console.log("Starting PDF generation with HTML2Canvas method")
+    await generatePDFWithHTML2Canvas(data)
   } catch (error) {
-    console.error("All PDF generation methods failed:", error)
-    throw new Error("Failed to generate PDF with all available methods")
+    console.error("Error generating PDF:", error)
+    throw error
   }
 }
 
-// طريقة إنشاء PDF باستخدام HTML2Canvas
-const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
+// طريقة بديلة لإنشاء PDF باستخدام HTML2Canvas كاحتياطي
+export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
   try {
     // استيراد المكتبات اللازمة
-    const jsPDFModule = await import("jspdf")
-    const html2canvasModule = await import("html2canvas")
-
-    const jsPDF = jsPDFModule.default
-    const html2canvas = html2canvasModule.default
+    const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([import("jspdf"), import("html2canvas")])
 
     // تحديد اسم الملف
     const pdfTitle = data.companyInfo?.pdfFileName || "WorldCosts"
@@ -212,9 +158,9 @@ const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
     container.style.top = "-9999px"
     container.style.width = "794px" // عرض A4 بالبكسل عند 96 DPI
     container.style.direction = data.dir
-    container.style.fontFamily = data.dir === "rtl" ? "Arial, sans-serif" : "Arial, sans-serif"
-    container.style.color = "#000000"
-    container.style.backgroundColor = "#FFFFFF"
+    container.style.fontFamily = "Arial, sans-serif" // استخدام خطوط النظام
+    container.style.color = "#000000" // تأكد من أن النص أسود
+    container.style.backgroundColor = "#FFFFFF" // تأكد من أن الخلفية بيضاء
     document.body.appendChild(container)
 
     // تنسيق التاريخ
@@ -310,7 +256,7 @@ const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
                 }; border: 1px solid #ddd; color: #000000;">${item.originalValue}</td>
                 <td style="padding: 8px; text-align: ${
                   data.dir === "rtl" ? "right" : "left"
-                }; border: 1px solid #ddd; color: #000000;">${formatNumber(item.value, "en", true)}</td>
+                }; border: 1px solid #ddd; color: #000000;">${formatNumber(item.value, "en")}</td>
                 <td style="padding: 8px; text-align: ${
                   data.dir === "rtl" ? "right" : "left"
                 }; border: 1px solid #ddd; color: #000000;">${getCurrencyName(item.currency, data.t)}</td>
@@ -334,7 +280,6 @@ const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
             <p style="margin: 5px 0 0; font-size: 18px; font-weight: bold; color: #000000;">${formatNumber(
               data.totals[data.selectedTotalCurrency],
               "en",
-              true,
             )} ${getCurrencySymbol(data.selectedTotalCurrency)}</p>
           </div>
         </div>
@@ -345,192 +290,57 @@ const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
       </div>
     `
 
-    // تحويل HTML إلى canvas
-    const canvas = await html2canvas(container, {
-      scale: 2, // جودة أعلى
-      useCORS: true,
-      logging: false,
-      backgroundColor: "#FFFFFF",
-      allowTaint: true,
-      foreignObjectRendering: false,
-    })
+    try {
+      // تحويل HTML إلى canvas
+      const canvas = await html2canvas(container, {
+        scale: 2, // جودة أعلى
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#FFFFFF", // تأكد من أن الخلفية بيضاء
+        allowTaint: true, // السماح بتلوين الكانفاس للصور من مصادر مختلفة
+        foreignObjectRendering: false, // تعطيل استخدام foreignObject لتحسين التوافق
+      })
 
-    // إنشاء PDF من canvas
-    const imgData = canvas.toDataURL("image/png")
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    })
+      // إنشاء PDF من canvas
+      const imgData = canvas.toDataURL("image/png")
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      })
 
-    // حساب الأبعاد لضبط الصورة بشكل صحيح في الصفحة
-    const imgWidth = 210 // عرض A4 بالملم
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
+      // حساب الأبعاد لتناسب الصورة بشكل صحيح على الصفحة
+      const imgWidth = 210 // عرض A4 بالملم
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
 
-    // إضافة المزيد من الصفحات إذا كان المحتوى طويلاً جداً
-    if (imgHeight > 297) {
-      // ارتفاع A4 بالملم
-      let remainingHeight = imgHeight
-      let position = -297 // الموضع الأولي للصفحة الثانية
+      // إضافة المزيد من الصفحات إذا كان المحتوى طويلاً جدًا
+      if (imgHeight > 297) {
+        // ارتفاع A4 بالملم
+        let remainingHeight = imgHeight
+        let position = -297 // موضع البداية للصفحة الثانية
 
-      while (remainingHeight > 297) {
-        pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-        remainingHeight -= 297
-        position -= 297
+        while (remainingHeight > 297) {
+          pdf.addPage()
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
+          remainingHeight -= 297
+          position -= 297
+        }
       }
+
+      // استخدام اسم الملف المخصص للملف المحفوظ
+      const filename = `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`
+      pdf.save(filename)
+    } catch (error) {
+      console.error("Error generating PDF with HTML2Canvas:", error)
+      throw error
+    } finally {
+      // تنظيف العنصر المؤقت
+      document.body.removeChild(container)
     }
-
-    // استخدام اسم ملف مخصص
-    const filename = `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`
-    pdf.save(filename)
-
-    // تنظيف العنصر المؤقت
-    document.body.removeChild(container)
   } catch (error) {
-    console.error("Error in HTML2Canvas PDF generation:", error)
-    throw error
-  }
-}
-
-// طريقة إنشاء PDF باستخدام jsPDF مباشرة
-const generatePDFWithJSPDF = async (data: PDFData): Promise<void> => {
-  try {
-    // استيراد المكتبة اللازمة
-    const jsPDFModule = await import("jspdf")
-    const jsPDF = jsPDFModule.default
-
-    // تحديد اسم الملف
-    const pdfTitle = data.companyInfo?.pdfFileName || "WorldCosts"
-
-    // إنشاء مستند PDF
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    })
-
-    // إعداد الصفحة
-    const pageWidth = 210
-    const pageHeight = 297
-    const margin = 20
-    const contentWidth = pageWidth - 2 * margin
-    let y = margin
-
-    // إضافة العنوان
-    pdf.setFontSize(18)
-    pdf.text(pdfTitle, pageWidth / 2, y, { align: "center" })
-    y += 15
-
-    // إضافة معلومات الشركة إذا كانت متوفرة
-    if (data.companyInfo?.name) {
-      pdf.setFontSize(12)
-      pdf.text(data.companyInfo.name, margin, y)
-      y += 7
-
-      if (data.companyInfo.address) {
-        pdf.setFontSize(10)
-        pdf.text(`${data.t.address}: ${data.companyInfo.address}`, margin, y)
-        y += 5
-      }
-
-      if (data.companyInfo.phone) {
-        pdf.setFontSize(10)
-        pdf.text(`${data.t.phone}: ${data.companyInfo.phone}`, margin, y)
-        y += 5
-      }
-    }
-
-    y += 10
-
-    // إضافة معلومات التقرير
-    pdf.setFontSize(10)
-    pdf.text(`${data.t.reportDate}: ${new Date().toLocaleDateString()}`, margin, y)
-    y += 5
-    pdf.text(`${data.t.lastUpdated}: ${new Date(data.lastUpdated).toLocaleDateString()}`, margin, y)
-    y += 5
-    pdf.text(`${data.t.totalCurrency}: ${getCurrencyName(data.selectedTotalCurrency, data.t)}`, margin, y)
-    y += 15
-
-    // إضافة جدول العناصر
-    pdf.setFontSize(14)
-    pdf.text(data.t.addedItems, pageWidth / 2, y, { align: "center" })
-    y += 10
-
-    // إعداد الجدول
-    const tableColumns = [data.t.itemName, data.t.inputValue, data.t.calculatedValue, data.t.currency]
-    const tableRows = data.items.map((item) => [
-      item.name,
-      item.originalValue,
-      formatNumber(item.value, "en", true),
-      getCurrencyName(item.currency, data.t),
-    ])
-
-    // رسم الجدول
-    pdf.setFontSize(10)
-    const cellWidth = contentWidth / tableColumns.length
-    const cellHeight = 10
-
-    // رسم رأس الجدول
-    pdf.setFillColor(240, 240, 240)
-    pdf.rect(margin, y, contentWidth, cellHeight, "F")
-
-    for (let i = 0; i < tableColumns.length; i++) {
-      pdf.text(tableColumns[i], margin + i * cellWidth + 2, y + 7)
-    }
-    y += cellHeight
-
-    // رسم صفوف الجدول
-    for (let i = 0; i < tableRows.length; i++) {
-      if (y + cellHeight > pageHeight - margin) {
-        pdf.addPage()
-        y = margin
-      }
-
-      if (i % 2 === 0) {
-        pdf.setFillColor(250, 250, 250)
-        pdf.rect(margin, y, contentWidth, cellHeight, "F")
-      }
-
-      for (let j = 0; j < tableRows[i].length; j++) {
-        pdf.text(tableRows[i][j].toString(), margin + j * cellWidth + 2, y + 7)
-      }
-      y += cellHeight
-    }
-
-    y += 10
-
-    // إضافة المجموع
-    pdf.setFontSize(14)
-    pdf.text(data.t.totalAmount, pageWidth / 2, y, { align: "center" })
-    y += 10
-
-    pdf.setFontSize(12)
-    pdf.text(`${data.t.totalCurrency}: ${getCurrencyName(data.selectedTotalCurrency, data.t)}`, pageWidth / 2, y, {
-      align: "center",
-    })
-    y += 7
-
-    pdf.setFontSize(16)
-    pdf.text(
-      `${formatNumber(data.totals[data.selectedTotalCurrency], "en", true)} ${getCurrencySymbol(data.selectedTotalCurrency)}`,
-      pageWidth / 2,
-      y,
-      { align: "center" },
-    )
-    y += 20
-
-    // إضافة تذييل
-    pdf.setFontSize(8)
-    pdf.text(data.t.generatedBy, pageWidth / 2, pageHeight - margin, { align: "center" })
-
-    // حفظ الملف
-    const filename = `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`
-    pdf.save(filename)
-  } catch (error) {
-    console.error("Error in direct jsPDF generation:", error)
+    console.error("Error in PDF generation with HTML2Canvas:", error)
     throw error
   }
 }
