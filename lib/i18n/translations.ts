@@ -139,17 +139,16 @@ export type Translation = {
   chartTitleDistribution: string
   chartTitleCount: string
   chartTitleItems: string
-  chartTitleValues: string // جديد
+  chartTitleValues: string
   pieChartView: string
   barChartView: string
   itemsChartView: string
   itemCount: string
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: string
 
-  // سياسة الخصوصية
+  // Privacy Policy
   privacyPolicy: string
   lastUpdated: string
   introductionTitle: string
@@ -175,7 +174,7 @@ export type Translation = {
   contactTitle: string
   contactInfo: string
 
-  // الشروط والأحكام
+  // Terms and Conditions
   termsAndConditions: string
   acceptanceTitle: string
   acceptanceText: string
@@ -196,7 +195,7 @@ export type Translation = {
   governingLawText: string
   contactInfoTerms: string
 
-  // من نحن
+  // About Us
   aboutUsSubtitle: string
   ourMissionTitle: string
   ourMissionText: string
@@ -214,22 +213,20 @@ export type Translation = {
   website: string
   copyrightText: string
   aboutUs: string
-  termsAndConditions: string
-  privacyPolicy: string
 
   // Theme related
   toggleTheme: string
   lightTheme: string
   darkTheme: string
 
-  // ترجمات جديدة للميزات
+  // Features
   features: string
   feature1Description: string
   feature2Description: string
   feature3Description: string
   feature4Description: string
 
-  // Historial de cálculos
+  // Calculation History
   calculationHistory: string
   saveCalculation: string
   noCalculationHistory: string
@@ -237,10 +234,44 @@ export type Translation = {
   clearHistory: string
   items: string
   total: string
+
+  // Cookie Consent
+  cookieConsentTitle: string
+  cookieConsentDescription: string
+  necessaryCookies: string
+  necessaryCookiesDescription: string
+  preferencesCookies: string
+  preferencesCookiesDescription: string
+  analyticsCookies: string
+  analyticsCookiesDescription: string
+  marketingCookies: string
+  marketingCookiesDescription: string
+  acceptAllCookies: string
+  rejectAllCookies: string
+  showDetails: string
+  hideDetails: string
+  savePreferences: string
 }
 
 // Arabic translations
 export const ar: Translation = {
+  // Cookie Consent
+  cookieConsentTitle: "إعدادات الخصوصية وملفات تعريف الارتباط",
+  cookieConsentDescription:
+    "نستخدم ملفات تعريف الارتباط وتقنيات التخزين المماثلة لتحسين تجربتك على موقعنا. يمكنك تخصيص تفضيلاتك أو قبول جميع ملفات تعريف الارتباط.",
+  necessaryCookies: "ملفات تعريف الارتباط الضرورية",
+  necessaryCookiesDescription: "ضرورية لتشغيل الموقع ولا يمكن تعطيلها.",
+  preferencesCookies: "ملفات تعريف ارتباط التفضيلات",
+  preferencesCookiesDescription: "تسمح للموقع بتذكر المعلومات التي تغير طريقة عمل الموقع أو مظهره.",
+  analyticsCookies: "ملفات تعريف ارتباط التحليلات",
+  analyticsCookiesDescription: "تساعدنا على فهم كيفية تفاعل الزوار مع الموقع.",
+  marketingCookies: "ملفات تعريف ارتباط التسويق",
+  marketingCookiesDescription: "تستخدم لتتبع الزوار عبر مواقع الويب وعرض إعلانات ذات صلة.",
+  acceptAllCookies: "قبول الكل",
+  rejectAllCookies: "رفض غير الضرورية",
+  showDetails: "عرض التفاصيل",
+  hideDetails: "إخفاء التفاصيل",
+  savePreferences: "حفظ التفضيلات",
   appTitle: "WorldCosts",
   appDescription: "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
 
@@ -457,8 +488,6 @@ export const ar: Translation = {
   website: "الموقع الإلكتروني",
   copyrightText: "جميع الحقوق محفوظة",
   aboutUs: "من نحن",
-  termsAndConditions: "الشروط والأحكام",
-  privacyPolicy: "سياسة الخصوصية",
 
   // Theme related
   toggleTheme: "تبديل المظهر",
@@ -484,6 +513,24 @@ export const ar: Translation = {
 
 // English translations
 export const en: Translation = {
+  // Cookie Consent
+  cookieConsentTitle: "Privacy and Cookie Settings",
+  cookieConsentDescription:
+    "We use cookies and similar storage technologies to enhance your experience on our site. You can customize your preferences or accept all cookies.",
+  necessaryCookies: "Necessary Cookies",
+  necessaryCookiesDescription: "Essential for the website to function and cannot be disabled.",
+  preferencesCookies: "Preference Cookies",
+  preferencesCookiesDescription:
+    "Allow the website to remember information that changes how the website behaves or looks.",
+  analyticsCookies: "Analytics Cookies",
+  analyticsCookiesDescription: "Help us understand how visitors interact with the website.",
+  marketingCookies: "Marketing Cookies",
+  marketingCookiesDescription: "Used to track visitors across websites and display relevant advertisements.",
+  acceptAllCookies: "Accept All",
+  rejectAllCookies: "Reject Non-Essential",
+  showDetails: "Show Details",
+  hideDetails: "Hide Details",
+  savePreferences: "Save Preferences",
   appTitle: "WorldCosts",
   appDescription: "Add items with currency selection and calculate totals in different currencies",
 
@@ -703,8 +750,6 @@ export const en: Translation = {
   website: "Website",
   copyrightText: "All rights reserved",
   aboutUs: "About Us",
-  termsAndConditions: "Terms & Conditions",
-  privacyPolicy: "Privacy Policy",
 
   // Theme related
   toggleTheme: "Toggle Theme",
@@ -730,6 +775,25 @@ export const en: Translation = {
 
 // German translations
 export const de: Translation = {
+  // Cookie Consent
+  cookieConsentTitle: "Datenschutz- und Cookie-Einstellungen",
+  cookieConsentDescription:
+    "Wir verwenden Cookies und ähnliche Speichertechnologien, um Ihre Erfahrung auf unserer Website zu verbessern. Sie können Ihre Präferenzen anpassen oder alle Cookies akzeptieren.",
+  necessaryCookies: "Notwendige Cookies",
+  necessaryCookiesDescription: "Wesentlich für die Funktionalität der Website und können nicht deaktiviert werden.",
+  preferencesCookies: "Präferenz-Cookies",
+  preferencesCookiesDescription:
+    "Ermöglichen der Website, sich an Informationen zu erinnern, die das Verhalten oder Aussehen der Website ändern.",
+  analyticsCookies: "Analyse-Cookies",
+  analyticsCookiesDescription: "Helfen uns zu verstehen, wie Besucher mit der Website interagieren.",
+  marketingCookies: "Marketing-Cookies",
+  marketingCookiesDescription:
+    "Werden verwendet, um Besucher über Websites hinweg zu verfolgen und relevante Werbung anzuzeigen.",
+  acceptAllCookies: "Alle akzeptieren",
+  rejectAllCookies: "Nicht wesentliche ablehnen",
+  showDetails: "Details anzeigen",
+  hideDetails: "Details ausblenden",
+  savePreferences: "Präferenzen speichern",
   appTitle: "WorldCosts",
   appDescription: "Fügen Sie Artikel mit Währungsauswahl hinzu und berechnen Sie Summen in verschiedenen Währungen",
 
@@ -954,8 +1018,6 @@ export const de: Translation = {
   website: "Website",
   copyrightText: "Alle Rechte vorbehalten",
   aboutUs: "Über uns",
-  termsAndConditions: "Allgemeine Geschäftsbedingungen",
-  privacyPolicy: "Datenschutzrichtlinie",
 
   // Theme related
   toggleTheme: "Thema umschalten",
@@ -983,6 +1045,25 @@ export const de: Translation = {
 
 // تحديث الترجمات الفرنسية
 export const fr: Translation = {
+  // Cookie Consent
+  cookieConsentTitle: "Paramètres de confidentialité et de cookies",
+  cookieConsentDescription:
+    "Nous utilisons des cookies et des technologies de stockage similaires pour améliorer votre expérience sur notre site. Vous pouvez personnaliser vos préférences ou accepter tous les cookies.",
+  necessaryCookies: "Cookies nécessaires",
+  necessaryCookiesDescription: "Essentiels au fonctionnement du site et ne peuvent pas être désactivés.",
+  preferencesCookies: "Cookies de préférences",
+  preferencesCookiesDescription:
+    "Permettent au site de mémoriser des informations qui modifient le comportement ou l'apparence du site.",
+  analyticsCookies: "Cookies d'analyse",
+  analyticsCookiesDescription: "Nous aident à comprendre comment les visiteurs interagissent avec le site.",
+  marketingCookies: "Cookies de marketing",
+  marketingCookiesDescription:
+    "Utilisés pour suivre les visiteurs sur les sites web et afficher des publicités pertinentes.",
+  acceptAllCookies: "Tout accepter",
+  rejectAllCookies: "Rejeter non essentiels",
+  showDetails: "Afficher les détails",
+  hideDetails: "Masquer les détails",
+  savePreferences: "Enregistrer les préférences",
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
 
@@ -1208,8 +1289,6 @@ export const fr: Translation = {
   website: "Site web",
   copyrightText: "Tous droits réservés",
   aboutUs: "À propos de nous",
-  termsAndConditions: "Conditions générales",
-  privacyPolicy: "Politique de confidentialité",
 
   // Theme related
   toggleTheme: "Changer de thème",

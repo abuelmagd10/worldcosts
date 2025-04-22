@@ -2,8 +2,6 @@
  * مكتبة للتعامل مع موافقة المستخدم على ملفات تعريف الارتباط
  */
 
-import { saveData, loadData } from "./storage-utils"
-
 // أنواع ملفات تعريف الارتباط
 export enum CookieType {
   NECESSARY = "necessary",
@@ -35,7 +33,18 @@ const CONSENT_STORAGE_KEY = "cookie_consent"
 
 // الحصول على حالة الموافقة الحالية
 export const getConsent = (): ConsentState => {
-  return loadData<ConsentState>(CONSENT_STORAGE_KEY, DEFAULT_CONSENT)
+  if (typeof window === "undefined") return DEFAULT_CONSENT
+
+  try {
+    const storedConsent = localStorage.getItem(CONSENT_STORAGE_KEY)
+    if (storedConsent) {
+      return JSON.parse(storedConsent) as ConsentState
+    }
+  } catch (error) {
+    console.error("Error loading consent data:", error)
+  }
+
+  return DEFAULT_CONSENT
 }
 
 // تحديث موافقة المستخدم
@@ -48,7 +57,14 @@ export const updateConsent = (consent: Partial<ConsentState>): ConsentState => {
     timestamp: Date.now(),
   }
 
-  saveData(CONSENT_STORAGE_KEY, newConsent)
+  try {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(newConsent))
+    }
+  } catch (error) {
+    console.error("Error saving consent data:", error)
+  }
+
   return newConsent
 }
 
