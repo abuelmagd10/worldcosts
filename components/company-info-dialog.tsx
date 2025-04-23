@@ -62,17 +62,17 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
     reader.readAsDataURL(file)
   }
 
-  // وظيفة جديدة للنقر على منطقة التحميل
+  // Modificar la función triggerFileInput para mejorar la respuesta en dispositivos móviles
   const triggerFileInput = useCallback(() => {
     if (fileInputRef.current) {
-      fileInputRef.current.click()
-
       // Añadir un pequeño retraso para dispositivos móviles
       setTimeout(() => {
         if (fileInputRef.current) {
+          fileInputRef.current.click()
+          // Forzar el enfoque para dispositivos móviles
           fileInputRef.current.focus()
         }
-      }, 100)
+      }, 300) // Aumentar el retraso para dar tiempo a que el navegador procese el evento táctil
     }
   }, [])
 
@@ -179,8 +179,8 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 </TeslaButton>
               </div>
             ) : (
+              // Modificar el área de carga para hacerla más grande y más fácil de tocar
               <div className="flex items-center justify-center w-full">
-                {/* استخدام زر بدلاً من label لتحسين الاستجابة على الأجهزة المحمولة */}
                 <TeslaButton
                   type="button"
                   variant="secondary"
@@ -191,17 +191,19 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   onTouchStart={() => setUploadActive(true)}
                   onTouchEnd={() => {
                     setUploadActive(false)
+                    // Llamar explícitamente a triggerFileInput en onTouchEnd para dispositivos móviles
                     triggerFileInput()
                   }}
+                  onTouchCancel={() => setUploadActive(false)}
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
                   onMouseLeave={() => uploadActive && setUploadActive(false)}
                 >
-                  <Upload className="w-6 h-6 mb-1 sm:w-8 sm:h-8 sm:mb-2 text-muted-foreground" />
-                  <p className="mb-1 text-xs sm:text-sm text-muted-foreground">
-                    <span className="font-semibold">{t.clickToUpload}</span> {t.dragAndDrop}
+                  <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">{t.clickToUpload}</span>
                   </p>
-                  <p className="text-xs text-muted-foreground hidden sm:block">{t.maxFileSize}</p>
+                  <p className="text-xs text-muted-foreground">{t.maxFileSize}</p>
                   <Input
                     id="logo-upload"
                     ref={fileInputRef}
