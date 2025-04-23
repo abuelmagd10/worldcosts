@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useCallback } from "react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
   Dialog,
@@ -41,8 +41,10 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   const [logo, setLogo] = useState<string | undefined>(companyInfo.logo)
   const [pdfFileName, setPdfFileName] = useState(companyInfo.pdfFileName || "")
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadActive, setUploadActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // تحسين وظيفة تحميل الشعار
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -59,6 +61,13 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
     }
     reader.readAsDataURL(file)
   }
+
+  // وظيفة جديدة للنقر على منطقة التحميل
+  const triggerFileInput = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }, [])
 
   const handleRemoveLogo = () => {
     setLogo(undefined)
@@ -161,26 +170,25 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               </div>
             ) : (
               <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="logo-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b]"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      if (fileInputRef.current) {
-                        fileInputRef.current.click()
-                      }
-                    }
-                  }}
+                {/* استخدام زر بدلاً من label لتحسين الاستجابة على الأجهزة المحمولة */}
+                <TeslaButton
+                  type="button"
+                  variant="secondary"
+                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b] ${
+                    uploadActive ? "bg-[#1f2124]" : ""
+                  }`}
+                  onClick={triggerFileInput}
+                  onTouchStart={() => setUploadActive(true)}
+                  onTouchEnd={() => setUploadActive(false)}
+                  onMouseDown={() => setUploadActive(true)}
+                  onMouseUp={() => setUploadActive(false)}
+                  onMouseLeave={() => uploadActive && setUploadActive(false)}
                 >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      <span className="font-semibold">{t.clickToUpload}</span> {t.dragAndDrop}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t.maxFileSize}</p>
-                  </div>
+                  <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                  <p className="mb-2 text-sm text-muted-foreground">
+                    <span className="font-semibold">{t.clickToUpload}</span> {t.dragAndDrop}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{t.maxFileSize}</p>
                   <Input
                     id="logo-upload"
                     ref={fileInputRef}
@@ -191,7 +199,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                     disabled={isUploading}
                     aria-label={t.companyLogo}
                   />
-                </label>
+                </TeslaButton>
               </div>
             )}
             {isUploading && <p className="text-sm text-center text-muted-foreground">{t.uploadingLogo}</p>}

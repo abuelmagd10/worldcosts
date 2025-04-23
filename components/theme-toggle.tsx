@@ -10,6 +10,7 @@ export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
   const { t } = useLanguage()
   const [mounted, setMounted] = useState(false)
+  const [isActive, setIsActive] = useState(false)
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -18,7 +19,11 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <TeslaButton variant="circle" size="icon" className="rounded-full bg-tesla-blue text-white">
+      <TeslaButton
+        variant="circle"
+        size="icon"
+        className="rounded-full bg-tesla-blue text-white min-h-[44px] min-w-[44px]"
+      >
         <div className="h-5 w-5" />
       </TeslaButton>
     )
@@ -26,6 +31,8 @@ export function ThemeToggle() {
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark")
+    setIsActive(true)
+    setTimeout(() => setIsActive(false), 200) // تأثير بصري للنقر
   }
 
   return (
@@ -33,8 +40,11 @@ export function ThemeToggle() {
       variant="circle"
       size="icon"
       onClick={toggleTheme}
-      className="rounded-full bg-tesla-blue text-white"
+      className={`rounded-full bg-tesla-blue text-white min-h-[44px] min-w-[44px] ${isActive ? "scale-95" : ""}`}
       title={t.toggleTheme}
+      onTouchStart={() => setIsActive(true)}
+      onTouchEnd={() => setIsActive(false)}
+      onTouchCancel={() => setIsActive(false)}
     >
       {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
       <span className="sr-only">{t.toggleTheme}</span>

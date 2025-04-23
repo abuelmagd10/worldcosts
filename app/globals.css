@@ -4,11 +4,21 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent; /* إزالة تأثير النقر الافتراضي على الأجهزة المحمولة */
+  touch-action: manipulation; /* تحسين أداء اللمس */
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .active-scale {
+    transform: scale(0.97);
   }
 }
 
@@ -86,6 +96,17 @@ body {
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  /* تحسين التفاعل مع العناصر القابلة للنقر */
+  button,
+  [role="button"],
+  a,
+  select,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    @apply touch-manipulation;
   }
 }
 
@@ -315,12 +336,23 @@ th {
   button,
   [role="button"],
   a,
-  input[type="submit"],
+  input[0,0,0.3 
+  )
+  ;
+}
+
+/* تحسين التفاعل على الأجهزة اللمسية */
+@media (hover: none) {
+  button,
+  [role="button"],
+  a,
+  input[type=\"submit"],
   input[type="button"],
   input[type="reset"],
   label[for] {
     cursor: pointer;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    kit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   }
 
   .tesla-button:active,
@@ -335,4 +367,88 @@ th {
 :focus-visible {
   outline: 2px solid hsl(var(--tesla-blue));
   outline-offset: 2px;
+}
+
+/* أضف هذه الأنماط في نهاية ملف globals.css */
+
+/* تحسينات خاصة للأجهزة اللمسية */
+@media (pointer: coarse) {
+  /* زيادة حجم المنطقة القابلة للنقر */
+  button,
+  [role="button"],
+  a,
+  label[for],
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* تحسين تجربة النقر على الأجهزة اللمسية */
+  input[type="file"] {
+    cursor: pointer;
+  }
+
+  /* إزالة تأثير التحويم على الأجهزة اللمسية لأنه غير مفيد */
+  .tesla-button:hover,
+  .tesla-button-secondary:hover,
+  button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* تحسين تأثير النقر النشط */
+  .tesla-button:active,
+  .tesla-button-secondary:active,
+  button:active,
+  a:active,
+  [role="button"]:active,
+  label[for]:active {
+    transform: scale(0.97);
+    transition: transform 0.1s;
+  }
+
+  /* تحسين تغذية راجعة بصرية للنقر */
+  .upload-area:active {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* تحسين تجربة تحميل الملفات */
+.file-upload-area {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-upload-area input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* تحسين تأثير النقر النشط للأزرار */
+.active-scale {
+  transform: scale(0.97);
+}
+
+/* تحسين تباعد العناصر في النماذج على الأجهزة المحمولة */
+@media (max-width: 640px) {
+  .dialog-content .grid.gap-4 {
+    gap: 1rem;
+  }
+
+  .dialog-content .grid.gap-2 {
+    gap: 0.75rem;
+  }
+
+  /* زيادة حجم الأزرار على الأجهزة المحمولة */
+  .dialog-footer button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
 }
