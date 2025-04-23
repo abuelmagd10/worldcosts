@@ -163,7 +163,16 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               <div className="flex items-center justify-center w-full">
                 <label
                   htmlFor="logo-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124]"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b]"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      if (fileInputRef.current) {
+                        fileInputRef.current.click()
+                      }
+                    }
+                  }}
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -180,6 +189,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                     className="hidden"
                     onChange={handleLogoUpload}
                     disabled={isUploading}
+                    aria-label={t.companyLogo}
                   />
                 </label>
               </div>

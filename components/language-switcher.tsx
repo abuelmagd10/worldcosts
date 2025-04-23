@@ -17,9 +17,14 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <TeslaButton variant="circle" size="icon" className="rounded-full bg-tesla-blue text-white">
+        <TeslaButton
+          variant="circle"
+          size="icon"
+          className="rounded-full bg-tesla-blue text-white"
+          aria-label="تغيير اللغة"
+        >
           <Globe className="h-5 w-5" />
-          <span className="sr-only">Switch language</span>
+          <span className="sr-only">تغيير اللغة</span>
         </TeslaButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-card border-border text-foreground">
@@ -29,6 +34,13 @@ export function LanguageSwitcher() {
               key={lang.code}
               onClick={() => setLanguage(lang.code as LanguageCode)}
               className="flex items-center justify-between hover:bg-secondary cursor-pointer"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault()
+                  setLanguage(lang.code as LanguageCode)
+                }
+              }}
             >
               <span>{lang.name}</span>
               {language === lang.code && <Check className="h-4 w-4 ml-2 text-tesla-blue" />}

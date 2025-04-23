@@ -124,6 +124,7 @@ body {
   box-shadow: 0 4px 10px rgba(14, 155, 239, 0.3), 0 1px 3px rgba(14, 155, 239, 0.2);
   transform: translateZ(0);
   transition: transform 0.2s ease, box-shadow 0.2s ease, brightness 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tesla-button:hover {
@@ -141,6 +142,7 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
   transform: translateZ(0);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .dark .tesla-button-secondary {
@@ -306,4 +308,31 @@ th {
 
 .dark .chart-container:hover {
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* تحسين التفاعل على الأجهزة اللمسية */
+@media (hover: none) {
+  button,
+  [role="button"],
+  a,
+  input[type="submit"],
+  input[type="button"],
+  input[type="reset"],
+  label[for] {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .tesla-button:active,
+  .tesla-button-secondary:active,
+  .tesla-circle-button:active,
+  .neomorphic-button:active {
+    transform: scale(0.98);
+  }
+}
+
+/* تحسين التركيز للوصول عبر لوحة المفاتيح */
+:focus-visible {
+  outline: 2px solid hsl(var(--tesla-blue));
+  outline-offset: 2px;
 }
