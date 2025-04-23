@@ -442,7 +442,6 @@ th {
 
 /* Mejoras específicas para la interacción táctil en el área de carga de archivos */
 @media (pointer: coarse) {
-  /* Aumentar el área de toque para el botón de carga */
   .file-upload-area,
   [type="button"],
   [type="file"],
@@ -454,8 +453,8 @@ th {
 
   /* Aumentar el área de toque para el botón de carga */
   .dialog-content button {
-    min-height: 48px;
-    min-width: 48px;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   /* Mejorar el feedback visual para el botón de carga */
@@ -477,58 +476,4 @@ input[type="file"].hidden {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
-}
-
-/* Optimizaciones para el diálogo de información de la empresa en dispositivos móviles */
-@media (max-width: 640px) {
-  /* Reducir el padding en los elementos del diálogo */
-  .dialog-content .grid.gap-3 > div {
-    margin-bottom: 0.5rem;
-  }
-
-  /* Hacer que las etiquetas sean más pequeñas */
-  .dialog-content label {
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-  }
-
-  /* Reducir el tamaño de los inputs */
-  .dialog-content .tesla-input {
-    min-height: 38px;
-  }
-
-  /* Optimizar el área de carga de archivos */
-  .dialog-content .file-upload-area {
-    min-height: 100px;
-  }
-
-  /* Hacer que los botones del diálogo sean más compactos */
-  .dialog-footer button {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    min-height: 38px;
-  }
-}
-
-/* Mejorar la visualización del diálogo en pantallas muy pequeñas */
-@media (max-width: 360px) {
-  .dialog-content {
-    width: 95% !important;
-    max-width: 95% !important;
-    padding: 0.75rem !important;
-  }
-
-  .dialog-content .grid.gap-3 {
-    gap: 0.5rem !important;
-  }
-
-  /* Hacer que el área de carga sea más grande en pantallas pequeñas */
-  .dialog-content .file-upload-area,
-  .dialog-content [role="button"] {
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
 }

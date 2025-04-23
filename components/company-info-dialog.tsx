@@ -62,17 +62,17 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
     reader.readAsDataURL(file)
   }
 
-  // Modificar la función triggerFileInput para mejorar la respuesta en dispositivos móviles
+  // وظيفة جديدة للنقر على منطقة التحميل
   const triggerFileInput = useCallback(() => {
     if (fileInputRef.current) {
+      fileInputRef.current.click()
+
       // Añadir un pequeño retraso para dispositivos móviles
       setTimeout(() => {
         if (fileInputRef.current) {
-          fileInputRef.current.click()
-          // Forzar el enfoque para dispositivos móviles
           fileInputRef.current.focus()
         }
-      }, 300) // Aumentar el retraso para dar tiempo a que el navegador procese el evento táctil
+      }, 100)
     }
   }, [])
 
@@ -97,19 +97,21 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[425px] max-w-[95%] bg-card text-foreground border-border p-4 sm:p-6"
+        className="sm:max-w-[425px] max-w-[90vw] bg-card text-foreground border-border p-4 sm:p-6"
         dir={dir}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Building2 className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2 text-foreground text-base sm:text-lg">
+            <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
             {t.companyInfoTitle}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">{t.companyInfoDescription}</DialogDescription>
+          <DialogDescription className="text-muted-foreground text-xs sm:text-sm">
+            {t.companyInfoDescription}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 py-2 sm:py-4">
-          <div className="grid gap-1 sm:gap-2">
-            <Label htmlFor="company-name" className="text-muted-foreground">
+          <div className="grid gap-2">
+            <Label htmlFor="company-name" className="text-muted-foreground text-xs sm:text-sm">
               {t.companyName}
             </Label>
             <div className="tesla-input p-1">
@@ -118,12 +120,12 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t.companyName}
-                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground"
+                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground text-sm h-8 sm:h-10"
               />
             </div>
           </div>
-          <div className="grid gap-1 sm:gap-2">
-            <Label htmlFor="company-address" className="text-muted-foreground">
+          <div className="grid gap-2">
+            <Label htmlFor="company-address" className="text-muted-foreground text-xs sm:text-sm">
               {t.companyAddress}
             </Label>
             <div className="tesla-input p-1">
@@ -132,12 +134,12 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder={t.companyAddress}
-                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground"
+                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground text-sm h-8 sm:h-10"
               />
             </div>
           </div>
-          <div className="grid gap-1 sm:gap-2">
-            <Label htmlFor="company-phone" className="text-muted-foreground">
+          <div className="grid gap-2">
+            <Label htmlFor="company-phone" className="text-muted-foreground text-xs sm:text-sm">
               {t.companyPhone}
             </Label>
             <div className="tesla-input p-1">
@@ -146,12 +148,12 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder={t.companyPhone}
-                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground"
+                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground text-sm h-8 sm:h-10"
               />
             </div>
           </div>
-          <div className="grid gap-1 sm:gap-2">
-            <Label htmlFor="pdf-file-name" className="text-muted-foreground">
+          <div className="grid gap-2">
+            <Label htmlFor="pdf-file-name" className="text-muted-foreground text-xs sm:text-sm">
               {t.pdfFileName}
             </Label>
             <div className="tesla-input p-1">
@@ -160,12 +162,12 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 value={pdfFileName}
                 onChange={(e) => setPdfFileName(e.target.value)}
                 placeholder={t.pdfFileName}
-                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground"
+                className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground text-sm h-8 sm:h-10"
               />
             </div>
           </div>
           <div className="grid gap-2">
-            <Label className="text-muted-foreground">{t.companyLogo}</Label>
+            <Label className="text-muted-foreground text-xs sm:text-sm">{t.companyLogo}</Label>
             {logo ? (
               <div className="relative w-full h-24 sm:h-32 border border-[#282b2e] rounded-md overflow-hidden bg-[#1b1d1e]">
                 <Image src={logo || "/placeholder.svg"} alt="Company Logo" fill style={{ objectFit: "contain" }} />
@@ -179,8 +181,8 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 </TeslaButton>
               </div>
             ) : (
-              // Modificar el área de carga para hacerla más grande y más fácil de tocar
               <div className="flex items-center justify-center w-full">
+                {/* استخدام زر بدلاً من label لتحسين الاستجابة على الأجهزة المحمولة */}
                 <TeslaButton
                   type="button"
                   variant="secondary"
@@ -191,17 +193,16 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   onTouchStart={() => setUploadActive(true)}
                   onTouchEnd={() => {
                     setUploadActive(false)
-                    // Llamar explícitamente a triggerFileInput en onTouchEnd para dispositivos móviles
-                    triggerFileInput()
+                    triggerFileInput() // Llamar explícitamente al trigger en onTouchEnd para dispositivos móviles
                   }}
-                  onTouchCancel={() => setUploadActive(false)}
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
                   onMouseLeave={() => uploadActive && setUploadActive(false)}
                 >
-                  <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
-                    <span className="font-semibold">{t.clickToUpload}</span>
+                  <Upload className="w-6 h-6 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground" />
+                  <p className="mb-1 sm:mb-2 text-xs sm:text-sm text-muted-foreground">
+                    <span className="font-semibold">{t.clickToUpload}</span>{" "}
+                    <span className="hidden sm:inline">{t.dragAndDrop}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">{t.maxFileSize}</p>
                   <Input
@@ -220,13 +221,15 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
             {isUploading && <p className="text-sm text-center text-muted-foreground">{t.uploadingLogo}</p>}
           </div>
         </div>
-        <DialogFooter
-          className={`flex ${dir === "rtl" ? "flex-row-reverse" : "flex-row"} sm:justify-end gap-2 mt-2 sm:mt-4`}
-        >
-          <TeslaButton onClick={handleSave} className="flex-1 sm:flex-auto">
+        <DialogFooter className={`flex ${dir === "rtl" ? "flex-row-reverse" : "flex-row"} sm:justify-end gap-2 mt-2`}>
+          <TeslaButton onClick={handleSave} className="text-xs sm:text-sm py-1.5 px-3 sm:py-2 sm:px-4">
             {t.saveInfo}
           </TeslaButton>
-          <TeslaButton variant="secondary" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-auto">
+          <TeslaButton
+            variant="secondary"
+            onClick={() => onOpenChange(false)}
+            className="text-xs sm:text-sm py-1.5 px-3 sm:py-2 sm:px-4"
+          >
             {t.cancel}
           </TeslaButton>
         </DialogFooter>
