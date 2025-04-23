@@ -66,6 +66,13 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   const triggerFileInput = useCallback(() => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
+
+      // Añadir un pequeño retraso para dispositivos móviles
+      setTimeout(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.focus()
+        }
+      }, 100)
     }
   }, [])
 
@@ -89,7 +96,10 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-card text-foreground border-border" dir={dir}>
+      <DialogContent
+        className="sm:max-w-[425px] max-w-[95%] bg-card text-foreground border-border p-4 sm:p-6"
+        dir={dir}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
             <Building2 className="h-5 w-5" />
@@ -97,8 +107,8 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">{t.companyInfoDescription}</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
+        <div className="grid gap-3 py-2 sm:py-4">
+          <div className="grid gap-1 sm:gap-2">
             <Label htmlFor="company-name" className="text-muted-foreground">
               {t.companyName}
             </Label>
@@ -112,7 +122,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               />
             </div>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-1 sm:gap-2">
             <Label htmlFor="company-address" className="text-muted-foreground">
               {t.companyAddress}
             </Label>
@@ -126,7 +136,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               />
             </div>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-1 sm:gap-2">
             <Label htmlFor="company-phone" className="text-muted-foreground">
               {t.companyPhone}
             </Label>
@@ -140,7 +150,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               />
             </div>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-1 sm:gap-2">
             <Label htmlFor="pdf-file-name" className="text-muted-foreground">
               {t.pdfFileName}
             </Label>
@@ -157,7 +167,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
           <div className="grid gap-2">
             <Label className="text-muted-foreground">{t.companyLogo}</Label>
             {logo ? (
-              <div className="relative w-full h-32 border border-[#282b2e] rounded-md overflow-hidden bg-[#1b1d1e]">
+              <div className="relative w-full h-24 sm:h-32 border border-[#282b2e] rounded-md overflow-hidden bg-[#1b1d1e]">
                 <Image src={logo || "/placeholder.svg"} alt="Company Logo" fill style={{ objectFit: "contain" }} />
                 <TeslaButton
                   variant="secondary"
@@ -174,21 +184,24 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 <TeslaButton
                   type="button"
                   variant="secondary"
-                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b] ${
+                  className={`flex flex-col items-center justify-center w-full h-24 sm:h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b] ${
                     uploadActive ? "bg-[#1f2124]" : ""
                   }`}
                   onClick={triggerFileInput}
                   onTouchStart={() => setUploadActive(true)}
-                  onTouchEnd={() => setUploadActive(false)}
+                  onTouchEnd={() => {
+                    setUploadActive(false)
+                    triggerFileInput()
+                  }}
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
                   onMouseLeave={() => uploadActive && setUploadActive(false)}
                 >
-                  <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                  <p className="mb-2 text-sm text-muted-foreground">
+                  <Upload className="w-6 h-6 mb-1 sm:w-8 sm:h-8 sm:mb-2 text-muted-foreground" />
+                  <p className="mb-1 text-xs sm:text-sm text-muted-foreground">
                     <span className="font-semibold">{t.clickToUpload}</span> {t.dragAndDrop}
                   </p>
-                  <p className="text-xs text-muted-foreground">{t.maxFileSize}</p>
+                  <p className="text-xs text-muted-foreground hidden sm:block">{t.maxFileSize}</p>
                   <Input
                     id="logo-upload"
                     ref={fileInputRef}
@@ -205,9 +218,13 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
             {isUploading && <p className="text-sm text-center text-muted-foreground">{t.uploadingLogo}</p>}
           </div>
         </div>
-        <DialogFooter className={`flex ${dir === "rtl" ? "flex-row-reverse" : "flex-row"} sm:justify-end gap-2`}>
-          <TeslaButton onClick={handleSave}>{t.saveInfo}</TeslaButton>
-          <TeslaButton variant="secondary" onClick={() => onOpenChange(false)}>
+        <DialogFooter
+          className={`flex ${dir === "rtl" ? "flex-row-reverse" : "flex-row"} sm:justify-end gap-2 mt-2 sm:mt-4`}
+        >
+          <TeslaButton onClick={handleSave} className="flex-1 sm:flex-auto">
+            {t.saveInfo}
+          </TeslaButton>
+          <TeslaButton variant="secondary" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-auto">
             {t.cancel}
           </TeslaButton>
         </DialogFooter>
