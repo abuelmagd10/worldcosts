@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/tesla-card"
 import { getExchangeRates, refreshExchangeRates, type ExchangeRates } from "./actions"
 // تحديث استيراد الوظائف من ملف pdf-generator
-import { generatePDFWithDirectURL } from "@/lib/pdf-generator"
+import { generatePDFWithDirectDownload } from "@/lib/pdf-generator"
 import { useToast } from "@/components/ui/use-toast"
 import { CompanyInfoDialog, type CompanyInfo } from "@/components/company-info-dialog"
 import { LanguageSwitcher } from "@/components/language-switcher"
@@ -307,8 +307,8 @@ export default function CurrencyCalculator() {
 
     setIsGeneratingPDF(true)
     try {
-      // استخدام طريقة واحدة فقط لإنشاء PDF وإرجاع رابط مباشر
-      const pdfUrl = await generatePDFWithDirectURL({
+      // استخدام طريقة التنزيل المباشر بدلاً من فتح نافذة جديدة
+      await generatePDFWithDirectDownload({
         items,
         totals,
         selectedTotalCurrency: totalCurrency,
@@ -318,9 +318,6 @@ export default function CurrencyCalculator() {
         t,
         dir,
       })
-
-      // فتح الرابط المباشر في نافذة جديدة أو تحميله مباشرة
-      window.open(pdfUrl, "_blank")
 
       toast({
         title: t.fileDownloadSuccess,
