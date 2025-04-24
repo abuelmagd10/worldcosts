@@ -1,21 +1,8 @@
 import { NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
-import { v4 as uuidv4 } from "uuid"
-import { existsSync } from "fs"
-import { addFileRecord } from "@/lib/file-tracker"
-
-// تكوين المجلد العام للملفات المرفوعة
-const PDF_DIR = join(process.cwd(), "public", "pdfs")
+import { fileStorage } from "@/lib/db-storage"
 
 export async function POST(request: Request) {
   try {
-    // التأكد من وجود المجلد، وإنشاؤه إذا لم يكن موجوداً
-    if (!existsSync(PDF_DIR)) {
-      await mkdir(PDF_DIR, { recursive: true })
-      console.log(`Created directory: ${PDF_DIR}`)
-    }
-
     const formData = await request.formData()
     const file = formData.get("file") as File
 
@@ -23,43 +10,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No PDF file uploaded" }, { status: 400 })
     }
 
-    // إنشاء اسم فريد للملف
-    const fileId = uuidv4()
-    const fileName = `worldcosts_${fileId}.pdf`
-    const filePath = join(PDF_DIR, fileName)
-    const fileUrl = `/pdfs/${fileName}`
-
-    // تحويل الملف إلى مصفوفة بايت
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // حفظ الملف في المجلد العام
-    await writeFile(filePath, buffer)
-    console.log(`PDF saved to: ${filePath}`)
-
-    // تسجيل معلومات الملف في نظام التتبع
-    try {
-      await addFileRecord({
-        id: fileId,
-        fileName,
-        originalName: file.name || "report.pdf",
-        filePath: fileUrl,
-        fileType: "pdf",
-        fileSize: buffer.length,
-        mimeType: "application/pdf",
-        uploadDate: new Date().toISOString(),
-        metadata: {
-          uploadType: "report",
-        },
-      })
-      console.log(`File record added for: ${fileName}`)
-    } catch (error) {
-      console.error("Error adding file record:", error)
-      // Continue even if tracking fails
+    // التحقق من نوع الملف
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      return NextResponse.json({ error: "Invalid file type. Only PDF files are allowed." }, { status: 400 })
     }
 
-    // إرجاع رابط مباشر للملف
-    return NextResponse.json({ url: fileUrl, success: true })
+    // التحقق من حجم الملف (الحد الأقصى 10 ميجابايت)
+    const maxSize = 10 * 1024 * 1024 // 10MB
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: "File size exceeds the limit (10MB)." }, { status: 400 })
+    }
+
+    // تحويل الملف إلى base64
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64Content = buffer.toString("base64")
+
+    // تخزين الملف في قاعدة البيانات
+    const storedFile = await fileStorage.addFile({
+      fileName: file.name || "report.pdf",
+      originalName: file.name || "report.pdf",
+      fileType: "pdf",
+      fileSize: file.size,
+      mimeType: "application/pdf",
+      content: base64Content,
+      uploadDate: new Date().toISOString(),
+      metadata: {
+        uploadType: "report",
+      },
+    })
+
+    // إنشاء عنوان URL للملف
+    const fileUrl = `data:application/pdf;base64,${base64Content}`
+
+    // إرجاع عنوان URL للملف
+    return NextResponse.json({
+      url: fileUrl,
+      id: storedFile.id,
+      success: true,
+    })
   } catch (error) {
     console.error("Error uploading PDF:", error)
     return NextResponse.json({ error: "Failed to upload PDF", details: String(error) }, { status: 500 })

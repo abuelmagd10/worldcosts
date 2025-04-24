@@ -1,8 +1,8 @@
 import fs from "fs"
 import path from "path"
-import { ensureDirectoriesExist } from "./ensure-directories"
+import { initDirectories } from "./init-directories"
 
-// Definir la estructura de los datos de seguimiento de archivos
+// تعريف بنية بيانات سجلات الملفات
 export interface FileRecord {
   id: string
   fileName: string
@@ -16,28 +16,28 @@ export interface FileRecord {
   metadata?: Record<string, any>
 }
 
-// Ruta al archivo JSON que almacenará los registros
+// مسار ملف JSON الذي سيخزن السجلات
 const DATA_DIR = path.join(process.cwd(), "data")
 const FILE_RECORDS_PATH = path.join(DATA_DIR, "file-records.json")
 
-// Asegurar que el directorio de datos existe
+// التأكد من وجود مجلد البيانات
 async function ensureDataDirExists() {
   try {
-    await ensureDirectoriesExist()
-
-    if (!fs.existsSync(FILE_RECORDS_PATH)) {
-      fs.writeFileSync(FILE_RECORDS_PATH, JSON.stringify([], null, 2))
-    }
+    await initDirectories()
   } catch (error) {
-    console.error("Error creating data directory:", error)
+    console.error("Error ensuring data directory exists:", error)
   }
 }
 
-// Obtener todos los registros de archivos
+// الحصول على جميع سجلات الملفات
 export async function getAllFileRecords(): Promise<FileRecord[]> {
   await ensureDataDirExists()
 
   try {
+    if (!fs.existsSync(FILE_RECORDS_PATH)) {
+      return []
+    }
+
     const data = fs.readFileSync(FILE_RECORDS_PATH, "utf8")
     return JSON.parse(data)
   } catch (error) {
@@ -46,7 +46,7 @@ export async function getAllFileRecords(): Promise<FileRecord[]> {
   }
 }
 
-// Agregar un nuevo registro de archivo
+// إضافة سجل ملف جديد
 export async function addFileRecord(record: FileRecord): Promise<FileRecord> {
   await ensureDataDirExists()
 
@@ -61,27 +61,27 @@ export async function addFileRecord(record: FileRecord): Promise<FileRecord> {
   }
 }
 
-// Obtener un registro de archivo por ID
+// الحصول على سجل ملف بواسطة المعرف
 export async function getFileRecordById(id: string): Promise<FileRecord | null> {
   const records = await getAllFileRecords()
   const record = records.find((r) => r.id === id)
   return record || null
 }
 
-// Obtener registros de archivos por tipo
+// الحصول على سجلات الملفات حسب النوع
 export async function getFileRecordsByType(fileType: string): Promise<FileRecord[]> {
   const records = await getAllFileRecords()
   return records.filter((r) => r.fileType === fileType)
 }
 
-// Eliminar un registro de archivo por ID
+// حذف سجل ملف بواسطة المعرف
 export async function deleteFileRecord(id: string): Promise<boolean> {
   try {
     const records = await getAllFileRecords()
     const newRecords = records.filter((r) => r.id !== id)
 
     if (records.length === newRecords.length) {
-      return false // No se encontró el registro
+      return false // لم يتم العثور على السجل
     }
 
     fs.writeFileSync(FILE_RECORDS_PATH, JSON.stringify(newRecords, null, 2))

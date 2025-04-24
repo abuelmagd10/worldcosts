@@ -58,9 +58,11 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
     "zod": "^3.24.1",
+    "@supabase/supabase-js": "latest",
     "chart.js": "latest",
     "fs": "latest",
     "path": "latest",
+    "@supabase/auth-helpers-nextjs": "latest",
     "uuid": "latest",
     "jspdf": "latest",
     "html2canvas": "latest"

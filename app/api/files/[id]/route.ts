@@ -1,18 +1,26 @@
 import { NextResponse } from "next/server"
-import { deleteFileRecord, getFileRecordById } from "@/lib/file-tracker"
-import fs from "fs"
-import path from "path"
-import { unlink } from "fs/promises"
+import { fileStorage } from "@/lib/db-storage"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const fileRecord = await getFileRecordById(params.id)
+    const fileRecord = await fileStorage.getFileById(params.id)
 
     if (!fileRecord) {
       return NextResponse.json({ error: "File not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ file: fileRecord })
+    // استبعاد محتوى الملف لتقليل حجم الاستجابة
+    const { content, ...fileInfo } = fileRecord
+
+    // إنشاء عنوان URL للملف
+    const fileUrl = `data:${fileRecord.mimeType};base64,${content.substring(0, 20)}...`
+
+    return NextResponse.json({
+      file: {
+        ...fileInfo,
+        filePath: fileUrl,
+      },
+    })
   } catch (error) {
     console.error("Error fetching file:", error)
     return NextResponse.json({ error: "Failed to fetch file", details: String(error) }, { status: 500 })
@@ -21,28 +29,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const fileRecord = await getFileRecordById(params.id)
-
-    if (!fileRecord) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
-    }
-
-    // Eliminar el archivo físico
-    const filePath = path.join(process.cwd(), "public", fileRecord.filePath)
-    console.log(`Attempting to delete file: ${filePath}`)
-
-    if (fs.existsSync(filePath)) {
-      await unlink(filePath)
-      console.log(`File deleted: ${filePath}`)
-    } else {
-      console.log(`File not found on disk: ${filePath}`)
-    }
-
-    // Eliminar el registro
-    const deleted = await deleteFileRecord(params.id)
+    const deleted = await fileStorage.deleteFile(params.id)
 
     if (!deleted) {
-      return NextResponse.json({ error: "Failed to delete file record" }, { status: 500 })
+      return NextResponse.json({ error: "File not found" }, { status: 404 })
     }
 
     return NextResponse.json({ success: true })

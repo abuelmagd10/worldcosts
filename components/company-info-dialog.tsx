@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Building2, Upload, X } from "lucide-react"
+import { Building2, Upload, X, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useLanguage } from "@/lib/i18n/language-context"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
 // تعديل نوع CompanyInfo لاستخدام رابط URL بدلاً من base64
 export type CompanyInfo = {
@@ -43,60 +43,82 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   const [logo, setLogo] = useState<string | undefined>(companyInfo.logo)
   const [pdfFileName, setPdfFileName] = useState(companyInfo.pdfFileName || "")
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadActive, setUploadActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toast } = useToast()
 
-  // تعديل وظيفة handleLogoUpload لرفع الملف إلى خدمة تخزين وإرجاع رابط مباشر
+  // تعديل وظيفة handleLogoUpload لاستخدام التخزين الجديد
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     setIsUploading(true)
+    setUploadError(null)
 
     try {
-      // إنشاء FormData لرفع الملف
-      const formData = new FormData()
-      formData.append("file", file)
-
-      console.log("Uploading file:", file.name, file.type, file.size)
-
-      // استخدام API لرفع الملف
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      const responseText = await response.text()
-      console.log("Upload response:", responseText)
-
-      let data
-      try {
-        data = JSON.parse(responseText)
-      } catch (e) {
-        console.error("Error parsing JSON response:", e)
-        throw new Error("Invalid response format")
+      // التحقق من نوع الملف
+      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"]
+      if (!validTypes.includes(file.type)) {
+        throw new Error("نوع الملف غير صالح. يُسمح فقط بملفات JPEG وPNG وGIF وSVG.")
       }
 
-      if (!response.ok) {
-        throw new Error(`فشل في رفع الملف: ${data.error || response.statusText}`)
+      // التحقق من حجم الملف (الحد الأقصى 2 ميجابايت)
+      const maxSize = 2 * 1024 * 1024 // 2MB
+      if (file.size > maxSize) {
+        throw new Error("حجم الملف يتجاوز الحد المسموح به (2 ميجابايت).")
       }
 
-      // استخدام الرابط المباشر الذي تم إرجاعه من الخادم
-      setLogo(data.url)
-      console.log("Logo set to:", data.url)
+      // تحويل الملف إلى base64 مباشرة
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        try {
+          if (!event.target || typeof event.target.result !== "string") {
+            throw new Error("فشل في قراءة الملف")
+          }
 
-      toast({
-        title: "تم رفع الشعار بنجاح",
-        description: "تم رفع شعار الشركة بنجاح",
-      })
+          const base64Data = event.target.result
+
+          // تعيين الشعار مباشرة بدون الحاجة إلى رفعه إلى الخادم
+          setLogo(base64Data)
+
+          toast({
+            title: "تم رفع الشعار بنجاح",
+            description: "تم رفع شعار الشركة بنجاح",
+          })
+
+          setIsUploading(false)
+        } catch (error) {
+          console.error("Error processing file:", error)
+          setUploadError(error instanceof Error ? error.message : "خطأ غير معروف")
+          toast({
+            title: "خطأ في معالجة الشعار",
+            description: `حدث خطأ أثناء معالجة الشعار: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
+            variant: "destructive",
+          })
+          setIsUploading(false)
+        }
+      }
+
+      reader.onerror = () => {
+        setUploadError("فشل في قراءة الملف")
+        toast({
+          title: "خطأ في قراءة الشعار",
+          description: "فشل في قراءة ملف الشعار",
+          variant: "destructive",
+        })
+        setIsUploading(false)
+      }
+
+      reader.readAsDataURL(file)
     } catch (error) {
       console.error("Error uploading logo:", error)
+      setUploadError(error instanceof Error ? error.message : "خطأ غير معروف")
       toast({
         title: "خطأ في رفع الشعار",
         description: `حدث خطأ أثناء رفع الشعار: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
         variant: "destructive",
       })
-    } finally {
       setIsUploading(false)
     }
   }
@@ -225,7 +247,15 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   alt="Company Logo"
                   fill
                   style={{ objectFit: "contain" }}
-                  crossOrigin="anonymous"
+                  onError={() => {
+                    // إذا فشل تحميل الصورة، قم بإزالة الشعار
+                    setLogo(undefined)
+                    toast({
+                      title: "خطأ في تحميل الشعار",
+                      description: "تعذر تحميل الشعار. يرجى المحاولة مرة أخرى.",
+                      variant: "destructive",
+                    })
+                  }}
                 />
                 <TeslaButton
                   variant="secondary"
@@ -253,18 +283,23 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
                   onMouseLeave={() => uploadActive && setUploadActive(false)}
+                  disabled={isUploading}
                 >
-                  <Upload className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground" />
+                  {isUploading ? (
+                    <Loader2 className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground animate-spin" />
+                  ) : (
+                    <Upload className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground" />
+                  )}
                   <p className="mb-0 sm:mb-2 text-xs sm:text-sm text-muted-foreground">
-                    <span className="font-semibold">{t.clickToUpload}</span>{" "}
-                    <span className="hidden sm:inline">{t.dragAndDrop}</span>
+                    <span className="font-semibold">{isUploading ? t.uploadingLogo : t.clickToUpload}</span>{" "}
+                    {!isUploading && <span className="hidden sm:inline">{t.dragAndDrop}</span>}
                   </p>
                   <p className="text-xs text-muted-foreground hidden xs:block">{t.maxFileSize}</p>
                   <Input
                     id="logo-upload"
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/gif,image/svg+xml"
                     className="hidden"
                     onChange={handleLogoUpload}
                     disabled={isUploading}
@@ -273,7 +308,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 </TeslaButton>
               </div>
             )}
-            {isUploading && <p className="text-sm text-center text-muted-foreground">{t.uploadingLogo}</p>}
+            {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
           </div>
         </div>
         <DialogFooter

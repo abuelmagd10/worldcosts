@@ -131,9 +131,7 @@ function getCurrencyName(currency: Currency, t: Translation): string {
   }
 }
 
-// تعديل وظيفة إنشاء وتحميل ملف PDF لاستخدام رابط مباشر
-
-// تعديل وظيفة generatePDF لإنشاء رابط مباشر للملف
+// وظيفة إنشاء PDF وتحميله
 export const generatePDF = async (data: PDFData): Promise<void> => {
   try {
     console.log("Starting PDF generation with direct URL method")
@@ -157,7 +155,7 @@ export const generatePDFWithDirectURL = async (data: PDFData): Promise<string> =
     // تحديد اسم الملف
     const pdfTitle = data.companyInfo?.pdfFileName || "WorldCosts"
 
-    // إنشاء عنصر مؤقت لعرض المحتوى (نفس الكود السابق)
+    // إنشاء عنصر مؤقت لعرض المحتوى
     const container = document.createElement("div")
     container.style.position = "absolute"
     container.style.left = "-9999px"
@@ -334,48 +332,155 @@ export const generatePDFWithDirectURL = async (data: PDFData): Promise<string> =
         }
       }
 
-      // بدلاً من حفظ الملف محلياً، نقوم برفعه إلى الخادم
-      const pdfBlob = pdf.output("blob")
+      // تحويل PDF إلى base64 مباشرة بدلاً من رفعه إلى الخادم
+      const pdfBase64 = pdf.output("datauristring")
 
-      // إنشاء FormData لرفع الملف
-      const formData = new FormData()
-      formData.append("file", pdfBlob, `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`)
-
-      console.log("Uploading PDF to server...")
-
-      // رفع الملف إلى الخادم
-      const response = await fetch("/api/upload-pdf", {
-        method: "POST",
-        body: formData,
-      })
-
-      const responseText = await response.text()
-      console.log("PDF upload response:", responseText)
-
-      let result
-      try {
-        result = JSON.parse(responseText)
-      } catch (e) {
-        console.error("Error parsing JSON response:", e)
-        throw new Error("Invalid response format")
-      }
-
-      if (!response.ok) {
-        throw new Error(`فشل في رفع ملف PDF: ${result.error || response.statusText}`)
-      }
-
-      // إرجاع الرابط المباشر للملف
-      console.log("PDF URL:", result.url)
-      return result.url
-    } catch (error) {
-      console.error("Error generating PDF with direct URL:", error)
-      throw error
-    } finally {
       // تنظيف العنصر المؤقت
       document.body.removeChild(container)
+
+      // إرجاع عنوان URL للملف
+      return pdfBase64
+    } catch (error) {
+      console.error("Error generating PDF with direct URL:", error)
+
+      // تنظيف العنصر المؤقت
+      document.body.removeChild(container)
+
+      // إعادة محاولة باستخدام طريقة بديلة
+      return generatePDFWithFallback(data)
     }
   } catch (error) {
     console.error("Error in PDF generation with direct URL:", error)
-    throw error
+
+    // إعادة محاولة باستخدام طريقة بديلة
+    return generatePDFWithFallback(data)
+  }
+}
+
+// طريقة بديلة لإنشاء PDF في حالة فشل الطريقة الأساسية
+async function generatePDFWithFallback(data: PDFData): Promise<string> {
+  try {
+    console.log("Using fallback PDF generation method")
+
+    // استيراد المكتبة اللازمة
+    const { default: jsPDF } = await import("jspdf")
+
+    // إنشاء مستند PDF جديد
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    })
+
+    // إضافة العنوان
+    const title = data.companyInfo?.pdfFileName || "WorldCosts"
+    pdf.setFontSize(18)
+    pdf.text(title, 105, 20, { align: "center" })
+
+    // إضافة معلومات التقرير
+    pdf.setFontSize(10)
+    pdf.text(`${data.t.reportDate}: ${new Date().toLocaleDateString()}`, 20, 30)
+    pdf.text(`${data.t.lastUpdated}: ${new Date(data.lastUpdated).toLocaleDateString()}`, 20, 35)
+    pdf.text(`${data.t.totalCurrency}: ${getCurrencyName(data.selectedTotalCurrency, data.t)}`, 20, 40)
+
+    // إضافة جدول العناصر
+    pdf.setFontSize(12)
+    pdf.text(data.t.addedItems, 105, 50, { align: "center" })
+
+    // رسم الجدول
+    const tableStartY = 60
+    const cellPadding = 5
+    const colWidths = [50, 40, 40, 40]
+    const rowHeight = 10
+
+    // رسم رأس الجدول
+    pdf.setFillColor(240, 240, 240)
+    pdf.rect(
+      20,
+      tableStartY,
+      colWidths.reduce((a, b) => a + b, 0),
+      rowHeight,
+      "F",
+    )
+
+    pdf.setFontSize(10)
+    let currentX = 20
+
+    // عناوين الأعمدة
+    pdf.text(data.t.itemName, currentX + cellPadding, tableStartY + 7)
+    currentX += colWidths[0]
+
+    pdf.text(data.t.inputValue, currentX + cellPadding, tableStartY + 7)
+    currentX += colWidths[1]
+
+    pdf.text(data.t.calculatedValue, currentX + cellPadding, tableStartY + 7)
+    currentX += colWidths[2]
+
+    pdf.text(data.t.currency, currentX + cellPadding, tableStartY + 7)
+
+    // رسم صفوف البيانات
+    let currentY = tableStartY + rowHeight
+
+    data.items.forEach((item, index) => {
+      // تبديل لون الخلفية للصفوف البديلة
+      if (index % 2 === 0) {
+        pdf.setFillColor(255, 255, 255)
+      } else {
+        pdf.setFillColor(249, 249, 249)
+      }
+
+      pdf.rect(
+        20,
+        currentY,
+        colWidths.reduce((a, b) => a + b, 0),
+        rowHeight,
+        "F",
+      )
+
+      currentX = 20
+
+      // بيانات الصف
+      pdf.text(item.name.substring(0, 20), currentX + cellPadding, currentY + 7)
+      currentX += colWidths[0]
+
+      pdf.text(item.originalValue.substring(0, 15), currentX + cellPadding, currentY + 7)
+      currentX += colWidths[1]
+
+      pdf.text(item.value.toFixed(2), currentX + cellPadding, currentY + 7)
+      currentX += colWidths[2]
+
+      pdf.text(getCurrencyName(item.currency, data.t).substring(0, 15), currentX + cellPadding, currentY + 7)
+
+      currentY += rowHeight
+    })
+
+    // إضافة المجموع
+    pdf.setFontSize(12)
+    pdf.text(data.t.totalAmount, 105, currentY + 20, { align: "center" })
+
+    pdf.setFillColor(249, 249, 249)
+    pdf.rect(70, currentY + 30, 70, 20, "F")
+
+    pdf.setFontSize(10)
+    pdf.text(`${data.t.totalCurrency}: ${getCurrencyName(data.selectedTotalCurrency, data.t)}`, 75, currentY + 40)
+
+    pdf.setFontSize(12)
+    pdf.text(
+      `${data.totals[data.selectedTotalCurrency].toFixed(2)} ${getCurrencySymbol(data.selectedTotalCurrency)}`,
+      75,
+      currentY + 50,
+    )
+
+    // إضافة تذييل
+    pdf.setFontSize(8)
+    pdf.text(data.t.generatedBy, 105, 280, { align: "center" })
+
+    // تحويل PDF إلى base64
+    const pdfBase64 = pdf.output("datauristring")
+
+    return pdfBase64
+  } catch (error) {
+    console.error("Error in fallback PDF generation:", error)
+    throw new Error("فشل في إنشاء ملف PDF. يرجى المحاولة مرة أخرى.")
   }
 }

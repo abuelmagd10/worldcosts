@@ -1,9 +1,24 @@
-"use server"
+export type Currency =
+  | "USD"
+  | "EGP"
+  | "AED"
+  | "EUR"
+  | "GBP"
+  | "SAR"
+  | "JPY"
+  | "CNY"
+  | "CAD"
+  | "AUD"
+  | "CHF"
+  | "INR"
+  | "RUB"
+  | "TRY"
+  | "BRL"
+  | "KWD"
+  | "QAR"
+  | "MYR"
 
-import { unstable_cache } from "next/cache"
-
-// Define the structure of our exchange rates
-export type ExchangeRates = {
+export interface ExchangeRates {
   USD: number
   EGP: number
   AED: number
@@ -25,101 +40,126 @@ export type ExchangeRates = {
   lastUpdated: string
 }
 
-// Initial fallback rates in case the API fails
-const FALLBACK_RATES: ExchangeRates = {
-  USD: 1,
-  EGP: 49.28,
-  AED: 3.67,
-  EUR: 0.92,
-  GBP: 0.79,
-  SAR: 3.75,
-  JPY: 151.72,
-  CNY: 7.23,
-  CAD: 1.36,
-  AUD: 1.51,
-  CHF: 0.9,
-  INR: 83.5,
-  RUB: 92.5,
-  TRY: 32.15,
-  BRL: 5.05,
-  KWD: 0.31,
-  QAR: 3.64,
-  MYR: 4.7,
-  lastUpdated: new Date().toISOString(),
-}
+const BASE_URL = "https://api.exchangerate-api.com/v4/latest/USD"
 
-// Function to fetch the latest exchange rates
-async function fetchExchangeRates(forceRefresh = false): Promise<ExchangeRates> {
+export async function getExchangeRates(): Promise<ExchangeRates> {
   try {
-    // Using ExchangeRate-API's free endpoint with a cache-busting parameter
-    const cacheBuster = forceRefresh ? `?_=${Date.now()}` : ""
-    const response = await fetch(`https://open.er-api.com/v6/latest/USD${cacheBuster}`, {
-      next: { revalidate: forceRefresh ? 0 : 86400 }, // Revalidate immediately if forced, otherwise once per day
-      cache: forceRefresh ? "no-store" : "default",
-    })
+    const res = await fetch(BASE_URL, { next: { revalidate: 3600 } })
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch exchange rates")
+    if (!res.ok) {
+      console.error("Failed to fetch exchange rates:", res.status, res.statusText)
+      throw new Error(`Failed to fetch exchange rates: ${res.status} ${res.statusText}`)
     }
 
-    const data = await response.json()
+    const data = await res.json()
 
-    // Crear una nueva fecha actual para la última actualización
-    const now = new Date()
+    if (!data || !data.rates) {
+      console.error("Invalid exchange rates data:", data)
+      throw new Error("Invalid exchange rates data")
+    }
 
-    return {
+    const rates: ExchangeRates = {
       USD: 1,
-      EGP: data.rates.EGP || FALLBACK_RATES.EGP,
-      AED: data.rates.AED || FALLBACK_RATES.AED,
-      EUR: data.rates.EUR || FALLBACK_RATES.EUR,
-      GBP: data.rates.GBP || FALLBACK_RATES.GBP,
-      SAR: data.rates.SAR || FALLBACK_RATES.SAR,
-      JPY: data.rates.JPY || FALLBACK_RATES.JPY,
-      CNY: data.rates.CNY || FALLBACK_RATES.CNY,
-      CAD: data.rates.CAD || FALLBACK_RATES.CAD,
-      AUD: data.rates.AUD || FALLBACK_RATES.AUD,
-      CHF: data.rates.CHF || FALLBACK_RATES.CHF,
-      INR: data.rates.INR || FALLBACK_RATES.INR,
-      RUB: data.rates.RUB || FALLBACK_RATES.RUB,
-      TRY: data.rates.TRY || FALLBACK_RATES.TRY,
-      BRL: data.rates.BRL || FALLBACK_RATES.BRL,
-      KWD: data.rates.KWD || FALLBACK_RATES.KWD,
-      QAR: data.rates.QAR || FALLBACK_RATES.QAR,
-      MYR: data.rates.MYR || FALLBACK_RATES.MYR,
-      lastUpdated: now.toISOString(), // Usar la fecha actual
+      EGP: data.rates.EGP,
+      AED: data.rates.AED,
+      EUR: data.rates.EUR,
+      GBP: data.rates.GBP,
+      SAR: data.rates.SAR,
+      JPY: data.rates.JPY,
+      CNY: data.rates.CNY,
+      CAD: data.rates.CAD,
+      AUD: data.rates.AUD,
+      CHF: data.rates.CHF,
+      INR: data.rates.INR,
+      RUB: data.rates.RUB,
+      TRY: data.rates.TRY,
+      BRL: data.rates.BRL,
+      KWD: data.rates.KWD,
+      QAR: data.rates.QAR,
+      MYR: data.rates.MYR,
+      lastUpdated: new Date().toISOString(),
     }
+
+    return rates
   } catch (error) {
     console.error("Error fetching exchange rates:", error)
-    // Asegurarse de que incluso en caso de error, la fecha de última actualización sea la actual
+    // Provide default rates in case of an error
     return {
-      ...FALLBACK_RATES,
+      USD: 1,
+      EGP: 30.9,
+      AED: 3.67,
+      EUR: 0.92,
+      GBP: 0.79,
+      SAR: 3.75,
+      JPY: 143.57,
+      CNY: 7.24,
+      CAD: 1.34,
+      AUD: 1.53,
+      CHF: 0.89,
+      INR: 82.67,
+      RUB: 92.23,
+      TRY: 29.5,
+      BRL: 4.92,
+      KWD: 0.31,
+      QAR: 3.64,
+      MYR: 4.69,
       lastUpdated: new Date().toISOString(),
     }
   }
 }
 
-// Function to get exchange rates (without caching for force refresh)
-export async function getExchangeRates(forceRefresh = false): Promise<ExchangeRates> {
-  if (forceRefresh) {
-    // Si se fuerza la actualización, omitir la caché completamente
-    return fetchExchangeRates(true)
-  }
-
-  // Si no se fuerza la actualización, usar la caché
-  return cachedGetExchangeRates()
+export async function refreshExchangeRates(): Promise<ExchangeRates> {
+  return getExchangeRates()
 }
 
-// Cached version for normal use
-const cachedGetExchangeRates = unstable_cache(
-  async () => {
-    return fetchExchangeRates(false)
-  },
-  ["exchange-rates"],
-  { revalidate: 86400 }, // 24 hours in seconds
-)
+export async function addNote(formData: FormData) {
+  const title = String(formData.get("title"))
 
-// Function to force refresh exchange rates
-export async function refreshExchangeRates(): Promise<ExchangeRates> {
-  // Forzar la actualización y omitir la caché
-  return getExchangeRates(true)
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/notes`, {
+      method: "POST",
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ title }),
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      console.error("Failed to add note:", error)
+      return { error: "Failed to add note" }
+    }
+
+    return { data: null }
+  } catch (error) {
+    console.error("Error adding note:", error)
+    return { error: "Failed to add note" }
+  }
+}
+
+export async function deleteNote(id: number) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/notes?id=eq.${id}`, {
+      method: "DELETE",
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+        Prefer: "return=minimal",
+      },
+    })
+
+    if (!res.ok) {
+      const error = await res.json()
+      console.error("Failed to delete note:", error)
+      return { success: false, error: "Failed to delete note" }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Error deleting note:", error)
+    return { success: false, error: "Failed to delete note" }
+  }
 }
