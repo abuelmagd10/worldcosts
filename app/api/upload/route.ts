@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server"
-import { writeFile } from "fs/promises"
+import { writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { v4 as uuidv4 } from "uuid"
+import { existsSync } from "fs"
 
 // تكوين المجلد العام للملفات المرفوعة
 const UPLOADS_DIR = join(process.cwd(), "public", "uploads")
 
 export async function POST(request: Request) {
   try {
+    // التأكد من وجود المجلد، وإنشاؤه إذا لم يكن موجوداً
+    if (!existsSync(UPLOADS_DIR)) {
+      await mkdir(UPLOADS_DIR, { recursive: true })
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File
 
