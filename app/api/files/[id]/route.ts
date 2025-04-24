@@ -9,15 +9,19 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: "File not found" }, { status: 404 })
     }
 
-    // استبعاد محتوى الملف لتقليل حجم الاستجابة
-    const { content, ...fileInfo } = fileRecord
-
-    // إنشاء عنوان URL للملف
-    const fileUrl = `data:${fileRecord.mimeType};base64,${content.substring(0, 20)}...`
+    // إنشاء عنوان URL كامل للملف
+    const fileUrl = `data:${fileRecord.mimeType};base64,${fileRecord.content}`
 
     return NextResponse.json({
       file: {
-        ...fileInfo,
+        id: fileRecord.id,
+        fileName: fileRecord.fileName,
+        originalName: fileRecord.originalName,
+        fileType: fileRecord.fileType,
+        fileSize: fileRecord.fileSize,
+        mimeType: fileRecord.mimeType,
+        uploadDate: fileRecord.uploadDate,
+        metadata: fileRecord.metadata,
         filePath: fileUrl,
       },
     })

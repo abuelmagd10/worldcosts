@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, FileText, ImageIcon, Download, Trash2 } from "lucide-react"
+import { ArrowLeft, FileText, ImageIcon, Download, Trash2, ExternalLink } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { AppLogo } from "@/components/app-logo"
@@ -83,6 +83,26 @@ export default function FilesAdminPage() {
       toast({
         title: "Error",
         description: "No se pudo eliminar el archivo",
+        variant: "destructive",
+      })
+    }
+  }
+
+  // Función para descargar un archivo
+  const downloadFile = (file: FileRecord) => {
+    try {
+      // Crear un enlace temporal para la descarga
+      const link = document.createElement("a")
+      link.href = file.filePath
+      link.download = file.originalName || file.fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error("Error downloading file:", error)
+      toast({
+        title: "Error",
+        description: "No se pudo descargar el archivo",
         variant: "destructive",
       })
     }
@@ -180,10 +200,19 @@ export default function FilesAdminPage() {
                                   variant="secondary"
                                   size="icon"
                                   className="h-8 w-8"
-                                  onClick={() => window.open(file.filePath, "_blank")}
+                                  onClick={() => downloadFile(file)}
                                 >
                                   <Download className="h-4 w-4" />
                                   <span className="sr-only">تحميل</span>
+                                </TeslaButton>
+                                <TeslaButton
+                                  variant="secondary"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => window.open(file.filePath, "_blank")}
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                  <span className="sr-only">عرض</span>
                                 </TeslaButton>
                                 <TeslaButton
                                   variant="secondary"

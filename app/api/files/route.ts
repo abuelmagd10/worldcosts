@@ -5,19 +5,25 @@ export async function GET() {
   try {
     const files = await fileStorage.getAllFiles()
 
-    // تحويل الملفات إلى تنسيق مناسب للعرض (بدون محتوى الملف)
-    const filesForDisplay = files.map((file) => {
-      // استبعاد محتوى الملف لتقليل حجم الاستجابة
-      const { content, ...fileInfo } = file
+    // تحويل الملفات إلى تنسيق مناسب للعرض
+    const filesForDisplay = await Promise.all(
+      files.map(async (file) => {
+        // إنشاء عنوان URL كامل للملف
+        const fileUrl = `data:${file.mimeType};base64,${file.content}`
 
-      // إنشاء عنوان URL للملف
-      const fileUrl = `data:${file.mimeType};base64,${content.substring(0, 20)}...`
-
-      return {
-        ...fileInfo,
-        filePath: fileUrl,
-      }
-    })
+        return {
+          id: file.id,
+          fileName: file.fileName,
+          originalName: file.originalName,
+          fileType: file.fileType,
+          fileSize: file.fileSize,
+          mimeType: file.mimeType,
+          uploadDate: file.uploadDate,
+          metadata: file.metadata,
+          filePath: fileUrl,
+        }
+      }),
+    )
 
     return NextResponse.json({ files: filesForDisplay })
   } catch (error) {

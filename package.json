@@ -63,9 +63,9 @@
     "fs": "latest",
     "path": "latest",
     "@supabase/auth-helpers-nextjs": "latest",
-    "uuid": "latest",
     "jspdf": "latest",
-    "html2canvas": "latest"
+    "html2canvas": "latest",
+    "uuid": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
