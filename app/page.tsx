@@ -1,12 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { TableCell } from "@/components/ui/table"
-import { TableBody } from "@/components/ui/table"
-import { TableHead } from "@/components/ui/table"
-import { TableRow } from "@/components/ui/table"
-import { TableHeader } from "@/components/ui/table"
-import { Table } from "@/components/ui/table"
+import { TableCell as TableCellComponent } from "@/components/ui/table"
+import { TableRow as TableRowComponent } from "@/components/ui/table"
+import { Table, TableHeader, TableBody, TableHead } from "@/components/ui/table"
 import { SelectContent } from "@/components/ui/select"
 import { SelectValue } from "@/components/ui/select"
 import { SelectTrigger } from "@/components/ui/select"
@@ -26,7 +23,7 @@ import {
 } from "@/components/ui/tesla-card"
 import { getExchangeRates, refreshExchangeRates, type ExchangeRates } from "./actions"
 // تحديث استيراد الوظائف من ملف pdf-generator
-import { generatePDF } from "@/lib/pdf-generator"
+import { generatePDFWithDirectURL } from "@/lib/pdf-generator"
 import { useToast } from "@/components/ui/use-toast"
 import { CompanyInfoDialog, type CompanyInfo } from "@/components/company-info-dialog"
 import { LanguageSwitcher } from "@/components/language-switcher"
@@ -298,8 +295,8 @@ export default function CurrencyCalculator() {
 
     setIsGeneratingPDF(true)
     try {
-      // استخدام طريقة واحدة فقط لإنشاء PDF
-      await generatePDF({
+      // استخدام طريقة واحدة فقط لإنشاء PDF وإرجاع رابط مباشر
+      const pdfUrl = await generatePDFWithDirectURL({
         items,
         totals,
         selectedTotalCurrency: totalCurrency,
@@ -309,6 +306,9 @@ export default function CurrencyCalculator() {
         t,
         dir,
       })
+
+      // فتح الرابط المباشر في نافذة جديدة أو تحميله مباشرة
+      window.open(pdfUrl, "_blank")
 
       toast({
         title: t.fileDownloadSuccess,
@@ -635,7 +635,7 @@ export default function CurrencyCalculator() {
                   <div className="bg-muted rounded-xl overflow-x-auto p-4">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-b border-border">
+                        <TableRowComponent className="border-b border-border">
                           <TableHead className={`${dir === "rtl" ? "text-right" : "text-left"} text-muted-foreground`}>
                             {t.itemName}
                           </TableHead>
@@ -649,24 +649,24 @@ export default function CurrencyCalculator() {
                             {t.currency}
                           </TableHead>
                           <TableHead className="text-right text-muted-foreground">{t.actions}</TableHead>
-                        </TableRow>
+                        </TableRowComponent>
                       </TableHeader>
                       <TableBody>
                         {items.map((item) => (
-                          <TableRow key={item.id} className="border-b border-border">
-                            <TableCell className={`font-medium ${dir === "rtl" ? "text-right" : "text-left"}`}>
+                          <TableRowComponent key={item.id} className="border-b border-border">
+                            <TableCellComponent className={`font-medium ${dir === "rtl" ? "text-right" : "text-left"}`}>
                               {item.name}
-                            </TableCell>
-                            <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                            </TableCellComponent>
+                            <TableCellComponent className={dir === "rtl" ? "text-right" : "text-left"}>
                               {item.originalValue}
-                            </TableCell>
-                            <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                            </TableCellComponent>
+                            <TableCellComponent className={dir === "rtl" ? "text-right" : "text-left"}>
                               {item.value.toFixed(2)}
-                            </TableCell>
-                            <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                            </TableCellComponent>
+                            <TableCellComponent className={dir === "rtl" ? "text-right" : "text-left"}>
                               {getCurrencyName(item.currency)}
-                            </TableCell>
-                            <TableCell className="text-right">
+                            </TableCellComponent>
+                            <TableCellComponent className="text-right">
                               <div className="flex justify-end gap-2">
                                 <TeslaButton
                                   variant="secondary"
@@ -687,8 +687,8 @@ export default function CurrencyCalculator() {
                                   <span className="sr-only">{t.delete}</span>
                                 </TeslaButton>
                               </div>
-                            </TableCell>
-                          </TableRow>
+                            </TableCellComponent>
+                          </TableRowComponent>
                         ))}
                       </TableBody>
                     </Table>

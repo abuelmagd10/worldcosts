@@ -17,13 +17,15 @@ import { Label } from "@/components/ui/label"
 import { Building2, Upload, X } from "lucide-react"
 import Image from "next/image"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { toast } from "@/components/ui/use-toast"
 
+// تعديل نوع CompanyInfo لاستخدام رابط URL بدلاً من base64
 export type CompanyInfo = {
   name: string
   address: string
   phone: string
-  logo?: string // Base64 encoded image
-  pdfFileName?: string // اسم ملف PDF
+  logo?: string // URL to the logo image instead of Base64
+  pdfFileName?: string
 }
 
 interface CompanyInfoDialogProps {
@@ -44,22 +46,42 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   const [uploadActive, setUploadActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // تحسين وظيفة تحميل الشعار
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // تعديل وظيفة handleLogoUpload لرفع الملف إلى خدمة تخزين وإرجاع رابط مباشر
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     setIsUploading(true)
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      setLogo(event.target?.result as string)
+    try {
+      // إنشاء FormData لرفع الملف
+      const formData = new FormData()
+      formData.append("file", file)
+
+      // استخدام API لرفع الملف (يمكن استبدالها بأي خدمة تخزين)
+      // هنا نفترض وجود نقطة نهاية API لرفع الملفات
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("فشل في رفع الملف")
+      }
+
+      const data = await response.json()
+      // استخدام الرابط المباشر الذي تم إرجاعه من الخادم
+      setLogo(data.url)
+    } catch (error) {
+      console.error("Error uploading logo:", error)
+      toast({
+        title: "خطأ في رفع الشعار",
+        description: "حدث خطأ أثناء رفع الشعار. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      })
+    } finally {
       setIsUploading(false)
     }
-    reader.onerror = () => {
-      setIsUploading(false)
-    }
-    reader.readAsDataURL(file)
   }
 
   // وظيفة جديدة للنقر على منطقة التحميل
@@ -181,7 +203,13 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
             <Label className="text-muted-foreground text-xs sm:text-sm">{t.companyLogo}</Label>
             {logo ? (
               <div className="relative w-full h-20 sm:h-32 border border-[#282b2e] rounded-md overflow-hidden bg-[#1b1d1e]">
-                <Image src={logo || "/placeholder.svg"} alt="Company Logo" fill style={{ objectFit: "contain" }} />
+                <Image
+                  src={logo || "/placeholder.svg"}
+                  alt="Company Logo"
+                  fill
+                  style={{ objectFit: "contain" }}
+                  crossOrigin="anonymous"
+                />
                 <TeslaButton
                   variant="secondary"
                   size="icon"

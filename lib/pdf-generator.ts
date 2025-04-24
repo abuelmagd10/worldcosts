@@ -131,19 +131,25 @@ function getCurrencyName(currency: Currency, t: Translation): string {
   }
 }
 
-// طريقة جديدة لإنشاء PDF باستخدام jsPDF مباشرة
+// تعديل وظيفة إنشاء وتحميل ملف PDF لاستخدام رابط مباشر
+
+// تعديل وظيفة generatePDF لإنشاء رابط مباشر للملف
 export const generatePDF = async (data: PDFData): Promise<void> => {
   try {
-    console.log("Starting PDF generation with HTML2Canvas method")
-    await generatePDFWithHTML2Canvas(data)
+    console.log("Starting PDF generation with direct URL method")
+    // استخدام وظيفة جديدة لإنشاء PDF وإرجاع رابط مباشر
+    const pdfUrl = await generatePDFWithDirectURL(data)
+
+    // فتح الرابط المباشر في نافذة جديدة أو تحميله مباشرة
+    window.open(pdfUrl, "_blank")
   } catch (error) {
     console.error("Error generating PDF:", error)
     throw error
   }
 }
 
-// طريقة بديلة لإنشاء PDF باستخدام HTML2Canvas كاحتياطي
-export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> => {
+// وظيفة جديدة لإنشاء PDF وإرجاع رابط مباشر
+export const generatePDFWithDirectURL = async (data: PDFData): Promise<string> => {
   try {
     // استيراد المكتبات اللازمة
     const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([import("jspdf"), import("html2canvas")])
@@ -151,16 +157,16 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
     // تحديد اسم الملف
     const pdfTitle = data.companyInfo?.pdfFileName || "WorldCosts"
 
-    // إنشاء عنصر مؤقت لعرض المحتوى
+    // إنشاء عنصر مؤقت لعرض المحتوى (نفس الكود السابق)
     const container = document.createElement("div")
     container.style.position = "absolute"
     container.style.left = "-9999px"
     container.style.top = "-9999px"
-    container.style.width = "794px" // عرض A4 بالبكسل عند 96 DPI
+    container.style.width = "794px"
     container.style.direction = data.dir
-    container.style.fontFamily = "Arial, sans-serif" // استخدام خطوط النظام
-    container.style.color = "#000000" // تأكد من أن النص أسود
-    container.style.backgroundColor = "#FFFFFF" // تأكد من أن الخلفية بيضاء
+    container.style.fontFamily = "Arial, sans-serif"
+    container.style.color = "#000000"
+    container.style.backgroundColor = "#FFFFFF"
     document.body.appendChild(container)
 
     // تنسيق التاريخ
@@ -293,16 +299,15 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
     try {
       // تحويل HTML إلى canvas
       const canvas = await html2canvas(container, {
-        scale: 2, // جودة أعلى
+        scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: "#FFFFFF", // تأكد من أن الخلفية بيضاء
-        allowTaint: true, // السماح بتلوين الكانفاس للصور من مصادر مختلفة
-        foreignObjectRendering: false, // تعطيل استخدام foreignObject لتحسين التوافق
+        backgroundColor: "#FFFFFF",
+        allowTaint: true,
+        foreignObjectRendering: false,
       })
 
       // إنشاء PDF من canvas
-      const imgData = canvas.toDataURL("image/png")
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -310,16 +315,16 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
       })
 
       // حساب الأبعاد لتناسب الصورة بشكل صحيح على الصفحة
-      const imgWidth = 210 // عرض A4 بالملم
+      const imgWidth = 210
       const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const imgData = canvas.toDataURL("image/png")
 
       pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight)
 
-      // إضافة المزيد من الصفحات إذا كان المحتوى طويلاً جدًا
+      // إضافة المزيد من الصفحات إذا كان المحتوى طويلاً جداً
       if (imgHeight > 297) {
-        // ارتفاع A4 بالملم
         let remainingHeight = imgHeight
-        let position = -297 // موضع البداية للصفحة الثانية
+        let position = -297
 
         while (remainingHeight > 297) {
           pdf.addPage()
@@ -329,18 +334,36 @@ export const generatePDFWithHTML2Canvas = async (data: PDFData): Promise<void> =
         }
       }
 
-      // استخدام اسم الملف المخصص للملف المحفوظ
-      const filename = `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`
-      pdf.save(filename)
+      // بدلاً من حفظ الملف محلياً، نقوم برفعه إلى الخادم
+      const pdfBlob = pdf.output("blob")
+
+      // إنشاء FormData لرفع الملف
+      const formData = new FormData()
+      formData.append("file", pdfBlob, `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`)
+
+      // رفع الملف إلى الخادم
+      const response = await fetch("/api/upload-pdf", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("فشل في رفع ملف PDF")
+      }
+
+      const result = await response.json()
+
+      // إرجاع الرابط المباشر للملف
+      return result.url
     } catch (error) {
-      console.error("Error generating PDF with HTML2Canvas:", error)
+      console.error("Error generating PDF with direct URL:", error)
       throw error
     } finally {
       // تنظيف العنصر المؤقت
       document.body.removeChild(container)
     }
   } catch (error) {
-    console.error("Error in PDF generation with HTML2Canvas:", error)
+    console.error("Error in PDF generation with direct URL:", error)
     throw error
   }
 }
