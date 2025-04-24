@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { v4 as uuidv4 } from "uuid"
 import { existsSync } from "fs"
+import { addFileRecord } from "@/lib/file-tracker"
 
 // تكوين المجلد العام للملفات المرفوعة
 const UPLOADS_DIR = join(process.cwd(), "public", "uploads")
@@ -12,6 +13,7 @@ export async function POST(request: Request) {
     // التأكد من وجود المجلد، وإنشاؤه إذا لم يكن موجوداً
     if (!existsSync(UPLOADS_DIR)) {
       await mkdir(UPLOADS_DIR, { recursive: true })
+      console.log(`Created directory: ${UPLOADS_DIR}`)
     }
 
     const formData = await request.formData()
@@ -22,9 +24,11 @@ export async function POST(request: Request) {
     }
 
     // إنشاء اسم فريد للملف
-    const fileExtension = file.name.split(".").pop()
-    const fileName = `${uuidv4()}.${fileExtension}`
+    const fileId = uuidv4()
+    const fileExtension = file.name.split(".").pop() || "jpg"
+    const fileName = `${fileId}.${fileExtension}`
     const filePath = join(UPLOADS_DIR, fileName)
+    const fileUrl = `/uploads/${fileName}`
 
     // تحويل الملف إلى مصفوفة بايت
     const bytes = await file.arrayBuffer()
@@ -32,13 +36,33 @@ export async function POST(request: Request) {
 
     // حفظ الملف في المجلد العام
     await writeFile(filePath, buffer)
+    console.log(`File saved to: ${filePath}`)
+
+    // تسجيل معلومات الملف في نظام التتبع
+    try {
+      await addFileRecord({
+        id: fileId,
+        fileName,
+        originalName: file.name,
+        filePath: fileUrl,
+        fileType: "logo",
+        fileSize: file.size,
+        mimeType: file.type,
+        uploadDate: new Date().toISOString(),
+        metadata: {
+          uploadType: "company-logo",
+        },
+      })
+      console.log(`File record added for: ${fileName}`)
+    } catch (error) {
+      console.error("Error adding file record:", error)
+      // Continue even if tracking fails
+    }
 
     // إرجاع رابط مباشر للملف
-    const fileUrl = `/uploads/${fileName}`
-
     return NextResponse.json({ url: fileUrl, success: true })
   } catch (error) {
     console.error("Error uploading file:", error)
-    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to upload file", details: String(error) }, { status: 500 })
   }
 }

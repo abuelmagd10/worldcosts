@@ -12,7 +12,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useRef, useEffect } from "react"
-import { RefreshCw, FileDown, Building2, Pencil, Trash2, Info, Shield, FileText, Plus, Calculator } from "lucide-react"
+import {
+  RefreshCw,
+  FileDown,
+  Building2,
+  Pencil,
+  Trash2,
+  Info,
+  Shield,
+  FileText,
+  Plus,
+  Calculator,
+  Settings,
+} from "lucide-react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
   TeslaCard,
@@ -796,6 +808,12 @@ export default function CurrencyCalculator() {
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1">
               <FileText className="h-4 w-4" />
               {t.termsAndConditions}
+            </TeslaButton>
+          </Link>
+          <Link href="/admin">
+            <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1">
+              <Settings className="h-4 w-4" />
+              إدارة الملفات
             </TeslaButton>
           </Link>
         </div>

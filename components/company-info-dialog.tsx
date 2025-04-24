@@ -58,25 +58,42 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
       const formData = new FormData()
       formData.append("file", file)
 
-      // استخدام API لرفع الملف (يمكن استبدالها بأي خدمة تخزين)
-      // هنا نفترض وجود نقطة نهاية API لرفع الملفات
+      console.log("Uploading file:", file.name, file.type, file.size)
+
+      // استخدام API لرفع الملف
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       })
 
-      if (!response.ok) {
-        throw new Error("فشل في رفع الملف")
+      const responseText = await response.text()
+      console.log("Upload response:", responseText)
+
+      let data
+      try {
+        data = JSON.parse(responseText)
+      } catch (e) {
+        console.error("Error parsing JSON response:", e)
+        throw new Error("Invalid response format")
       }
 
-      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(`فشل في رفع الملف: ${data.error || response.statusText}`)
+      }
+
       // استخدام الرابط المباشر الذي تم إرجاعه من الخادم
       setLogo(data.url)
+      console.log("Logo set to:", data.url)
+
+      toast({
+        title: "تم رفع الشعار بنجاح",
+        description: "تم رفع شعار الشركة بنجاح",
+      })
     } catch (error) {
       console.error("Error uploading logo:", error)
       toast({
         title: "خطأ في رفع الشعار",
-        description: "حدث خطأ أثناء رفع الشعار. يرجى المحاولة مرة أخرى.",
+        description: `حدث خطأ أثناء رفع الشعار: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
         variant: "destructive",
       })
     } finally {

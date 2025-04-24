@@ -341,19 +341,31 @@ export const generatePDFWithDirectURL = async (data: PDFData): Promise<string> =
       const formData = new FormData()
       formData.append("file", pdfBlob, `${pdfTitle}_${new Date().toISOString().slice(0, 10)}.pdf`)
 
+      console.log("Uploading PDF to server...")
+
       // رفع الملف إلى الخادم
       const response = await fetch("/api/upload-pdf", {
         method: "POST",
         body: formData,
       })
 
-      if (!response.ok) {
-        throw new Error("فشل في رفع ملف PDF")
+      const responseText = await response.text()
+      console.log("PDF upload response:", responseText)
+
+      let result
+      try {
+        result = JSON.parse(responseText)
+      } catch (e) {
+        console.error("Error parsing JSON response:", e)
+        throw new Error("Invalid response format")
       }
 
-      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(`فشل في رفع ملف PDF: ${result.error || response.statusText}`)
+      }
 
       // إرجاع الرابط المباشر للملف
+      console.log("PDF URL:", result.url)
       return result.url
     } catch (error) {
       console.error("Error generating PDF with direct URL:", error)
