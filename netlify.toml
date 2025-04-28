@@ -1,6 +1,6 @@
 [build]
+  publish = "dist"
   command = "npm run build"
-  publish = ".next"
 
-[dev]
-  command = "npm run dev"
+[[plugins]]
+  package = "@netlify/visual-editor"
