@@ -420,10 +420,24 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                     <Upload className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground" />
                   )}
                   <p className="mb-0 sm:mb-2 text-xs sm:text-sm text-muted-foreground">
-                    <span className="font-semibold">{isUploading ? t.uploadingLogo : t.clickToUpload}</span>{" "}
-                    {!isUploading && <span className="hidden sm:inline">{t.dragAndDrop}</span>}
+                    <span className="font-semibold">
+                      {isUploading
+                        ? t.uploadingLogo
+                        : /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                          ? "اختر صورة من المعرض"
+                          : t.clickToUpload
+                      }
+                    </span>{" "}
+                    {!isUploading && !(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) &&
+                      <span className="hidden sm:inline">{t.dragAndDrop}</span>
+                    }
                   </p>
-                  <p className="text-xs text-muted-foreground hidden xs:block">{t.maxFileSize}</p>
+                  <p className="text-xs text-muted-foreground hidden xs:block">
+                    {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                      ? "يمكنك اختيار صورة من المعرض أو التقاطها بالكاميرا"
+                      : t.maxFileSize
+                    }
+                  </p>
                 </div>
                 {/* عنصر الإدخال منفصل عن منطقة النقر لتجنب مشاكل الأحداث */}
                 <Input
@@ -435,8 +449,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   onChange={handleLogoUpload}
                   disabled={isUploading}
                   aria-label={t.companyLogo}
-                  // إضافة خصائص إضافية لتحسين التوافق مع الأجهزة المحمولة
-                  capture="environment"
+                  // إزالة خاصية capture لإتاحة الخيار للمستخدم
                 />
               </div>
             )}
