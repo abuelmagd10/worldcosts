@@ -27,21 +27,21 @@ export function LanguageSwitcher() {
         <TeslaButton
           variant="circle"
           size="icon"
-          className="rounded-full bg-tesla-blue text-white min-h-[44px] min-w-[44px]"
+          className="rounded-full bg-tesla-blue text-white h-8 w-8 sm:h-10 sm:w-10 min-h-[32px] min-w-[32px] sm:min-h-[40px] sm:min-w-[40px]"
           aria-label="تغيير اللغة"
           aria-expanded={isOpen}
         >
-          <Globe className="h-5 w-5" />
+          <Globe className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="sr-only">تغيير اللغة</span>
         </TeslaButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-card border-border text-foreground" sideOffset={8}>
+      <DropdownMenuContent align="end" className="bg-card border-border text-foreground w-[150px] sm:w-auto" sideOffset={8}>
         <DropdownMenuGroup>
           {languages.map((lang) => (
             <DropdownMenuItem
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code as LanguageCode)}
-              className="flex items-center justify-between hover:bg-secondary cursor-pointer py-3 px-4 min-h-[44px]"
+              className="flex items-center justify-between hover:bg-secondary cursor-pointer py-2 sm:py-3 px-3 sm:px-4 min-h-[36px] sm:min-h-[44px] text-sm sm:text-base"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -51,7 +51,7 @@ export function LanguageSwitcher() {
               }}
             >
               <span>{lang.name}</span>
-              {language === lang.code && <Check className="h-4 w-4 ml-2 text-tesla-blue" />}
+              {language === lang.code && <Check className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2 text-tesla-blue" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>

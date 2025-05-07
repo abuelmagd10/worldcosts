@@ -12,60 +12,61 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
+      <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-4">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
           <Link href="/">
-            <TeslaButton variant="secondary" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
+            <TeslaButton variant="secondary" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-10">
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               {t.backToHome}
             </TeslaButton>
           </Link>
-          <AppLogo size={40} />
+          <AppLogo size={32} className="sm:hidden" />
+          <AppLogo size={40} className="hidden sm:block" />
         </div>
 
-        <TeslaCard className="max-w-6xl mx-auto mb-6">
-          <TeslaCardHeader>
-            <TeslaCardTitle className="text-2xl">{t.adminPanel}</TeslaCardTitle>
+        <TeslaCard className="max-w-6xl mx-auto mb-4 sm:mb-6">
+          <TeslaCardHeader className="pb-2 sm:pb-4">
+            <TeslaCardTitle className="text-xl sm:text-2xl">{t.adminPanel}</TeslaCardTitle>
           </TeslaCardHeader>
           <TeslaCardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link href="/admin/files">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <Link href="/admin/files" className="block w-full">
                 <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer">
-                  <TeslaCardContent className="flex items-center gap-4 p-6">
-                    <div className="bg-muted p-3 rounded-full">
-                      <Files className="h-6 w-6 text-tesla-blue" />
+                  <TeslaCardContent className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                    <div className="bg-muted p-2 sm:p-3 rounded-full flex-shrink-0">
+                      <Files className="h-5 w-5 sm:h-6 sm:w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">{t.fileManagement}</h3>
-                      <p className="text-sm text-muted-foreground">{t.viewAndManageFiles}</p>
+                      <h3 className="text-base sm:text-lg font-medium">{t.fileManagement}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{t.viewAndManageFiles}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
               </Link>
 
-              <Link href="/admin/settings">
+              <Link href="/admin/settings" className="block w-full">
                 <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer">
-                  <TeslaCardContent className="flex items-center gap-4 p-6">
-                    <div className="bg-muted p-3 rounded-full">
-                      <Settings className="h-6 w-6 text-tesla-blue" />
+                  <TeslaCardContent className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                    <div className="bg-muted p-2 sm:p-3 rounded-full flex-shrink-0">
+                      <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">{t.settings}</h3>
-                      <p className="text-sm text-muted-foreground">{t.configureAppSettings}</p>
+                      <h3 className="text-base sm:text-lg font-medium">{t.settings}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{t.configureAppSettings}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
               </Link>
 
-              <Link href="/admin/subscription">
+              <Link href="/admin/subscription" className="block w-full sm:col-span-2 lg:col-span-1">
                 <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer border-tesla-blue">
-                  <TeslaCardContent className="flex items-center gap-4 p-6">
-                    <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                      <Zap className="h-6 w-6 text-tesla-blue" />
+                  <TeslaCardContent className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                    <div className="bg-blue-100 dark:bg-blue-900 p-2 sm:p-3 rounded-full flex-shrink-0">
+                      <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">{t.upgradeAccount}</h3>
-                      <p className="text-sm text-muted-foreground">{t.upgradeToProVersion}</p>
+                      <h3 className="text-base sm:text-lg font-medium">{t.upgradeAccount}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{t.upgradeToProVersion}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>

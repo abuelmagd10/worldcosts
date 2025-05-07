@@ -22,9 +22,9 @@ export function ThemeToggle() {
       <TeslaButton
         variant="circle"
         size="icon"
-        className="rounded-full bg-tesla-blue text-white min-h-[44px] min-w-[44px]"
+        className="rounded-full bg-tesla-blue text-white h-8 w-8 sm:h-10 sm:w-10 min-h-[32px] min-w-[32px] sm:min-h-[40px] sm:min-w-[40px]"
       >
-        <div className="h-5 w-5" />
+        <div className="h-4 w-4 sm:h-5 sm:w-5" />
       </TeslaButton>
     )
   }
@@ -40,13 +40,13 @@ export function ThemeToggle() {
       variant="circle"
       size="icon"
       onClick={toggleTheme}
-      className={`rounded-full bg-tesla-blue text-white min-h-[44px] min-w-[44px] ${isActive ? "scale-95" : ""}`}
+      className={`rounded-full bg-tesla-blue text-white h-8 w-8 sm:h-10 sm:w-10 min-h-[32px] min-w-[32px] sm:min-h-[40px] sm:min-w-[40px] ${isActive ? "scale-95" : ""}`}
       title={t.toggleTheme}
       onTouchStart={() => setIsActive(true)}
       onTouchEnd={() => setIsActive(false)}
       onTouchCancel={() => setIsActive(false)}
     >
-      {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      {resolvedTheme === "dark" ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
       <span className="sr-only">{t.toggleTheme}</span>
     </TeslaButton>
   )
