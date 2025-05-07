@@ -22,29 +22,47 @@ export default function SettingsPage() {
   const { t, dir } = useLanguage()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [settings, setSettings] = useState({
-    enableFileTracking: true,
-    maxFileSize: 5, // MB
-    allowedFileTypes: "jpg,jpeg,png,pdf",
-    autoDeleteOldFiles: false,
-    autoDeleteDays: 30,
-  })
+  const [settings, setSettings] = useState(() => {
+    // Load settings from localStorage if available
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('appSettings');
+      if (savedSettings) {
+        try {
+          return JSON.parse(savedSettings);
+        } catch (e) {
+          console.error('Error parsing saved settings:', e);
+        }
+      }
+    }
+
+    // Default settings
+    return {
+      enableFileTracking: true,
+      maxFileSize: 5, // MB
+      allowedFileTypes: "jpg,jpeg,png,pdf",
+      autoDeleteOldFiles: false,
+      autoDeleteDays: 30,
+    };
+  });
 
   const handleSaveSettings = async () => {
     setIsLoading(true)
     try {
-      // Simular guardado de configuración
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Save settings to localStorage
+      localStorage.setItem('appSettings', JSON.stringify(settings));
+
+      // Simulate network delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       toast({
-        title: "تم الحفظ",
-        description: "تم حفظ الإعدادات بنجاح",
+        title: t.settingsSaved,
+        description: t.settingsSavedDesc,
       })
     } catch (error) {
       console.error("Error saving settings:", error)
       toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء حفظ الإعدادات",
+        title: t.settingsError,
+        description: t.settingsErrorDesc,
         variant: "destructive",
       })
     } finally {
@@ -59,7 +77,7 @@ export default function SettingsPage() {
           <Link href="/admin">
             <TeslaButton variant="secondary" className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
-              العودة إلى لوحة الإدارة
+              {t.backToAdmin}
             </TeslaButton>
           </Link>
           <AppLogo size={40} />
@@ -67,16 +85,16 @@ export default function SettingsPage() {
 
         <TeslaCard className="max-w-3xl mx-auto">
           <TeslaCardHeader>
-            <TeslaCardTitle className="text-2xl">إعدادات التطبيق</TeslaCardTitle>
+            <TeslaCardTitle className="text-2xl">{t.appSettings}</TeslaCardTitle>
           </TeslaCardHeader>
           <TeslaCardContent className="space-y-6">
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">إعدادات الملفات</h3>
+              <h3 className="text-lg font-medium">{t.fileSettings}</h3>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="enableFileTracking">تمكين تتبع الملفات</Label>
-                  <p className="text-sm text-muted-foreground">تتبع جميع الملفات المرفوعة وتخزين معلوماتها</p>
+                  <Label htmlFor="enableFileTracking">{t.enableFileTracking}</Label>
+                  <p className="text-sm text-muted-foreground">{t.trackAllUploadedFiles}</p>
                 </div>
                 <Switch
                   id="enableFileTracking"
@@ -86,7 +104,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="maxFileSize">الحد الأقصى لحجم الملف (ميجابايت)</Label>
+                <Label htmlFor="maxFileSize">{t.maxFileSizeMB}</Label>
                 <Input
                   id="maxFileSize"
                   type="number"
@@ -98,20 +116,20 @@ export default function SettingsPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="allowedFileTypes">أنواع الملفات المسموح بها</Label>
+                <Label htmlFor="allowedFileTypes">{t.allowedFileTypes}</Label>
                 <Input
                   id="allowedFileTypes"
                   value={settings.allowedFileTypes}
                   onChange={(e) => setSettings({ ...settings, allowedFileTypes: e.target.value })}
                   placeholder="jpg,jpeg,png,pdf"
                 />
-                <p className="text-xs text-muted-foreground">أدخل امتدادات الملفات مفصولة بفواصل</p>
+                <p className="text-xs text-muted-foreground">{t.enterFileExtensions}</p>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="autoDeleteOldFiles">حذف الملفات القديمة تلقائيًا</Label>
-                  <p className="text-sm text-muted-foreground">حذف الملفات القديمة بعد فترة محددة</p>
+                  <Label htmlFor="autoDeleteOldFiles">{t.autoDeleteOldFiles}</Label>
+                  <p className="text-sm text-muted-foreground">{t.deleteOldFilesAfterPeriod}</p>
                 </div>
                 <Switch
                   id="autoDeleteOldFiles"
@@ -122,7 +140,7 @@ export default function SettingsPage() {
 
               {settings.autoDeleteOldFiles && (
                 <div className="grid gap-2">
-                  <Label htmlFor="autoDeleteDays">حذف الملفات بعد (أيام)</Label>
+                  <Label htmlFor="autoDeleteDays">{t.deleteFilesAfterDays}</Label>
                   <Input
                     id="autoDeleteDays"
                     type="number"
@@ -142,7 +160,7 @@ export default function SettingsPage() {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              حفظ الإعدادات
+              {t.saveSettings}
             </TeslaButton>
           </TeslaCardFooter>
         </TeslaCard>

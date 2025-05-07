@@ -60,7 +60,7 @@ export type Translation = {
   selectTotalCurrency: string
 
   // Exchange rates
-  lastUpdated: string
+  ratesLastUpdated: string
   updateRates: string
 
   // PDF related
@@ -69,6 +69,7 @@ export type Translation = {
   addCompanyInfo: string
   editCompanyInfo: string
   pdfFileName: string
+  pdfFileNameHint: string
 
   // Company info dialog
   companyInfoTitle: string
@@ -129,19 +130,18 @@ export type Translation = {
   chartTitleDistribution: string
   chartTitleCount: string
   chartTitleItems: string
-  chartTitleValues: string // جديد
+  chartTitleValues: string
   pieChartView: string
   barChartView: string
   itemsChartView: string
   itemCount: string
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: string
 
-  // سياسة الخصوصية
-  privacyPolicy: string
-  lastUpdated: string
+  // Privacy Policy
+  privacyPolicyTitle: string
+  privacyLastUpdated: string
   introductionTitle: string
   privacyIntro: string
   informationCollectionTitle: string
@@ -165,8 +165,8 @@ export type Translation = {
   contactTitle: string
   contactInfo: string
 
-  // الشروط والأحكام
-  termsAndConditions: string
+  // Terms and Conditions
+  termsAndConditionsTitle: string
   acceptanceTitle: string
   acceptanceText: string
   useOfServiceTitle: string
@@ -186,7 +186,7 @@ export type Translation = {
   governingLawText: string
   contactInfoTerms: string
 
-  // من نحن
+  // About Us
   aboutUsSubtitle: string
   ourMissionTitle: string
   ourMissionText: string
@@ -204,22 +204,22 @@ export type Translation = {
   website: string
   copyrightText: string
   aboutUs: string
-  termsAndConditions: string
-  privacyPolicy: string
+  termsLink: string
+  privacyLink: string
 
   // Theme related
   toggleTheme: string
   lightTheme: string
   darkTheme: string
 
-  // ترجمات جديدة للميزات
+  // Features
   features: string
   feature1Description: string
   feature2Description: string
   feature3Description: string
   feature4Description: string
 
-  // إضافة ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
+  // Cookie consent
   cookieConsentText: string
   accept: string
   decline: string
@@ -232,6 +232,83 @@ export type Translation = {
   advertisingCookies: string
   functionalCookies: string
   savePreferences: string
+
+  // File management
+  fileManagement: string
+  fileStatistics: string
+  totalFiles: string
+  totalSize: string
+  fileTypes: string
+  pdfFiles: string
+  logoFiles: string
+  otherFiles: string
+  uploadedFilesManagement: string
+  clearAllFiles: string
+  uploadNewFile: string
+  refresh: string
+  noFiles: string
+  fileName: string
+  fileType: string
+  fileSize: string
+  uploadDate: string
+  downloadFile: string
+  viewFile: string
+  deleteFile: string
+  fileDeleted: string
+  fileDeletedDesc: string
+  fileUploaded: string
+  fileUploadedDesc: string
+  fileDownloaded: string
+  fileDownloadedDesc: string
+  fileViewError: string
+  fileViewErrorDesc: string
+  refreshed: string
+  refreshedDesc: string
+  allFilesCleared: string
+  allFilesClearedDesc: string
+  adminPanel: string
+  viewAndManageFiles: string
+
+  // Admin settings
+  settings: string
+  configureAppSettings: string
+  backToAdmin: string
+  appSettings: string
+  fileSettings: string
+  enableFileTracking: string
+  trackAllUploadedFiles: string
+  maxFileSizeLimit: string
+  maxFileSizeMB: string
+  allowedFileTypes: string
+  enterFileExtensions: string
+  autoDeleteOldFiles: string
+  deleteOldFilesAfterPeriod: string
+  deleteFilesAfterDays: string
+  saveSettings: string
+  settingsSaved: string
+  settingsSavedDesc: string
+  settingsError: string
+  settingsErrorDesc: string
+
+  // Subscription
+  subscription: string
+  upgradeAccount: string
+  upgradeToProVersion: string
+  proFeatures: string
+  unlimitedItems: string
+  advancedReports: string
+  customBranding: string
+  dataSync: string
+  prioritySupport: string
+  currentPlan: string
+  freePlan: string
+  proPlan: string
+  businessPlan: string
+  monthlyBilling: string
+  yearlyBilling: string
+  yearlyDiscount: string
+  subscribe: string
+  manageSubscription: string
 }
 
 // Arabic translations
@@ -290,7 +367,7 @@ export const ar: Translation = {
   totalCurrency: "عملة المجموع",
   selectTotalCurrency: "اختر عملة المجموع",
 
-  lastUpdated: "آخر تحديث لأسعار الصرف",
+  ratesLastUpdated: "آخر تحديث لأسعار الصرف",
   updateRates: "تحديث الأسعار",
 
   downloadPDF: "تحميل PDF",
@@ -298,6 +375,7 @@ export const ar: Translation = {
   addCompanyInfo: "إضافة معلومات الشركة",
   editCompanyInfo: "تعديل معلومات الشركة",
   pdfFileName: "اسم ملف PDF",
+  pdfFileNameHint: "سيتم استخدام هذا الاسم عند تنزيل ملف PDF. إذا لم تدخل اسمًا، سيتم استخدام اسم افتراضي.",
 
   companyInfoTitle: "معلومات الشركة",
   companyInfoDescription: "أدخل معلومات الشركة التي ستظهر في ملف PDF",
@@ -361,13 +439,12 @@ export const ar: Translation = {
   itemsChartView: "عرض قيم العناصر",
   itemCount: "عدد العناصر",
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: "العودة إلى الصفحة الرئيسية",
 
-  // سياسة الخصوصية
-  privacyPolicy: "سياسة الخصوصية",
-  lastUpdated: "آخر تحديث",
+  // Privacy Policy
+  privacyPolicyTitle: "سياسة الخصوصية",
+  privacyLastUpdated: "آخر تحديث",
   introductionTitle: "مقدمة",
   privacyIntro:
     "نحن في WorldCosts نقدر خصوصيتك ونلتزم بحمايتها. تشرح سياسة الخصوصية هذه كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتك عند استخدام تطبيقنا.",
@@ -396,8 +473,8 @@ export const ar: Translation = {
   contactTitle: "اتصل بنا",
   contactInfo: "إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى الاتصال بنا على info@worldcosts.com.",
 
-  // الشروط والأحكام
-  termsAndConditions: "الشروط والأحكام",
+  // Terms and Conditions
+  termsAndConditionsTitle: "الشروط والأحكام",
   acceptanceTitle: "قبول الشروط",
   acceptanceText:
     "باستخدام تطبيق WorldCosts، فإنك توافق على الالتزام بهذه الشروط والأحكام. إذا كنت لا توافق على أي جزء من هذه الشروط، يرجى عدم استخدام التطبيق.",
@@ -422,7 +499,7 @@ export const ar: Translation = {
     "تخضع هذه الشروط وتفسر وفقًا لقوانين البلد الذي تم تأسيس WorldCosts فيه، دون اعتبار لتعارض مبادئ القانون.",
   contactInfoTerms: "إذا كان لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على info@worldcosts.com.",
 
-  // من نحن
+  // About Us
   aboutUsSubtitle: "حاسبة العملات المتعددة السهلة الاستخدام",
   ourMissionTitle: "مهمتنا",
   ourMissionText:
@@ -442,22 +519,22 @@ export const ar: Translation = {
   website: "الموقع الإلكتروني",
   copyrightText: "جميع الحقوق محفوظة",
   aboutUs: "من نحن",
-  termsAndConditions: "الشروط والأحكام",
-  privacyPolicy: "سياسة الخصوصية",
+  termsLink: "الشروط والأحكام",
+  privacyLink: "سياسة الخصوصية",
 
   // Theme related
   toggleTheme: "تبديل المظهر",
   lightTheme: "وضع النهار",
   darkTheme: "وضع الليل",
 
-  // ترجمات جديدة للميزات
+  // Features
   features: "المميزات",
   feature1Description: "احسب تكلفة منتجاتك بدقة بما في ذلك تكلفة الوحدة والتعبئة والشحن والجمارك",
   feature2Description: "تحويل العملات في الوقت الفعلي باستخدام أحدث أسعار الصرف",
   feature3Description: "تصميم التقارير المهنية وتحميلها كملف PDF مع إمكانية إضافة شعار الشركة ومعلوماتها",
   feature4Description: "واجهة سهلة الاستخدام ومتوفرة بلغات متعددة",
 
-  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
+  // Cookie consent
   cookieConsentText: "نستخدم ملفات تعريف الارتباط لتحسين تجربتك. هل توافق على استخدامنا لملفات تعريف الارتباط؟",
   accept: "موافق",
   decline: "رفض",
@@ -470,6 +547,83 @@ export const ar: Translation = {
   advertisingCookies: "ملفات تعريف الارتباط الإعلانية",
   functionalCookies: "ملفات تعريف الارتباط الوظيفية",
   savePreferences: "حفظ التفضيلات",
+
+  // File management
+  fileManagement: "إدارة الملفات",
+  fileStatistics: "إحصائيات الملفات",
+  totalFiles: "إجمالي الملفات",
+  totalSize: "الحجم الإجمالي",
+  fileTypes: "أنواع الملفات",
+  pdfFiles: "PDF",
+  logoFiles: "شعارات",
+  otherFiles: "أخرى",
+  uploadedFilesManagement: "إدارة الملفات المرفوعة",
+  clearAllFiles: "مسح جميع الملفات",
+  uploadNewFile: "رفع ملف جديد",
+  refresh: "تحديث",
+  noFiles: "لا توجد ملفات",
+  fileName: "الاسم",
+  fileType: "النوع",
+  fileSize: "الحجم",
+  uploadDate: "تاريخ الرفع",
+  downloadFile: "تحميل الملف",
+  viewFile: "عرض الملف",
+  deleteFile: "حذف الملف",
+  fileDeleted: "تم الحذف",
+  fileDeletedDesc: "تم حذف الملف بنجاح",
+  fileUploaded: "تم الرفع",
+  fileUploadedDesc: "تم رفع الملف بنجاح",
+  fileDownloaded: "تم التحميل",
+  fileDownloadedDesc: "تم تحميل الملف بنجاح",
+  fileViewError: "خطأ",
+  fileViewErrorDesc: "لا يمكن عرض الملف، المحتوى غير متوفر",
+  refreshed: "تم التحديث",
+  refreshedDesc: "تم تحميل الملفات بنجاح",
+  allFilesCleared: "تم المسح",
+  allFilesClearedDesc: "تم مسح جميع الملفات بنجاح",
+  adminPanel: "لوحة الإدارة",
+  viewAndManageFiles: "عرض وإدارة الملفات المرفوعة",
+
+  // Admin settings
+  settings: "الإعدادات",
+  configureAppSettings: "تكوين إعدادات التطبيق",
+  backToAdmin: "العودة إلى لوحة الإدارة",
+  appSettings: "إعدادات التطبيق",
+  fileSettings: "إعدادات الملفات",
+  enableFileTracking: "تمكين تتبع الملفات",
+  trackAllUploadedFiles: "تتبع جميع الملفات المرفوعة وتخزين معلوماتها",
+  maxFileSizeLimit: "الحد الأقصى لحجم الملف",
+  maxFileSizeMB: "الحد الأقصى لحجم الملف (ميجابايت)",
+  allowedFileTypes: "أنواع الملفات المسموح بها",
+  enterFileExtensions: "أدخل امتدادات الملفات مفصولة بفواصل",
+  autoDeleteOldFiles: "حذف الملفات القديمة تلقائيًا",
+  deleteOldFilesAfterPeriod: "حذف الملفات القديمة بعد فترة محددة",
+  deleteFilesAfterDays: "حذف الملفات بعد (أيام)",
+  saveSettings: "حفظ الإعدادات",
+  settingsSaved: "تم الحفظ",
+  settingsSavedDesc: "تم حفظ الإعدادات بنجاح",
+  settingsError: "خطأ",
+  settingsErrorDesc: "حدث خطأ أثناء حفظ الإعدادات",
+
+  // Subscription
+  subscription: "الاشتراك",
+  upgradeAccount: "ترقية الحساب",
+  upgradeToProVersion: "الترقية إلى النسخة الاحترافية",
+  proFeatures: "ميزات النسخة الاحترافية",
+  unlimitedItems: "عناصر غير محدودة",
+  advancedReports: "تقارير متقدمة",
+  customBranding: "علامة تجارية مخصصة",
+  dataSync: "مزامنة البيانات",
+  prioritySupport: "دعم ذو أولوية",
+  currentPlan: "الخطة الحالية",
+  freePlan: "الخطة المجانية",
+  proPlan: "الخطة الاحترافية",
+  businessPlan: "خطة الأعمال",
+  monthlyBilling: "فوترة شهرية",
+  yearlyBilling: "فوترة سنوية",
+  yearlyDiscount: "خصم 20% على الفوترة السنوية",
+  subscribe: "اشترك الآن",
+  manageSubscription: "إدارة الاشتراك"
 }
 
 // English translations
@@ -478,7 +632,7 @@ export const en: Translation = {
   appDescription: "Add items with currency selection and calculate totals in different currencies",
 
   itemName: "Item Name",
-  itemValue: "Value (mathematical expressions allowed)",
+  itemValue: "Value (math expressions allowed)",
   currency: "Currency",
   addItem: "Add Item",
   reset: "Reset",
@@ -528,7 +682,7 @@ export const en: Translation = {
   totalCurrency: "Total Currency",
   selectTotalCurrency: "Select Total Currency",
 
-  lastUpdated: "Exchange rates last updated",
+  ratesLastUpdated: "Exchange rates last updated",
   updateRates: "Update Rates",
 
   downloadPDF: "Download PDF",
@@ -536,6 +690,7 @@ export const en: Translation = {
   addCompanyInfo: "Add Company Info",
   editCompanyInfo: "Edit Company Info",
   pdfFileName: "PDF File Name",
+  pdfFileNameHint: "This name will be used when downloading the PDF file. If you don't enter a name, a default name will be used.",
 
   companyInfoTitle: "Company Information",
   companyInfoDescription: "Enter company information to be displayed in the PDF file",
@@ -599,13 +754,12 @@ export const en: Translation = {
   itemsChartView: "Items Values View",
   itemCount: "Item Count",
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: "Back to Home",
 
-  // سياسة الخصوصية
-  privacyPolicy: "Privacy Policy",
-  lastUpdated: "Last Updated",
+  // Privacy Policy
+  privacyPolicyTitle: "Privacy Policy",
+  privacyLastUpdated: "Last Updated",
   introductionTitle: "Introduction",
   privacyIntro:
     "At WorldCosts, we value your privacy and are committed to protecting it. This Privacy Policy explains how we collect, use, and safeguard your information when you use our application.",
@@ -634,8 +788,8 @@ export const en: Translation = {
   contactTitle: "Contact Us",
   contactInfo: "If you have any questions about this Privacy Policy, please contact us at info@worldcosts.com.",
 
-  // الشروط والأحكام
-  termsAndConditions: "Terms and Conditions",
+  // Terms and Conditions
+  termsAndConditionsTitle: "Terms and Conditions",
   acceptanceTitle: "Acceptance of Terms",
   acceptanceText:
     "By using the WorldCosts application, you agree to be bound by these Terms and Conditions. If you do not agree to any part of these terms, please do not use the application.",
@@ -662,7 +816,7 @@ export const en: Translation = {
     "These terms shall be governed by and construed in accordance with the laws of the country in which WorldCosts is established, without regard to conflict of law principles.",
   contactInfoTerms: "If you have any questions about these Terms, please contact us at info@worldcosts.com.",
 
-  // من نحن
+  // About Us
   aboutUsSubtitle: "Easy-to-use Multi-Currency Calculator",
   ourMissionTitle: "Our Mission",
   ourMissionText:
@@ -683,22 +837,22 @@ export const en: Translation = {
   website: "Website",
   copyrightText: "All rights reserved",
   aboutUs: "About Us",
-  termsAndConditions: "Terms & Conditions",
-  privacyPolicy: "Privacy Policy",
+  termsLink: "Terms & Conditions",
+  privacyLink: "Privacy Policy",
 
   // Theme related
   toggleTheme: "Toggle Theme",
   lightTheme: "Light Mode",
   darkTheme: "Dark Mode",
 
-  // ترجمات جديدة للميزات
+  // Features
   features: "Features",
   feature1Description: "Calculate your product costs accurately including unit cost, packaging, shipping, and customs",
   feature2Description: "Real-time currency conversion using the latest exchange rates",
   feature3Description: "Design professional reports and download them as PDF with company logo and information",
   feature4Description: "User-friendly interface available in multiple languages",
 
-  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
+  // Cookie consent
   cookieConsentText: "We use cookies to enhance your experience. Do you consent to our use of cookies?",
   accept: "Accept",
   decline: "Decline",
@@ -711,6 +865,83 @@ export const en: Translation = {
   advertisingCookies: "Advertising Cookies",
   functionalCookies: "Functional Cookies",
   savePreferences: "Save Preferences",
+
+  // File management
+  fileManagement: "File Management",
+  fileStatistics: "File Statistics",
+  totalFiles: "Total Files",
+  totalSize: "Total Size",
+  fileTypes: "File Types",
+  pdfFiles: "PDF",
+  logoFiles: "Logos",
+  otherFiles: "Others",
+  uploadedFilesManagement: "Uploaded Files Management",
+  clearAllFiles: "Clear All Files",
+  uploadNewFile: "Upload New File",
+  refresh: "Refresh",
+  noFiles: "No Files",
+  fileName: "Name",
+  fileType: "Type",
+  fileSize: "Size",
+  uploadDate: "Upload Date",
+  downloadFile: "Download File",
+  viewFile: "View File",
+  deleteFile: "Delete File",
+  fileDeleted: "Deleted",
+  fileDeletedDesc: "File has been successfully deleted",
+  fileUploaded: "Uploaded",
+  fileUploadedDesc: "File has been successfully uploaded",
+  fileDownloaded: "Downloaded",
+  fileDownloadedDesc: "File has been successfully downloaded",
+  fileViewError: "Error",
+  fileViewErrorDesc: "Cannot view file, content not available",
+  refreshed: "Refreshed",
+  refreshedDesc: "Files have been successfully loaded",
+  allFilesCleared: "Cleared",
+  allFilesClearedDesc: "All files have been successfully cleared",
+  adminPanel: "Admin Panel",
+  viewAndManageFiles: "View and manage uploaded files",
+
+  // Admin settings
+  settings: "Settings",
+  configureAppSettings: "Configure application settings",
+  backToAdmin: "Back to Admin Panel",
+  appSettings: "Application Settings",
+  fileSettings: "File Settings",
+  enableFileTracking: "Enable File Tracking",
+  trackAllUploadedFiles: "Track all uploaded files and store their information",
+  maxFileSizeLimit: "Maximum File Size",
+  maxFileSizeMB: "Maximum File Size (MB)",
+  allowedFileTypes: "Allowed File Types",
+  enterFileExtensions: "Enter file extensions separated by commas",
+  autoDeleteOldFiles: "Auto Delete Old Files",
+  deleteOldFilesAfterPeriod: "Delete old files after a specified period",
+  deleteFilesAfterDays: "Delete Files After (days)",
+  saveSettings: "Save Settings",
+  settingsSaved: "Saved",
+  settingsSavedDesc: "Settings have been saved successfully",
+  settingsError: "Error",
+  settingsErrorDesc: "An error occurred while saving settings",
+
+  // Subscription
+  subscription: "Subscription",
+  upgradeAccount: "Upgrade Account",
+  upgradeToProVersion: "Upgrade to Pro Version",
+  proFeatures: "Pro Features",
+  unlimitedItems: "Unlimited Items",
+  advancedReports: "Advanced Reports",
+  customBranding: "Custom Branding",
+  dataSync: "Data Synchronization",
+  prioritySupport: "Priority Support",
+  currentPlan: "Current Plan",
+  freePlan: "Free Plan",
+  proPlan: "Pro Plan",
+  businessPlan: "Business Plan",
+  monthlyBilling: "Monthly Billing",
+  yearlyBilling: "Yearly Billing",
+  yearlyDiscount: "20% discount with yearly billing",
+  subscribe: "Subscribe Now",
+  manageSubscription: "Manage Subscription"
 }
 
 // German translations
@@ -769,7 +1000,7 @@ export const de: Translation = {
   totalCurrency: "Gesamtwährung",
   selectTotalCurrency: "Gesamtwährung auswählen",
 
-  lastUpdated: "Wechselkurse zuletzt aktualisiert",
+  ratesLastUpdated: "Wechselkurse zuletzt aktualisiert",
   updateRates: "Kurse aktualisieren",
 
   downloadPDF: "PDF herunterladen",
@@ -777,6 +1008,7 @@ export const de: Translation = {
   addCompanyInfo: "Firmeninformationen hinzufügen",
   editCompanyInfo: "Firmeninformationen bearbeiten",
   pdfFileName: "PDF-Dateiname",
+  pdfFileNameHint: "Geben Sie einen Namen für die PDF-Datei ein",
 
   companyInfoTitle: "Firmeninformationen",
   companyInfoDescription: "Geben Sie Firmeninformationen ein, die in der PDF-Datei angezeigt werden sollen",
@@ -842,13 +1074,12 @@ export const de: Translation = {
   itemsChartView: "Artikelwerte anzeigen",
   itemCount: "Artikelanzahl",
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: "Zurück zur Startseite",
 
-  // سياسة الخصوصية
-  privacyPolicy: "Datenschutzrichtlinie",
-  lastUpdated: "Zuletzt aktualisiert",
+  // Privacy Policy
+  privacyPolicyTitle: "Datenschutzrichtlinie",
+  privacyLastUpdated: "Zuletzt aktualisiert",
   introductionTitle: "Einführung",
   privacyIntro:
     "Bei WorldCosts schätzen wir Ihre Privatsphäre und sind bestrebt, sie zu schützen. Diese Datenschutzrichtlinie erklärt, wie wir Ihre Informationen sammeln, verwenden und schützen, wenn Sie unsere Anwendung nutzen.",
@@ -878,8 +1109,8 @@ export const de: Translation = {
   contactInfo:
     "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben, kontaktieren Sie uns bitte unter info@worldcosts.com.",
 
-  // الشروط والأحكام
-  termsAndConditions: "Allgemeine Geschäftsbedingungen",
+  // Terms and Conditions
+  termsAndConditionsTitle: "Allgemeine Geschäftsbedingungen",
   acceptanceTitle: "Annahme der Bedingungen",
   acceptanceText:
     "Durch die Nutzung der WorldCosts-Anwendung erklären Sie sich mit diesen Allgemeinen Geschäftsbedingungen einverstanden. Wenn Sie mit einem Teil dieser Bedingungen nicht einverstanden sind, nutzen Sie bitte die Anwendung nicht.",
@@ -907,7 +1138,7 @@ export const de: Translation = {
   contactInfoTerms:
     "Wenn Sie Fragen zu diesen Bedingungen haben, kontaktieren Sie uns bitte unter info@worldcosts.com.",
 
-  // من نحن
+  // About Us
   aboutUsSubtitle: "Benutzerfreundlicher Mehrwährungsrechner",
   ourMissionTitle: "Unsere Mission",
   ourMissionText:
@@ -929,15 +1160,15 @@ export const de: Translation = {
   website: "Website",
   copyrightText: "Alle Rechte vorbehalten",
   aboutUs: "Über uns",
-  termsAndConditions: "Allgemeine Geschäftsbedingungen",
-  privacyPolicy: "Datenschutzrichtlinie",
+  termsLink: "Allgemeine Geschäftsbedingungen",
+  privacyLink: "Datenschutzrichtlinie",
 
   // Theme related
   toggleTheme: "Thema umschalten",
   lightTheme: "Heller Modus",
   darkTheme: "Dunkler Modus",
 
-  // ترجمات جديدة للميزات
+  // Features
   features: "Funktionen",
   feature1Description:
     "Berechnen Sie Ihre Produktkosten genau, einschließlich Stückkosten, Verpackung, Versand und Zoll",
@@ -946,7 +1177,7 @@ export const de: Translation = {
     "Entwerfen Sie professionelle Berichte und laden Sie sie als PDF mit Firmenlogo und Informationen herunter",
   feature4Description: "Benutzerfreundliche Oberfläche in mehreren Sprachen verfügbar",
 
-  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
+  // Cookie consent
   cookieConsentText:
     "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Stimmen Sie der Verwendung von Cookies zu?",
   accept: "Akzeptieren",
@@ -960,9 +1191,86 @@ export const de: Translation = {
   advertisingCookies: "Werbe-Cookies",
   functionalCookies: "Funktionale Cookies",
   savePreferences: "Einstellungen speichern",
+
+  // File management
+  fileManagement: "Dateiverwaltung",
+  fileStatistics: "Dateistatistiken",
+  totalFiles: "Gesamtanzahl Dateien",
+  totalSize: "Gesamtgröße",
+  fileTypes: "Dateitypen",
+  pdfFiles: "PDF",
+  logoFiles: "Logos",
+  otherFiles: "Andere",
+  uploadedFilesManagement: "Verwaltung hochgeladener Dateien",
+  clearAllFiles: "Alle Dateien löschen",
+  uploadNewFile: "Neue Datei hochladen",
+  refresh: "Aktualisieren",
+  noFiles: "Keine Dateien",
+  fileName: "Name",
+  fileType: "Typ",
+  fileSize: "Größe",
+  uploadDate: "Hochladedatum",
+  downloadFile: "Datei herunterladen",
+  viewFile: "Datei anzeigen",
+  deleteFile: "Datei löschen",
+  fileDeleted: "Gelöscht",
+  fileDeletedDesc: "Datei wurde erfolgreich gelöscht",
+  fileUploaded: "Hochgeladen",
+  fileUploadedDesc: "Datei wurde erfolgreich hochgeladen",
+  fileDownloaded: "Heruntergeladen",
+  fileDownloadedDesc: "Datei wurde erfolgreich heruntergeladen",
+  fileViewError: "Fehler",
+  fileViewErrorDesc: "Datei kann nicht angezeigt werden, Inhalt nicht verfügbar",
+  refreshed: "Aktualisiert",
+  refreshedDesc: "Dateien wurden erfolgreich geladen",
+  allFilesCleared: "Gelöscht",
+  allFilesClearedDesc: "Alle Dateien wurden erfolgreich gelöscht",
+  adminPanel: "Administrationsbereich",
+  viewAndManageFiles: "Hochgeladene Dateien anzeigen und verwalten",
+
+  // Admin settings
+  settings: "Einstellungen",
+  configureAppSettings: "Anwendungseinstellungen konfigurieren",
+  backToAdmin: "Zurück zum Administrationsbereich",
+  appSettings: "Anwendungseinstellungen",
+  fileSettings: "Dateieinstellungen",
+  enableFileTracking: "Dateiverfolgung aktivieren",
+  trackAllUploadedFiles: "Alle hochgeladenen Dateien verfolgen und ihre Informationen speichern",
+  maxFileSizeLimit: "Maximale Dateigröße",
+  maxFileSizeMB: "Maximale Dateigröße (MB)",
+  allowedFileTypes: "Erlaubte Dateitypen",
+  enterFileExtensions: "Geben Sie Dateierweiterungen durch Kommas getrennt ein",
+  autoDeleteOldFiles: "Alte Dateien automatisch löschen",
+  deleteOldFilesAfterPeriod: "Alte Dateien nach einem bestimmten Zeitraum löschen",
+  deleteFilesAfterDays: "Dateien löschen nach (Tagen)",
+  saveSettings: "Einstellungen speichern",
+  settingsSaved: "Gespeichert",
+  settingsSavedDesc: "Die Einstellungen wurden erfolgreich gespeichert",
+  settingsError: "Fehler",
+  settingsErrorDesc: "Beim Speichern der Einstellungen ist ein Fehler aufgetreten",
+
+  // Subscription
+  subscription: "Abonnement",
+  upgradeAccount: "Konto upgraden",
+  upgradeToProVersion: "Auf Pro-Version upgraden",
+  proFeatures: "Pro-Funktionen",
+  unlimitedItems: "Unbegrenzte Artikel",
+  advancedReports: "Erweiterte Berichte",
+  customBranding: "Individuelles Branding",
+  dataSync: "Datensynchronisierung",
+  prioritySupport: "Prioritäts-Support",
+  currentPlan: "Aktueller Plan",
+  freePlan: "Kostenloser Plan",
+  proPlan: "Pro-Plan",
+  businessPlan: "Business-Plan",
+  monthlyBilling: "Monatliche Abrechnung",
+  yearlyBilling: "Jährliche Abrechnung",
+  yearlyDiscount: "20% Rabatt bei jährlicher Abrechnung",
+  subscribe: "Jetzt abonnieren",
+  manageSubscription: "Abonnement verwalten"
 }
 
-// تحديث الترجمات الفرنسية
+// French translations
 export const fr: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
@@ -970,7 +1278,7 @@ export const fr: Translation = {
   itemName: "Nom de l'article",
   itemValue: "Valeur (expressions mathématiques autorisées)",
   currency: "Devise",
-  addItem: "Ajouter l'article",
+  addItem: "Ajouter un article",
   reset: "Réinitialiser",
 
   addedItems: "Articles ajoutés",
@@ -979,7 +1287,7 @@ export const fr: Translation = {
 
   usd: "Dollar américain",
   egp: "Livre égyptienne",
-  aed: "Dirham des EAU",
+  aed: "Dirham des Émirats",
   eur: "Euro",
   gbp: "Livre sterling",
   sar: "Riyal saoudien",
@@ -1015,24 +1323,25 @@ export const fr: Translation = {
   inKWD: "En KWD",
   inQAR: "En QAR",
   inMYR: "En MYR",
-  totalCurrency: "Devise du total",
-  selectTotalCurrency: "Sélectionner la devise du total",
+  totalCurrency: "Devise totale",
+  selectTotalCurrency: "Sélectionner la devise totale",
 
-  lastUpdated: "Taux de change mis à jour le",
+  ratesLastUpdated: "Taux de change mis à jour le",
   updateRates: "Mettre à jour les taux",
 
   downloadPDF: "Télécharger PDF",
-  companyInfo: "Infos de l'entreprise",
-  addCompanyInfo: "Ajouter infos de l'entreprise",
-  editCompanyInfo: "Modifier infos de l'entreprise",
+  companyInfo: "Infos société",
+  addCompanyInfo: "Ajouter infos société",
+  editCompanyInfo: "Modifier infos société",
   pdfFileName: "Nom du fichier PDF",
+  pdfFileNameHint: "Entrez un nom pour le fichier PDF",
 
-  companyInfoTitle: "Informations de l'entreprise",
-  companyInfoDescription: "Entrez les informations de l'entreprise à afficher dans le fichier PDF",
-  companyName: "Nom de l'entreprise",
-  companyAddress: "Adresse de l'entreprise",
+  companyInfoTitle: "Informations de la société",
+  companyInfoDescription: "Entrez les informations de la société à afficher dans le fichier PDF",
+  companyName: "Nom de la société",
+  companyAddress: "Adresse de la société",
   companyPhone: "Numéro de téléphone",
-  companyLogo: "Logo de l'entreprise",
+  companyLogo: "Logo de la société",
   clickToUpload: "Cliquez pour télécharger",
   dragAndDrop: "ou glissez-déposez",
   maxFileSize: "PNG, JPG (Max: 2MB)",
@@ -1046,8 +1355,8 @@ export const fr: Translation = {
   fileDownloadSuccessDesc: "Le fichier PDF a été créé et téléchargé avec succès.",
   fileDownloadError: "Erreur lors de la création du fichier",
   fileDownloadErrorDesc: "Une erreur s'est produite lors de la création du fichier PDF. Veuillez réessayer.",
-  companyInfoSaved: "Informations de l'entreprise enregistrées",
-  companyInfoSavedDesc: "Les informations de l'entreprise seront ajoutées au fichier PDF lors du téléchargement.",
+  companyInfoSaved: "Informations de la société enregistrées",
+  companyInfoSavedDesc: "Les informations de la société seront ajoutées au fichier PDF lors du téléchargement.",
 
   reportDate: "Date du rapport",
   dollarToEGP: "Taux de change USD vers EGP",
@@ -1060,13 +1369,12 @@ export const fr: Translation = {
   actions: "Actions",
   edit: "Modifier",
   delete: "Supprimer",
-  updateItem: "Mettre à jour",
+  updateItem: "Mettre à jour l'article",
 
   // PWA translations
   installApp: "Installer l'application",
   offlineTitle: "Vous êtes hors ligne",
-  offlineDescription:
-    "Certaines fonctionnalités peuvent ne pas fonctionner correctement. Veuillez vérifier votre connexion Internet.",
+  offlineDescription: "Certaines fonctionnalités peuvent ne pas fonctionner correctement. Veuillez vérifier votre connexion Internet.",
   networkStatus: "État du réseau",
   online: "En ligne",
   offline: "Hors ligne",
@@ -1076,9 +1384,8 @@ export const fr: Translation = {
   ratesUpdatedDesc: "Les taux de change ont été mis à jour avec succès",
 
   // Empty state
-  emptyStateTitle: "Calculatrice Multi-Devises",
-  emptyStateDescription:
-    "Ajoutez des éléments à l'aide du formulaire ci-dessus pour commencer à calculer des valeurs en plusieurs devises.",
+  emptyStateTitle: "Calculatrice multi-devises",
+  emptyStateDescription: "Ajoutez des articles à l'aide du formulaire ci-dessus pour commencer à calculer les valeurs en plusieurs devises.",
 
   // Chart related
   chartTitle: "Graphique des articles",
@@ -1086,26 +1393,24 @@ export const fr: Translation = {
   chartTitleCount: "Nombre d'articles par devise",
   chartTitleItems: "Valeurs des articles ajoutés",
   chartTitleValues: "Valeurs totales par devise",
-  pieChartView: "Vue en graphique circulaire par devise",
-  barChartView: "Vue en graphique à barres des valeurs par devise",
+  pieChartView: "Vue graphique circulaire des devises",
+  barChartView: "Graphique à barres des valeurs par devise",
   itemsChartView: "Vue des valeurs des articles",
   itemCount: "Nombre d'articles",
 
-  // ترجمات جديدة للصفحات الإضافية
-  // روابط التنقل
+  // Navigation links
   backToHome: "Retour à l'accueil",
 
-  // سياسة الخصوصية
-  privacyPolicy: "Politique de confidentialité",
-  lastUpdated: "Dernière mise à jour",
+  // Privacy Policy
+  privacyPolicyTitle: "Politique de confidentialité",
+  privacyLastUpdated: "Dernière mise à jour",
   introductionTitle: "Introduction",
   privacyIntro:
     "Chez WorldCosts, nous valorisons votre vie privée et nous nous engageons à la protéger. Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos informations lorsque vous utilisez notre application.",
   informationCollectionTitle: "Informations que nous collectons",
   informationCollection: "Nous pouvons collecter différents types d'informations, notamment :",
   deviceInfo: "Informations sur l'appareil telles que le type d'appareil, le système d'exploitation et le navigateur",
-  usageData:
-    "Données d'utilisation telles que la façon dont vous utilisez l'application et les fonctionnalités que vous utilisez",
+  usageData: "Données d'utilisation telles que la façon dont vous utilisez l'application et les fonctionnalités que vous utilisez",
   preferences: "Vos préférences telles que la langue et la devise préférée",
   dataUsageTitle: "Comment nous utilisons vos données",
   dataUsage: "Nous utilisons les informations que nous collectons aux fins suivantes :",
@@ -1114,7 +1419,7 @@ export const fr: Translation = {
   analytics: "Pour analyser l'utilisation et les performances de l'application",
   dataStorageTitle: "Stockage des données",
   dataStorage:
-    "Nous utilisons le stockage local dans votre navigateur pour stocker vos préférences et données. Ces données ne sont pas transférées à nos serveurs sauf si vous choisissez de les partager avec nous.",
+    "Nous utilisons le stockage local dans votre navigateur pour stocker vos préférences et vos données. Ces données ne sont pas transférées à nos serveurs, sauf si vous choisissez de les partager avec nous.",
   thirdPartyServicesTitle: "Services tiers",
   thirdPartyServices:
     "Nous pouvons utiliser des services tiers tels que Google AdSense pour afficher des publicités. Ces services sont soumis à leurs propres politiques de confidentialité.",
@@ -1125,26 +1430,25 @@ export const fr: Translation = {
   policyChanges:
     "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle politique sur cette page.",
   contactTitle: "Contactez-nous",
-  contactInfo:
-    "Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à info@worldcosts.com.",
+  contactInfo: "Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à info@worldcosts.com.",
 
-  // الشروط والأحكام
-  termsAndConditions: "Conditions générales",
+  // Terms and Conditions
+  termsAndConditionsTitle: "Conditions générales",
   acceptanceTitle: "Acceptation des conditions",
   acceptanceText:
-    "En utilisant l'application WorldCosts, vous acceptez d'être lié par ces conditions générales. Si vous n'acceptez pas une partie de ces conditions, veuillez ne pas utiliser l'application.",
+    "En utilisant l'application WorldCosts, vous acceptez d'être lié par ces conditions générales. Si vous n'êtes pas d'accord avec une partie de ces conditions, veuillez ne pas utiliser l'application.",
   useOfServiceTitle: "Utilisation du service",
   useOfServiceText:
     "Vous devez utiliser l'application conformément aux lois applicables et aux conditions énoncées ici. Vous acceptez de ne pas :",
   useRestriction1: "Utiliser l'application à des fins illégales ou interdites",
   useRestriction2: "Tenter d'accéder sans autorisation à nos systèmes ou réseaux",
-  useRestriction3: "Publier ou transmettre du contenu nuisible ou abusif",
+  useRestriction3: "Publier ou transmettre tout contenu nuisible ou abusif",
   intellectualPropertyTitle: "Propriété intellectuelle",
   intellectualPropertyText:
     "L'application et tout le contenu, les fonctionnalités et les fonctionnalités disponibles par son intermédiaire sont la propriété de WorldCosts ou de ses concédants de licence et sont protégés par les lois sur la propriété intellectuelle.",
-  disclaimerTitle: "Avis de non-responsabilité",
+  disclaimerTitle: "Avertissement",
   disclaimerText:
-    "L'application est fournie 'telle quelle' et 'selon disponibilité' sans garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas l'exactitude des taux de change ou d'autres données fournies dans l'application.",
+    "L'application est fournie 'telle quelle' et 'selon disponibilité' sans aucune garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas l'exactitude des taux de change ou d'autres données fournies dans l'application.",
   limitationOfLiabilityTitle: "Limitation de responsabilité",
   limitationOfLiabilityText:
     "WorldCosts ne sera pas responsable des dommages directs, indirects, accessoires, spéciaux ou consécutifs résultant de votre utilisation de l'application.",
@@ -1153,18 +1457,16 @@ export const fr: Translation = {
     "Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications prendront effet immédiatement après leur publication sur cette page.",
   governingLawTitle: "Loi applicable",
   governingLawText:
-    "Ces conditions sont régies et interprétées conformément aux lois du pays dans lequel WorldCosts est établi, sans égard aux principes de conflit de lois.",
-  contactInfoTerms:
-    "Si vous avez des questions concernant ces conditions, veuillez nous contacter à info@worldcosts.com.",
+    "Ces conditions sont régies par et interprétées conformément aux lois du pays dans lequel WorldCosts est établi, sans égard aux principes de conflit de lois.",
+  contactInfoTerms: "Si vous avez des questions concernant ces conditions, veuillez nous contacter à info@worldcosts.com.",
 
-  // من نحن
-  aboutUsSubtitle: "Calculateur multi-devises facile à utiliser",
+  // About Us
+  aboutUsSubtitle: "Calculatrice multi-devises facile à utiliser",
   ourMissionTitle: "Notre mission",
   ourMissionText:
-    "Chez WorldCosts, notre mission est de simplifier la gestion des coûts multi-devises pour les particuliers et les entreprises. Nous nous efforçons de fournir un outil facile à utiliser et fiable qui aide les utilisateurs à calculer et à suivre les dépenses dans différentes devises avec facilité.",
+    "Chez WorldCosts, notre mission est de simplifier la gestion des coûts en plusieurs devises pour les particuliers et les entreprises. Nous nous efforçons de fournir un outil facile à utiliser et fiable qui aide les utilisateurs à calculer et à suivre les dépenses dans différentes devises avec facilité.",
   whatWeOfferTitle: "Ce que nous offrons",
-  whatWeOfferText:
-    "Notre application offre une gamme de fonctionnalités conçues pour répondre aux besoins de gestion multi-devises :",
+  whatWeOfferText: "Notre application offre une gamme de fonctionnalités conçues pour répondre aux besoins de gestion multi-devises :",
   feature1: "Calcul rapide et précis des valeurs en plusieurs devises",
   feature2: "Conversion de devises en temps réel utilisant les derniers taux de change",
   feature3: "Possibilité d'exporter des données vers des fichiers PDF pour le partage et l'impression",
@@ -1179,38 +1481,123 @@ export const fr: Translation = {
   website: "Site web",
   copyrightText: "Tous droits réservés",
   aboutUs: "À propos de nous",
-  termsAndConditions: "Conditions générales",
-  privacyPolicy: "Politique de confidentialité",
+  termsLink: "Conditions générales",
+  privacyLink: "Politique de confidentialité",
 
   // Theme related
   toggleTheme: "Changer de thème",
   lightTheme: "Mode clair",
   darkTheme: "Mode sombre",
 
-  // ترجمات جديدة للميزات
+  // Features
   features: "Fonctionnalités",
-  feature1Description:
-    "Calculez avec précision les coûts de vos produits, y compris le coût unitaire, l'emballage, l'expédition et les douanes",
+  feature1Description: "Calculez vos coûts de produits avec précision, y compris le coût unitaire, l'emballage, l'expédition et les douanes",
   feature2Description: "Conversion de devises en temps réel utilisant les derniers taux de change",
-  feature3Description:
-    "Concevez des rapports professionnels et téléchargez-les au format PDF avec le logo et les informations de l'entreprise",
+  feature3Description: "Concevez des rapports professionnels et téléchargez-les au format PDF avec le logo et les informations de l'entreprise",
   feature4Description: "Interface conviviale disponible en plusieurs langues",
 
-  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
-  cookieConsentText:
-    "Nous utilisons des cookies pour améliorer votre expérience. Acceptez-vous notre utilisation des cookies ?",
+  // Cookie consent
+  cookieConsentText: "Nous utilisons des cookies pour améliorer votre expérience. Consentez-vous à notre utilisation des cookies ?",
   accept: "Accepter",
   decline: "Refuser",
   privacySettings: "Paramètres de confidentialité",
   storagePreferences: "Préférences de stockage",
   analyticsPreferences: "Préférences d'analyse",
-  advertisingPreferences: "Préférences de publicité",
+  advertisingPreferences: "Préférences publicitaires",
   necessaryCookies: "Cookies nécessaires",
-  analyticsCookies: "Cookies analytiques",
+  analyticsCookies: "Cookies d'analyse",
   advertisingCookies: "Cookies publicitaires",
   functionalCookies: "Cookies fonctionnels",
   savePreferences: "Enregistrer les préférences",
+
+  // File management
+  fileManagement: "Gestion des fichiers",
+  fileStatistics: "Statistiques des fichiers",
+  totalFiles: "Total des fichiers",
+  totalSize: "Taille totale",
+  fileTypes: "Types de fichiers",
+  pdfFiles: "PDF",
+  logoFiles: "Logos",
+  otherFiles: "Autres",
+  uploadedFilesManagement: "Gestion des fichiers téléchargés",
+  clearAllFiles: "Effacer tous les fichiers",
+  uploadNewFile: "Télécharger un nouveau fichier",
+  refresh: "Actualiser",
+  noFiles: "Aucun fichier",
+  fileName: "Nom",
+  fileType: "Type",
+  fileSize: "Taille",
+  uploadDate: "Date de téléchargement",
+  downloadFile: "Télécharger le fichier",
+  viewFile: "Voir le fichier",
+  deleteFile: "Supprimer le fichier",
+  fileDeleted: "Supprimé",
+  fileDeletedDesc: "Le fichier a été supprimé avec succès",
+  fileUploaded: "Téléchargé",
+  fileUploadedDesc: "Le fichier a été téléchargé avec succès",
+  fileDownloaded: "Téléchargé",
+  fileDownloadedDesc: "Le fichier a été téléchargé avec succès",
+  fileViewError: "Erreur",
+  fileViewErrorDesc: "Impossible d'afficher le fichier, le contenu n'est pas disponible",
+  refreshed: "Actualisé",
+  refreshedDesc: "Les fichiers ont été chargés avec succès",
+  allFilesCleared: "Effacé",
+  allFilesClearedDesc: "Tous les fichiers ont été effacés avec succès",
+  adminPanel: "Panneau d'administration",
+  viewAndManageFiles: "Afficher et gérer les fichiers téléchargés",
+
+  // Admin settings
+  settings: "Paramètres",
+  configureAppSettings: "Configurer les paramètres de l'application",
+  backToAdmin: "Retour au panneau d'administration",
+  appSettings: "Paramètres de l'application",
+  fileSettings: "Paramètres des fichiers",
+  enableFileTracking: "Activer le suivi des fichiers",
+  trackAllUploadedFiles: "Suivre tous les fichiers téléchargés et stocker leurs informations",
+  maxFileSizeLimit: "Taille maximale de fichier",
+  maxFileSizeMB: "Taille maximale de fichier (MB)",
+  allowedFileTypes: "Types de fichiers autorisés",
+  enterFileExtensions: "Entrez les extensions de fichiers séparées par des virgules",
+  autoDeleteOldFiles: "Supprimer automatiquement les anciens fichiers",
+  deleteOldFilesAfterPeriod: "Supprimer les anciens fichiers après une période spécifiée",
+  deleteFilesAfterDays: "Supprimer les fichiers après (jours)",
+  saveSettings: "Enregistrer les paramètres",
+  settingsSaved: "Enregistré",
+  settingsSavedDesc: "Les paramètres ont été enregistrés avec succès",
+  settingsError: "Erreur",
+  settingsErrorDesc: "Une erreur s'est produite lors de l'enregistrement des paramètres",
+
+  // Subscription
+  subscription: "Abonnement",
+  upgradeAccount: "Mettre à niveau le compte",
+  upgradeToProVersion: "Passer à la version Pro",
+  proFeatures: "Fonctionnalités Pro",
+  unlimitedItems: "Articles illimités",
+  advancedReports: "Rapports avancés",
+  customBranding: "Personnalisation de la marque",
+  dataSync: "Synchronisation des données",
+  prioritySupport: "Support prioritaire",
+  currentPlan: "Forfait actuel",
+  freePlan: "Forfait gratuit",
+  proPlan: "Forfait Pro",
+  businessPlan: "Forfait Business",
+  monthlyBilling: "Facturation mensuelle",
+  yearlyBilling: "Facturation annuelle",
+  yearlyDiscount: "20% de réduction avec la facturation annuelle",
+  subscribe: "S'abonner maintenant",
+  manageSubscription: "Gérer l'abonnement"
 }
+
+// Define language codes
+export type LanguageCode = 'ar' | 'en' | 'de' | 'fr';
+
+// Define available languages
+export const languages = [
+  { code: 'ar', name: 'العربية' },
+  { code: 'en', name: 'English' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'fr', name: 'Français' },
+];
 
 // Export all translations
 export const translations = {
@@ -1219,14 +1606,3 @@ export const translations = {
   de,
   fr,
 }
-
-// Export language metadata
-export const languages = [
-  { code: "ar", name: "العربية", dir: "rtl" },
-  { code: "en", name: "English", dir: "ltr" },
-  { code: "de", name: "Deutsch", dir: "ltr" },
-  { code: "fr", name: "Français", dir: "ltr" },
-]
-
-// Export language codes type
-export type LanguageCode = keyof typeof translations

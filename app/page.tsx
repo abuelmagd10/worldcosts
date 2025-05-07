@@ -1,6 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { v4 as uuidv4 } from "uuid"
+import { StoredFile } from "@/lib/user-data-store"
 import { TableCell as TableCellComponent } from "@/components/ui/table"
 import { TableRow as TableRowComponent } from "@/components/ui/table"
 import { Table, TableHeader, TableBody, TableHead } from "@/components/ui/table"
@@ -12,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useRef, useEffect } from "react"
+import { useToast } from "@/components/ui/use-toast"
+import { userDataStore } from "@/lib/user-data-store"
 import {
   RefreshCw,
   FileDown,
@@ -35,8 +39,9 @@ import {
 } from "@/components/ui/tesla-card"
 import { getExchangeRates, refreshExchangeRates, type ExchangeRates } from "./actions"
 // تحديث استيراد الوظائف من ملف pdf-generator
-import { generatePDFWithDirectDownload } from "@/lib/pdf-generator"
-import { useToast } from "@/components/ui/use-toast"
+import { generatePDFWithDirectDownload, generatePDFWithDirectURL } from "@/lib/pdf-generator"
+// Remove this duplicate import
+// import { useToast } from "@/components/ui/use-toast"
 import { CompanyInfoDialog, type CompanyInfo } from "@/components/company-info-dialog"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/lib/i18n/language-context"
@@ -49,6 +54,7 @@ import { ItemsChart } from "@/components/items-chart"
 import { ThemeToggle } from "@/components/theme-toggle"
 // أضف استيراد مكون FeaturesShowcase
 import { FeaturesShowcase } from "@/components/features-showcase"
+import { supabase } from "@/lib/supabase-client"
 
 type Currency =
   | "USD"
@@ -84,6 +90,12 @@ export default function CurrencyCalculator() {
   const [value, setValue] = useState("")
   const [currency, setCurrency] = useState<Currency>("USD")
   const [totalCurrency, setTotalCurrency] = useState<Currency>("USD")
+
+  // وظيفة لتحديث عملة المجموع وحفظها في localStorage
+  const updateTotalCurrency = (currency: Currency) => {
+    setTotalCurrency(currency)
+    userDataStore.saveTotalCurrency(currency)
+  }
   const [nextId, setNextId] = useState(1)
   const [rates, setRates] = useState<ExchangeRates | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -101,8 +113,36 @@ export default function CurrencyCalculator() {
   const [editingItemId, setEditingItemId] = useState<number | null>(null)
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now())
 
-  // Fetch exchange rates on component mount
+  // تحميل البيانات المحفوظة عند تحميل المكون
   useEffect(() => {
+    // تحميل العناصر
+    const savedItems = userDataStore.getItems()
+    if (savedItems.length > 0) {
+      setItems(savedItems)
+    }
+
+    // تحميل معلومات الشركة
+    const savedCompanyInfo = userDataStore.getCompanyInfo()
+    if (savedCompanyInfo.name || savedCompanyInfo.address || savedCompanyInfo.phone || savedCompanyInfo.logo || savedCompanyInfo.pdfFileName) {
+      console.log('Loaded company info from localStorage:', savedCompanyInfo);
+      setCompanyInfo(savedCompanyInfo)
+    } else {
+      console.log('No company info found in localStorage');
+    }
+
+    // تحميل المعرف التالي
+    const savedNextId = userDataStore.getNextId()
+    if (savedNextId > 1) {
+      setNextId(savedNextId)
+    }
+
+    // تحميل عملة المجموع
+    const savedTotalCurrency = userDataStore.getTotalCurrency() as Currency
+    if (savedTotalCurrency) {
+      setTotalCurrency(savedTotalCurrency)
+    }
+
+    // تحميل أسعار الصرف
     fetchRates()
   }, [])
 
@@ -151,7 +191,7 @@ export default function CurrencyCalculator() {
   // Calculate the value from a mathematical expression
   const calculateValue = (expression: string): number => {
     try {
-      // استخدام Function بشكل صحيح لتقييم التعبير الرياضي
+      // استخدام Function بشكل صحيح لتقيير التعبير الرياضي
       return Function('"use strict"; return (' + expression + ")")()
     } catch (error) {
       console.error("Error calculating value:", error)
@@ -164,34 +204,42 @@ export default function CurrencyCalculator() {
 
     const calculatedValue = calculateValue(value)
 
+    let updatedItems: Item[] = []
+
     if (editingItemId !== null) {
-      setItems(
-        items.map((item) =>
-          item.id === editingItemId
-            ? {
-                ...item,
-                name,
-                value: calculatedValue,
-                currency,
-                originalValue: value,
-              }
-            : item,
-        ),
+      updatedItems = items.map((item) =>
+        item.id === editingItemId
+          ? {
+              ...item,
+              name,
+              value: calculatedValue,
+              currency,
+              originalValue: value,
+            }
+          : item,
       )
+      setItems(updatedItems)
       setEditingItemId(null)
     } else {
-      setItems([
-        ...items,
-        {
-          id: nextId,
-          name,
-          value: calculatedValue,
-          currency,
-          originalValue: value,
-        },
-      ])
-      setNextId(nextId + 1)
+      const newItem = {
+        id: nextId,
+        name,
+        value: calculatedValue,
+        currency,
+        originalValue: value,
+      }
+      updatedItems = [...items, newItem]
+      setItems(updatedItems)
+
+      const newNextId = nextId + 1
+      setNextId(newNextId)
+
+      // حفظ المعرف التالي
+      userDataStore.saveNextId(newNextId)
     }
+
+    // حفظ العناصر المحدثة
+    userDataStore.saveItems(updatedItems)
 
     setName("")
     setValue("")
@@ -203,6 +251,11 @@ export default function CurrencyCalculator() {
     setValue("")
     setCurrency("USD")
     setNextId(1)
+
+    // مسح البيانات المحفوظة
+    userDataStore.saveItems([])
+    userDataStore.saveNextId(1)
+    // لا نقوم بإعادة تعيين عملة المجموع
   }
 
   // Calculate totals in different currencies
@@ -307,8 +360,8 @@ export default function CurrencyCalculator() {
 
     setIsGeneratingPDF(true)
     try {
-      // استخدام طريقة التنزيل المباشر بدلاً من فتح نافذة جديدة
-      await generatePDFWithDirectDownload({
+      // استخدام طريقة إنشاء PDF وإرجاع رابط مباشر
+      const pdfDataUrl = await generatePDFWithDirectURL({
         items,
         totals,
         selectedTotalCurrency: totalCurrency,
@@ -317,7 +370,90 @@ export default function CurrencyCalculator() {
         companyInfo,
         t,
         dir,
-      })
+      });
+
+      // تنزيل الملف مباشرة
+      const link = document.createElement('a');
+      link.href = pdfDataUrl;
+
+      // استخدام اسم الملف الذي أدخله المستخدم إذا كان موجودًا
+      let fileName = '';
+      if (companyInfo?.pdfFileName && companyInfo.pdfFileName.trim() !== '') {
+        // إضافة امتداد .pdf إذا لم يكن موجودًا
+        fileName = companyInfo.pdfFileName.trim();
+        if (!fileName.toLowerCase().endsWith('.pdf')) {
+          fileName += '.pdf';
+        }
+      } else {
+        // استخدام اسم افتراضي إذا لم يدخل المستخدم اسمًا
+        fileName = `WorldCosts_${new Date().toISOString().slice(0, 10)}.pdf`;
+      }
+
+      console.log('DEBUG - Using PDF file name:', fileName);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // حفظ الملف في قاعدة البيانات وفي localStorage
+      try {
+        // تحويل data URL إلى Blob مباشرة
+        const blob = dataURLtoBlob(pdfDataUrl);
+
+        // حفظ معلومات الملف فقط في localStorage (بدون المحتوى)
+        // هذا سيقلل بشكل كبير من حجم البيانات المخزنة
+        const pdfFile: StoredFile = {
+          id: uuidv4(),
+          fileName: fileName,
+          originalName: fileName,
+          fileType: 'pdf',
+          fileSize: Math.round(pdfDataUrl.length * 0.75), // تقدير تقريبي لحجم الملف
+          mimeType: 'application/pdf',
+          // لا نخزن المحتوى الكامل للملف في localStorage لتجنب تجاوز الحد الأقصى
+          // content: pdfDataUrl,
+          url: URL.createObjectURL(blob), // استخدام URL.createObjectURL بدلاً من تخزين البيانات الكاملة
+          uploadDate: new Date().toISOString(),
+          metadata: {
+            uploadType: 'pdf',
+            source: 'pdf-generator',
+            items: items.length
+          }
+        };
+
+        try {
+          // إضافة ملف PDF إلى مخزن الملفات
+          userDataStore.addFile(pdfFile);
+          console.log('PDF saved to localStorage with ID:', pdfFile.id);
+        } catch (storageError) {
+          console.error('Error saving PDF to localStorage:', storageError);
+          // عرض رسالة للمستخدم
+          toast({
+            title: "تنبيه",
+            description: "تم تنزيل الملف بنجاح، ولكن لم يتم حفظه في قائمة الملفات بسبب امتلاء مساحة التخزين المحلية.",
+            variant: "warning",
+            duration: 5000,
+          });
+        }
+
+        // إنشاء FormData لرفع الملف إلى الخادم
+        const formData = new FormData();
+        formData.append('file', blob, fileName);
+
+        // رفع الملف إلى الخادم
+        const response = await fetch('/api/local-files', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          console.error('Error saving PDF to API:', await response.text());
+        } else {
+          const responseData = await response.json();
+          console.log('PDF saved to API successfully with ID:', responseData.id);
+        }
+      } catch (saveError) {
+        console.error('Error saving PDF:', saveError);
+      }
 
       toast({
         title: t.fileDownloadSuccess,
@@ -335,19 +471,145 @@ export default function CurrencyCalculator() {
     }
   }
 
-  // Handle saving company info
-  const handleSaveCompanyInfo = (info: CompanyInfo) => {
-    setCompanyInfo(info)
-    toast({
-      title: t.companyInfoSaved,
-      description: t.companyInfoSavedDesc,
-    })
-  }
+  const handleSaveCompanyInfo = async (data: CompanyInfo) => {
+    try {
+      // تحديث حالة معلومات الشركة في الواجهة
+      setCompanyInfo({ ...data });
+
+      // حفظ معلومات الشركة في localStorage
+      userDataStore.saveCompanyInfo(data);
+      console.log('Company info saved to localStorage:', data);
+
+      // حفظ الشعار في localStorage إذا كان موجودًا
+      if (data.logo) {
+        try {
+          // حفظ الشعار في localStorage
+          const logoFile: StoredFile = {
+            id: uuidv4(),
+            fileName: `company-logo-${Date.now()}.png`,
+            originalName: 'company-logo.png',
+            fileType: 'logo',
+            fileSize: Math.round(data.logo.length * 0.75), // تقدير تقريبي لحجم الملف
+            mimeType: 'image/png',
+            // لا نخزن المحتوى الكامل للشعار في localStorage لتجنب تجاوز الحد الأقصى
+            // بدلاً من ذلك، نخزن فقط معلومات الملف
+            // content: data.logo,
+            url: data.logo, // استخدام base64 كـ URL
+            uploadDate: new Date().toISOString(),
+            metadata: {
+              uploadType: 'logo',
+              source: 'company-info'
+            }
+          };
+
+          try {
+            // إضافة الشعار إلى مخزن الملفات
+            userDataStore.addFile(logoFile);
+            console.log('Logo saved to localStorage with ID:', logoFile.id);
+          } catch (storageError) {
+            console.error('Error saving logo to localStorage:', storageError);
+            // عرض رسالة للمستخدم
+            toast({
+              title: "تنبيه",
+              description: "تم حفظ معلومات الشركة، ولكن لم يتم حفظ الشعار في قائمة الملفات بسبب امتلاء مساحة التخزين المحلية.",
+              variant: "warning",
+              duration: 5000,
+            });
+          }
+
+          // رفع الشعار إلى API المحلي
+          try {
+            const formData = createFormDataFromBase64(data.logo, 'company-logo.png', 'image/png');
+            const logoResponse = await fetch('/api/local-files', {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!logoResponse.ok) {
+              console.error('Error uploading logo to API:', await logoResponse.text());
+            } else {
+              const logoData = await logoResponse.json();
+              console.log('Logo uploaded to API successfully with ID:', logoData.id);
+            }
+          } catch (apiError) {
+            console.error('Error calling API to upload logo:', apiError);
+          }
+        } catch (logoError) {
+          console.error('Error processing logo:', logoError);
+          // استمر في التنفيذ حتى لو فشل رفع الشعار
+        }
+      }
+
+      // عرض رسالة نجاح
+      toast({
+        title: t.saveSuccess || "تم الحفظ بنجاح",
+        description: t.companyInfoSaved || "تم حفظ معلومات الشركة بنجاح",
+      });
+    } catch (error) {
+      console.error('Error saving company info:', error);
+      toast({
+        title: t.saveError || "خطأ في الحفظ",
+        description: t.companyInfoSaveError || "حدث خطأ أثناء حفظ معلومات الشركة",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // وظيفة مساعدة لتحويل data URL إلى Blob
+  const dataURLtoBlob = (dataURL: string): Blob => {
+    // استخراج نوع الملف والبيانات من data URL
+    const arr = dataURL.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'application/octet-stream';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new Blob([u8arr], { type: mime });
+  };
+
+  // وظيفة مساعدة لتحويل base64 إلى FormData
+  const createFormDataFromBase64 = (base64Data: string, fileName: string, mimeType: string): FormData => {
+    // استخراج البيانات من data URL
+    const base64Content = base64Data.split(',')[1];
+
+    // تحويل base64 إلى Blob
+    const byteCharacters = atob(base64Content);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: mimeType });
+
+    // إنشاء FormData
+    const formData = new FormData();
+    formData.append('file', blob, fileName);
+
+    return formData;
+  };
 
   const hasCompanyInfo = !!(companyInfo.name || companyInfo.address || companyInfo.phone || companyInfo.logo)
 
   const handleDeleteItem = (id: number) => {
-    setItems(items.filter((item) => item.id !== id))
+    const updatedItems = items.filter((item) => item.id !== id)
+    setItems(updatedItems)
+
+    // حفظ العناصر المحدثة
+    userDataStore.saveItems(updatedItems)
+
     if (editingItemId === id) {
       setEditingItemId(null)
       setName("")
@@ -727,7 +989,7 @@ export default function CurrencyCalculator() {
                 <TeslaCardFooter className="mt-4">
                   <div className="w-full">
                     <p className="text-sm text-muted-foreground mb-2">{t.selectTotalCurrency}</p>
-                    <Select value={totalCurrency} onValueChange={(value) => setTotalCurrency(value as Currency)}>
+                    <Select value={totalCurrency} onValueChange={(value) => updateTotalCurrency(value as Currency)}>
                       <SelectTrigger
                         id="totalCurrency"
                         className="tesla-input border-0 bg-transparent focus:ring-0 w-full text-foreground"
@@ -798,19 +1060,19 @@ export default function CurrencyCalculator() {
           <Link href="/privacy">
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
-              {t.privacyPolicy}
+              {t.privacyPolicyTitle}
             </TeslaButton>
           </Link>
           <Link href="/terms">
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1">
               <FileText className="h-4 w-4" />
-              {t.termsAndConditions}
+              {t.termsAndConditionsTitle}
             </TeslaButton>
           </Link>
           <Link href="/admin">
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1">
               <Settings className="h-4 w-4" />
-              إدارة الملفات
+              {t.fileManagement}
             </TeslaButton>
           </Link>
         </div>
@@ -830,3 +1092,55 @@ export default function CurrencyCalculator() {
     </div>
   )
 }
+
+const handleSaveCompanyInfo = async (info: CompanyInfo) => {
+  try {
+    if (!info.name) {
+      throw new Error('اسم الشركة مطلوب');
+    }
+
+    // التحقق من الاتصال بالإنترنت
+    if (!navigator.onLine) {
+      throw new Error('لا يوجد اتصال بالإنترنت');
+    }
+
+    const response = await fetch('/api/save-company-info', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...info,
+        updated_at: new Date().toISOString()
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'فشل في حفظ معلومات الشركة');
+    }
+
+    const { data } = await response.json();
+
+    // التحقق من البيانات المستلمة
+    if (!data) {
+      throw new Error('لم يتم استلام بيانات من الخادم');
+    }
+
+    setCompanyInfo({ ...data });
+
+    toast({
+      title: 'تم الحفظ',
+      description: 'تم حفظ معلومات الشركة بنجاح',
+    });
+
+    setCompanyInfoDialogOpen(false);
+  } catch (error) {
+    console.error('Error saving company info:', error);
+    toast({
+      title: 'فشل في الحفظ',
+      description: error instanceof Error ? error.message : 'حدث خطأ أثناء حفظ معلومات الشركة',
+      variant: "destructive",
+    });
+  }
+};

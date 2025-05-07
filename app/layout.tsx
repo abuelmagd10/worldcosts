@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { CookieConsent } from "@/components/cookie-consent"
 import Script from "next/script"
 import { CookieConsentReset } from "@/components/cookie-consent-reset"
+import { LocalStorageProvider } from "@/components/local-storage-provider"
+import { UserDataInitializer } from "@/components/user-data-initializer"
 
 export const metadata: Metadata = {
   title: "WorldCosts",
@@ -68,22 +70,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LanguageProvider>
-            {children}
-            <CookieConsentReset />
-            <CookieConsent />
+            <LocalStorageProvider>
+              <UserDataInitializer />
+              {children}
+              <CookieConsentReset />
+              <CookieConsent />
+            </LocalStorageProvider>
           </LanguageProvider>
         </ThemeProvider>
 
-        {/* Solo cargar el script de AdSense en producción */}
-        {isProduction && (
-          <Script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"
-            crossOrigin="anonymous"
-            data-ad-client="ca-pub-3799584967407983"
-            strategy="afterInteractive"
-          />
-        )}
+        {/* تحميل سكريبت AdSense في جميع البيئات */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3799584967407983"
+          crossOrigin="anonymous"
+          data-ad-client="ca-pub-3799584967407983"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )

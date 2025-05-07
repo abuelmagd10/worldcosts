@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid"
+import { IFileStorage, StorageOptions, StorageProgress } from "./storage-interface"
 
 // نوع بيانات الملف المخزن
 export interface StoredFile {
@@ -13,12 +14,31 @@ export interface StoredFile {
   metadata?: Record<string, any>
 }
 
-// مخزن بيانات بسيط باستخدام localStorage
-class FileStorage {
-  private storageKey = "worldcosts_files"
-  private maxChunkSize = 1024 * 1024 // 1MB per chunk
+const DEFAULT_RETRY_ATTEMPTS = 3;
+const DEFAULT_CHUNK_SIZE = 1024 * 1024; // 1MB
 
-  // تقسيم الملفات الكبيرة إلى أجزاء صغيرة
+// مخزن بيانات بسيط باستخدام localStorage
+class FileStorage implements IFileStorage {
+  private storageKey = "worldcosts_files"
+  private maxChunkSize: number
+
+  constructor(chunkSize: number = DEFAULT_CHUNK_SIZE) {
+    this.maxChunkSize = chunkSize;
+  }
+
+  private async retry<T>(
+    operation: () => Promise<T>,
+    attempts: number
+  ): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (attempts <= 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return this.retry(operation, attempts - 1);
+    }
+  }
+
   private chunkifyContent(content: string): string[] {
     const chunks: string[] = []
     let i = 0
@@ -29,28 +49,23 @@ class FileStorage {
     return chunks
   }
 
-  // إعادة تجميع الأجزاء إلى ملف كامل
   private dechunkifyContent(chunks: string[]): string {
     return chunks.join("")
   }
 
-  // الحصول على جميع الملفات
   async getAllFiles(): Promise<StoredFile[]> {
     if (typeof window === "undefined") return []
 
     try {
-      // الحصول على فهرس الملفات
       const indexData = localStorage.getItem(`${this.storageKey}_index`)
       if (!indexData) return []
 
       const fileIndex = JSON.parse(indexData) as Array<Omit<StoredFile, "content"> & { chunkCount: number }>
 
-      // استرجاع محتوى كل ملف
       const files: StoredFile[] = []
 
       for (const indexItem of fileIndex) {
         try {
-          // استرجاع أجزاء المحتوى
           const chunks: string[] = []
           for (let i = 0; i < indexItem.chunkCount; i++) {
             const chunk = localStorage.getItem(`${this.storageKey}_${indexItem.id}_chunk_${i}`)
@@ -61,7 +76,6 @@ class FileStorage {
             }
           }
 
-          // إعادة تجميع المحتوى
           const content = this.dechunkifyContent(chunks)
 
           files.push({
@@ -80,29 +94,41 @@ class FileStorage {
     }
   }
 
-  // إضافة ملف جديد
-  async addFile(file: Omit<StoredFile, "id">): Promise<StoredFile> {
-    if (typeof window === "undefined") throw new Error("Cannot add file in server context")
+  async addFile(
+    file: Omit<StoredFile, "id">,
+    options: StorageOptions = {}
+  ): Promise<StoredFile> {
+    if (typeof window === "undefined")
+      throw new Error("Cannot add file in server context")
 
-    try {
-      // إنشاء معرف جديد للملف
+    const retryAttempts = options.retryAttempts ?? DEFAULT_RETRY_ATTEMPTS;
+    const chunkSize = options.chunkSize ?? this.maxChunkSize;
+
+    return this.retry(async () => {
       const id = uuidv4()
-
-      // تقسيم المحتوى إلى أجزاء
       const contentChunks = this.chunkifyContent(file.content)
+      const totalChunks = contentChunks.length;
 
-      // تخزين أجزاء المحتوى
       for (let i = 0; i < contentChunks.length; i++) {
-        localStorage.setItem(`${this.storageKey}_${id}_chunk_${i}`, contentChunks[i])
+        await this.retry(async () => {
+          localStorage.setItem(`${this.storageKey}_${id}_chunk_${i}`, contentChunks[i])
+        }, retryAttempts);
+
+        if (options.onProgress) {
+          const progress: StorageProgress = {
+            bytesTransferred: (i + 1) * chunkSize,
+            totalBytes: file.fileSize,
+            percent: ((i + 1) / totalChunks) * 100
+          };
+          options.onProgress(progress);
+        }
       }
 
-      // إنشاء كائن الملف الجديد (بدون المحتوى)
       const newFile: StoredFile = {
         ...file,
         id,
       }
 
-      // تحديث فهرس الملفات
       const indexData = localStorage.getItem(`${this.storageKey}_index`)
       const fileIndex = indexData ? JSON.parse(indexData) : []
 
@@ -118,19 +144,22 @@ class FileStorage {
         chunkCount: contentChunks.length,
       })
 
-      localStorage.setItem(`${this.storageKey}_index`, JSON.stringify(fileIndex))
+      await this.retry(async () => {
+        localStorage.setItem(`${this.storageKey}_index`, JSON.stringify(fileIndex))
+      }, retryAttempts);
 
       return newFile
-    } catch (error) {
-      console.error("Error adding file to storage:", error)
-      throw error
-    }
+    }, retryAttempts);
   }
 
-  // الحصول على ملف بواسطة المعرف
   async getFileById(id: string): Promise<StoredFile | null> {
+    // التحقق من بيئة التنفيذ
+    if (typeof window === "undefined") {
+      console.log("Running in server environment, cannot get file by ID")
+      return null
+    }
+
     try {
-      // الحصول على فهرس الملفات
       const indexData = localStorage.getItem(`${this.storageKey}_index`)
       if (!indexData) return null
 
@@ -139,7 +168,6 @@ class FileStorage {
 
       if (!indexItem) return null
 
-      // استرجاع أجزاء المحتوى
       const chunks: string[] = []
       for (let i = 0; i < indexItem.chunkCount; i++) {
         const chunk = localStorage.getItem(`${this.storageKey}_${id}_chunk_${i}`)
@@ -150,7 +178,6 @@ class FileStorage {
         }
       }
 
-      // إعادة تجميع المحتوى
       const content = this.dechunkifyContent(chunks)
 
       return {
@@ -163,12 +190,10 @@ class FileStorage {
     }
   }
 
-  // حذف ملف بواسطة المعرف
   async deleteFile(id: string): Promise<boolean> {
     if (typeof window === "undefined") throw new Error("Cannot delete file in server context")
 
     try {
-      // الحصول على فهرس الملفات
       const indexData = localStorage.getItem(`${this.storageKey}_index`)
       if (!indexData) return false
 
@@ -177,12 +202,10 @@ class FileStorage {
 
       if (!indexItem) return false
 
-      // حذف أجزاء المحتوى
       for (let i = 0; i < indexItem.chunkCount; i++) {
         localStorage.removeItem(`${this.storageKey}_${id}_chunk_${i}`)
       }
 
-      // تحديث فهرس الملفات
       const newIndex = fileIndex.filter((item: any) => item.id !== id)
       localStorage.setItem(`${this.storageKey}_index`, JSON.stringify(newIndex))
 
@@ -193,14 +216,22 @@ class FileStorage {
     }
   }
 
-  // الحصول على إحصائيات الملفات
   async getFileStats(): Promise<{
     totalFiles: number
     totalSize: number
     byType: Record<string, { count: number; size: number }>
   }> {
+    // التحقق من بيئة التنفيذ
+    if (typeof window === "undefined") {
+      console.log("Running in server environment, returning empty stats")
+      return {
+        totalFiles: 0,
+        totalSize: 0,
+        byType: {},
+      }
+    }
+
     try {
-      // الحصول على فهرس الملفات
       const indexData = localStorage.getItem(`${this.storageKey}_index`)
       if (!indexData) {
         return {
@@ -218,7 +249,6 @@ class FileStorage {
         byType: {} as Record<string, { count: number; size: number }>,
       }
 
-      // تجميع حسب النوع
       fileIndex.forEach((file: any) => {
         if (!stats.byType[file.fileType]) {
           stats.byType[file.fileType] = { count: 0, size: 0 }
@@ -241,4 +271,9 @@ class FileStorage {
 }
 
 // إنشاء نسخة واحدة من مخزن الملفات
-export const fileStorage = new FileStorage()
+const clientStorage = new FileStorage()
+
+// تصدير مخزن الملفات المناسب بناءً على بيئة التنفيذ
+export const fileStorage = typeof window === 'undefined'
+  ? require('./supabase-storage').supabaseFileStorage
+  : clientStorage

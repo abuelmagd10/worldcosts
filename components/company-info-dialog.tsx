@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
   Dialog,
@@ -37,6 +37,7 @@ interface CompanyInfoDialogProps {
 
 export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: CompanyInfoDialogProps) {
   const { t, dir } = useLanguage()
+  // استخدام useEffect لتحديث الحالة عند تغيير companyInfo
   const [name, setName] = useState(companyInfo.name)
   const [address, setAddress] = useState(companyInfo.address)
   const [phone, setPhone] = useState(companyInfo.phone)
@@ -47,6 +48,19 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   const [uploadActive, setUploadActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
+
+  // تحديث الحالة عند تغيير companyInfo
+  useEffect(() => {
+    if (open) {
+      setName(companyInfo.name)
+      setAddress(companyInfo.address)
+      setPhone(companyInfo.phone)
+      setLogo(companyInfo.logo)
+      setPdfFileName(companyInfo.pdfFileName || "")
+      setUploadError(null)
+      console.log('CompanyInfoDialog opened with data:', companyInfo)
+    }
+  }, [open, companyInfo])
 
   // تعديل وظيفة handleLogoUpload لاستخدام التخزين الجديد
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,14 +170,31 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
   }
 
   const handleSave = () => {
-    onSave({
+    // تجميع بيانات الشركة
+    const updatedCompanyInfo = {
       name,
       address,
       phone,
       logo,
       pdfFileName,
-    })
-    onOpenChange(false)
+    };
+
+    // التحقق من البيانات قبل الحفظ
+    if (!name && !address && !phone && !logo && !pdfFileName) {
+      toast({
+        title: "تنبيه",
+        description: "لم يتم إدخال أي معلومات للشركة",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // حفظ البيانات
+    console.log('Saving company info:', updatedCompanyInfo);
+    onSave(updatedCompanyInfo);
+
+    // إغلاق النافذة
+    onOpenChange(false);
   }
 
   return (
@@ -233,10 +264,13 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                 id="pdf-file-name"
                 value={pdfFileName}
                 onChange={(e) => setPdfFileName(e.target.value)}
-                placeholder={t.pdfFileName}
+                placeholder={t.pdfFileName || "اسم ملف PDF"}
                 className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground text-xs sm:text-sm h-7 sm:h-10"
               />
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {t.pdfFileNameHint || "سيتم استخدام هذا الاسم عند تنزيل ملف PDF. إذا لم تدخل اسمًا، سيتم استخدام اسم افتراضي."}
+            </p>
           </div>
           <div className="grid gap-2">
             <Label className="text-muted-foreground text-xs sm:text-sm">{t.companyLogo}</Label>

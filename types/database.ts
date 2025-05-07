@@ -18,6 +18,36 @@ export interface Database {
         }
         Relationships: []
       }
+      company_info: {
+        Row: {
+          id: number
+          name: string
+          address: string
+          phone: string
+          logo?: string
+          pdf_file_name?: string
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          name: string
+          address: string
+          phone: string
+          logo?: string
+          pdf_file_name?: string
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          address?: string
+          phone?: string
+          logo?: string
+          pdf_file_name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

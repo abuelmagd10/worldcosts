@@ -31,8 +31,8 @@ export default function PrivacyPolicy() {
 
         <TeslaCard className="max-w-3xl mx-auto">
           <TeslaCardHeader>
-            <TeslaCardTitle className="text-2xl">{t.privacyPolicy}</TeslaCardTitle>
-            <TeslaCardDescription className="text-muted-foreground">{t.lastUpdated}: 2023-04-07</TeslaCardDescription>
+            <TeslaCardTitle className="text-2xl">{t.privacyPolicyTitle}</TeslaCardTitle>
+            <TeslaCardDescription className="text-muted-foreground">{t.privacyLastUpdated}: 2023-04-07</TeslaCardDescription>
           </TeslaCardHeader>
           <TeslaCardContent className="space-y-6">
             <div className="space-y-4">

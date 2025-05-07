@@ -7,6 +7,14 @@ export async function GET() {
     return NextResponse.json({ stats })
   } catch (error) {
     console.error("Error calculating file stats:", error)
-    return NextResponse.json({ error: "Failed to calculate file stats", details: String(error) }, { status: 500 })
+    // إرجاع إحصائيات فارغة بدلاً من خطأ
+    return NextResponse.json({
+      stats: {
+        totalFiles: 0,
+        totalSize: 0,
+        byType: {},
+      },
+      error: String(error)
+    })
   }
 }

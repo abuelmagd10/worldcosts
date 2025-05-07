@@ -1,12 +1,11 @@
 "use client"
 
-import { ArrowLeft, Files, Settings } from "lucide-react"
+import { ArrowLeft, Files, Settings, Zap } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { AppLogo } from "@/components/app-logo"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import { TeslaCard, TeslaCardContent, TeslaCardHeader, TeslaCardTitle } from "@/components/ui/tesla-card"
-import { FileStats } from "@/components/file-stats"
 
 export default function AdminPage() {
   const { t, dir } = useLanguage()
@@ -26,10 +25,10 @@ export default function AdminPage() {
 
         <TeslaCard className="max-w-6xl mx-auto mb-6">
           <TeslaCardHeader>
-            <TeslaCardTitle className="text-2xl">لوحة الإدارة</TeslaCardTitle>
+            <TeslaCardTitle className="text-2xl">{t.adminPanel}</TeslaCardTitle>
           </TeslaCardHeader>
           <TeslaCardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link href="/admin/files">
                 <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer">
                   <TeslaCardContent className="flex items-center gap-4 p-6">
@@ -37,8 +36,8 @@ export default function AdminPage() {
                       <Files className="h-6 w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">إدارة الملفات</h3>
-                      <p className="text-sm text-muted-foreground">عرض وإدارة الملفات المرفوعة</p>
+                      <h3 className="text-lg font-medium">{t.fileManagement}</h3>
+                      <p className="text-sm text-muted-foreground">{t.viewAndManageFiles}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
@@ -51,8 +50,22 @@ export default function AdminPage() {
                       <Settings className="h-6 w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">الإعدادات</h3>
-                      <p className="text-sm text-muted-foreground">تكوين إعدادات التطبيق</p>
+                      <h3 className="text-lg font-medium">{t.settings}</h3>
+                      <p className="text-sm text-muted-foreground">{t.configureAppSettings}</p>
+                    </div>
+                  </TeslaCardContent>
+                </TeslaCard>
+              </Link>
+
+              <Link href="/admin/subscription">
+                <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer border-tesla-blue">
+                  <TeslaCardContent className="flex items-center gap-4 p-6">
+                    <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
+                      <Zap className="h-6 w-6 text-tesla-blue" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium">{t.upgradeAccount}</h3>
+                      <p className="text-sm text-muted-foreground">{t.upgradeToProVersion}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
@@ -60,8 +73,6 @@ export default function AdminPage() {
             </div>
           </TeslaCardContent>
         </TeslaCard>
-
-        <FileStats />
       </div>
     </div>
   )

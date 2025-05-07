@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { fileStorage } from "@/lib/db-storage"
+import { supabaseFileStorage } from "@/lib/supabaseStorage"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -31,17 +32,35 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const deleted = await fileStorage.deleteFile(params.id)
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const fileId = params.id
 
-    if (!deleted) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 })
+  if (!fileId) {
+    return NextResponse.json({ error: "File ID is required" }, { status: 400 })
+  }
+
+  try {
+    // Delete file using Supabase storage class (deletes from Storage and DB)
+    const success = await supabaseFileStorage.deleteFile(fileId)
+
+    if (!success) {
+      // This might happen if the file metadata was not found in the DB
+      // Or if there was an error deleting from the DB after potentially deleting from Storage
+      // We might return 404 if not found, or 500 if DB deletion failed
+      console.warn(`Failed to delete file with ID: ${fileId}. It might not exist or DB deletion failed.`)
+      // Let's return 404 for simplicity, assuming not found is the common case
+      return NextResponse.json({ error: "File not found or failed to delete" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ message: "File deleted successfully" }, { status: 200 })
+
   } catch (error) {
-    console.error("Error deleting file:", error)
-    return NextResponse.json({ error: "Failed to delete file", details: String(error) }, { status: 500 })
+    console.error(`Error deleting file with ID ${fileId}:`, error)
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
+    // Add more specific error handling based on potential Supabase errors
+    return NextResponse.json({ error: "Failed to delete file", details: errorMessage }, { status: 500 })
   }
 }
