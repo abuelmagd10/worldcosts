@@ -62,102 +62,185 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
     }
   }, [open, companyInfo])
 
-  // تعديل وظيفة handleLogoUpload لاستخدام التخزين الجديد
+  // وظيفة محسنة لمعالجة رفع الشعار
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    console.log('File input change event triggered');
 
-    setIsUploading(true)
-    setUploadError(null)
+    // التحقق من وجود ملفات
+    if (!e.target.files || e.target.files.length === 0) {
+      console.log('No files selected');
+      return;
+    }
+
+    const file = e.target.files[0];
+    console.log('File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
+
+    setIsUploading(true);
+    setUploadError(null);
 
     try {
       // التحقق من نوع الملف
-      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"]
+      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
       if (!validTypes.includes(file.type)) {
-        throw new Error("نوع الملف غير صالح. يُسمح فقط بملفات JPEG وPNG وGIF وSVG.")
+        const errorMsg = "نوع الملف غير صالح. يُسمح فقط بملفات JPEG وPNG وGIF وSVG.";
+        console.error(errorMsg);
+        setUploadError(errorMsg);
+        toast({
+          title: "خطأ في نوع الملف",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        return;
       }
 
       // التحقق من حجم الملف (الحد الأقصى 2 ميجابايت)
-      const maxSize = 2 * 1024 * 1024 // 2MB
+      const maxSize = 2 * 1024 * 1024; // 2MB
       if (file.size > maxSize) {
-        throw new Error("حجم الملف يتجاوز الحد المسموح به (2 ميجابايت).")
+        const errorMsg = "حجم الملف يتجاوز الحد المسموح به (2 ميجابايت).";
+        console.error(errorMsg);
+        setUploadError(errorMsg);
+        toast({
+          title: "خطأ في حجم الملف",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        setIsUploading(false);
+        return;
       }
 
       // تحويل الملف إلى base64 مباشرة
-      const reader = new FileReader()
-      reader.onload = async (event) => {
+      console.log('Starting file read as data URL');
+      const reader = new FileReader();
+
+      // تعريف وظيفة onload
+      reader.onload = (event) => {
         try {
+          console.log('File read completed');
+
           if (!event.target || typeof event.target.result !== "string") {
-            throw new Error("فشل في قراءة الملف")
+            throw new Error("فشل في قراءة الملف");
           }
 
-          const base64Data = event.target.result
+          const base64Data = event.target.result;
+          console.log('Base64 data generated, length:', base64Data.length);
 
-          // تعيين الشعار مباشرة بدون الحاجة إلى رفعه إلى الخادم
-          setLogo(base64Data)
+          // تعيين الشعار مباشرة
+          setLogo(base64Data);
+          console.log('Logo state updated with base64 data');
 
           toast({
             title: "تم رفع الشعار بنجاح",
             description: "تم رفع شعار الشركة بنجاح",
-          })
+          });
 
-          setIsUploading(false)
+          setIsUploading(false);
         } catch (error) {
-          console.error("Error processing file:", error)
-          setUploadError(error instanceof Error ? error.message : "خطأ غير معروف")
+          console.error("Error in onload handler:", error);
+          setUploadError(error instanceof Error ? error.message : "خطأ غير معروف");
           toast({
             title: "خطأ في معالجة الشعار",
             description: `حدث خطأ أثناء معالجة الشعار: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
             variant: "destructive",
-          })
-          setIsUploading(false)
+          });
+          setIsUploading(false);
         }
-      }
+      };
 
-      reader.onerror = () => {
-        setUploadError("فشل في قراءة الملف")
+      // تعريف وظيفة onerror
+      reader.onerror = (event) => {
+        console.error("FileReader error:", event);
+        setUploadError("فشل في قراءة الملف");
         toast({
           title: "خطأ في قراءة الشعار",
           description: "فشل في قراءة ملف الشعار",
           variant: "destructive",
-        })
-        setIsUploading(false)
-      }
+        });
+        setIsUploading(false);
+      };
 
-      reader.readAsDataURL(file)
+      // تعريف وظيفة onprogress للتعامل مع الملفات الكبيرة
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentLoaded = Math.round((event.loaded / event.total) * 100);
+          console.log(`Loading progress: ${percentLoaded}%`);
+        }
+      };
+
+      // بدء قراءة الملف
+      reader.readAsDataURL(file);
+      console.log('Started reading file as data URL');
+
+      // إضافة مهلة زمنية للتعامل مع الملفات الكبيرة
+      setTimeout(() => {
+        if (isUploading) {
+          console.log('Upload timeout reached, checking status');
+          // إذا استمرت عملية التحميل لفترة طويلة، نتحقق من حالتها
+          if (reader.readyState !== FileReader.DONE) {
+            console.log('FileReader still in progress, current state:', reader.readyState);
+          }
+        }
+      }, 5000); // 5 ثوانٍ
+
     } catch (error) {
-      console.error("Error uploading logo:", error)
-      setUploadError(error instanceof Error ? error.message : "خطأ غير معروف")
+      console.error("Error in handleLogoUpload:", error);
+      setUploadError(error instanceof Error ? error.message : "خطأ غير معروف");
       toast({
         title: "خطأ في رفع الشعار",
         description: `حدث خطأ أثناء رفع الشعار: ${error instanceof Error ? error.message : "خطأ غير معروف"}`,
         variant: "destructive",
-      })
-      setIsUploading(false)
+      });
+      setIsUploading(false);
     }
   }
 
-  // وظيفة جديدة للنقر على منطقة التحميل
+  // وظيفة محسنة للنقر على منطقة التحميل
   const triggerFileInput = useCallback(() => {
     if (fileInputRef.current) {
-      // إضافة تأخير أطول للأجهزة المحمولة
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      try {
+        // تحديد ما إذا كان الجهاز محمولاً
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
-      if (isMobile) {
-        // تأخير أطول للأجهزة المحمولة
+        if (isMobile) {
+          // على الأجهزة المحمولة، نستخدم نهجًا مختلفًا
+          console.log('Mobile device detected, triggering file input with special handling');
+
+          // محاولة تنفيذ النقر بشكل مباشر أولاً
+          fileInputRef.current.click();
+
+          // ثم نضيف تأخيرًا للتركيز
+          setTimeout(() => {
+            if (fileInputRef.current) {
+              // محاولة التركيز على عنصر الإدخال
+              fileInputRef.current.focus();
+
+              // في بعض الأجهزة المحمولة، قد نحتاج إلى محاولة النقر مرة أخرى
+              if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) { // تجنب هذا على أجهزة iOS
+                setTimeout(() => {
+                  if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                  }
+                }, 100);
+              }
+            }
+          }, 100);
+        } else {
+          // على أجهزة سطح المكتب، نستخدم النهج العادي
+          console.log('Desktop device detected, triggering file input normally');
+          fileInputRef.current.click();
+        }
+      } catch (error) {
+        console.error('Error triggering file input:', error);
+        // في حالة حدوث خطأ، نحاول مرة أخرى بعد تأخير قصير
         setTimeout(() => {
           if (fileInputRef.current) {
-            fileInputRef.current.click()
-            setTimeout(() => {
-              if (fileInputRef.current) {
-                fileInputRef.current.focus()
-              }
-            }, 300)
+            try {
+              fileInputRef.current.click();
+            } catch (retryError) {
+              console.error('Error on retry:', retryError);
+            }
           }
-        }, 150)
-      } else {
-        // تأخير أقصر للأجهزة المكتبية
-        fileInputRef.current.click()
+        }, 200);
       }
     }
   }, [])
@@ -302,22 +385,34 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               </div>
             ) : (
               <div className="flex items-center justify-center w-full">
-                <TeslaButton
-                  type="button"
-                  variant="secondary"
+                {/* استخدام div بدلاً من TeslaButton لتجنب مشاكل الأحداث على الأجهزة المحمولة */}
+                <div
                   className={`flex flex-col items-center justify-center w-full h-20 sm:h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b] ${
                     uploadActive ? "bg-[#1f2124]" : ""
                   }`}
                   onClick={triggerFileInput}
-                  onTouchStart={() => setUploadActive(true)}
+                  onTouchStart={() => {
+                    console.log('Touch start event');
+                    setUploadActive(true);
+                  }}
                   onTouchEnd={() => {
-                    setUploadActive(false)
-                    triggerFileInput()
+                    console.log('Touch end event');
+                    setUploadActive(false);
+                    // على الأجهزة المحمولة، نستخدم setTimeout لتجنب مشاكل التزامن
+                    setTimeout(() => triggerFileInput(), 10);
                   }}
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
                   onMouseLeave={() => uploadActive && setUploadActive(false)}
-                  disabled={isUploading}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t.clickToUpload}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      triggerFileInput();
+                    }
+                  }}
                 >
                   {isUploading ? (
                     <Loader2 className="w-5 h-5 sm:w-8 sm:h-8 mb-1 sm:mb-2 text-muted-foreground animate-spin" />
@@ -329,17 +424,20 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                     {!isUploading && <span className="hidden sm:inline">{t.dragAndDrop}</span>}
                   </p>
                   <p className="text-xs text-muted-foreground hidden xs:block">{t.maxFileSize}</p>
-                  <Input
-                    id="logo-upload"
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/svg+xml"
-                    className="hidden"
-                    onChange={handleLogoUpload}
-                    disabled={isUploading}
-                    aria-label={t.companyLogo}
-                  />
-                </TeslaButton>
+                </div>
+                {/* عنصر الإدخال منفصل عن منطقة النقر لتجنب مشاكل الأحداث */}
+                <Input
+                  id="logo-upload"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/svg+xml"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                  disabled={isUploading}
+                  aria-label={t.companyLogo}
+                  // إضافة خصائص إضافية لتحسين التوافق مع الأجهزة المحمولة
+                  capture="environment"
+                />
               </div>
             )}
             {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
