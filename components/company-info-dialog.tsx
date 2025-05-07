@@ -194,41 +194,22 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
     }
   }
 
-  // وظيفة محسنة للنقر على منطقة التحميل
+  // وظيفة مبسطة للنقر على منطقة التحميل
   const triggerFileInput = useCallback(() => {
     if (fileInputRef.current) {
       try {
-        // تحديد ما إذا كان الجهاز محمولاً
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+        // تسجيل الحدث للتصحيح
+        console.log('Triggering file input');
 
-        if (isMobile) {
-          // على الأجهزة المحمولة، نستخدم نهجًا مختلفًا
-          console.log('Mobile device detected, triggering file input with special handling');
+        // استخدام نفس الطريقة لجميع الأجهزة: النقر المباشر
+        fileInputRef.current.click();
 
-          // محاولة تنفيذ النقر بشكل مباشر أولاً
-          fileInputRef.current.click();
-
-          // ثم نضيف تأخيرًا للتركيز
-          setTimeout(() => {
-            if (fileInputRef.current) {
-              // محاولة التركيز على عنصر الإدخال
-              fileInputRef.current.focus();
-
-              // في بعض الأجهزة المحمولة، قد نحتاج إلى محاولة النقر مرة أخرى
-              if (!/iPhone|iPad|iPod/i.test(navigator.userAgent)) { // تجنب هذا على أجهزة iOS
-                setTimeout(() => {
-                  if (fileInputRef.current) {
-                    fileInputRef.current.click();
-                  }
-                }, 100);
-              }
-            }
-          }, 100);
-        } else {
-          // على أجهزة سطح المكتب، نستخدم النهج العادي
-          console.log('Desktop device detected, triggering file input normally');
-          fileInputRef.current.click();
-        }
+        // إضافة تركيز بعد النقر
+        setTimeout(() => {
+          if (fileInputRef.current) {
+            fileInputRef.current.focus();
+          }
+        }, 50);
       } catch (error) {
         console.error('Error triggering file input:', error);
         // في حالة حدوث خطأ، نحاول مرة أخرى بعد تأخير قصير
@@ -240,7 +221,7 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
               console.error('Error on retry:', retryError);
             }
           }
-        }, 200);
+        }, 100);
       }
     }
   }, [])
@@ -390,7 +371,15 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   className={`flex flex-col items-center justify-center w-full h-20 sm:h-32 border-2 border-dashed border-[#282b2e] rounded-lg cursor-pointer bg-[#1b1d1e] hover:bg-[#1f2124] transition-colors duration-200 active:bg-[#18191b] ${
                     uploadActive ? "bg-[#1f2124]" : ""
                   }`}
-                  onClick={triggerFileInput}
+                  onClick={(e) => {
+                    // تنفيذ triggerFileInput فقط إذا لم يكن الجهاز محمولاً
+                    if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                      console.log('Desktop click event');
+                      triggerFileInput();
+                    } else {
+                      console.log('Mobile click event - ignoring to prevent double trigger');
+                    }
+                  }}
                   onTouchStart={() => {
                     console.log('Touch start event');
                     setUploadActive(true);
@@ -398,8 +387,11 @@ export function CompanyInfoDialog({ open, onOpenChange, companyInfo, onSave }: C
                   onTouchEnd={() => {
                     console.log('Touch end event');
                     setUploadActive(false);
-                    // على الأجهزة المحمولة، نستخدم setTimeout لتجنب مشاكل التزامن
-                    setTimeout(() => triggerFileInput(), 10);
+                    // على الأجهزة المحمولة، نستخدم triggerFileInput هنا فقط
+                    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                      console.log('Mobile touch end - triggering file input');
+                      triggerFileInput();
+                    }
                   }}
                   onMouseDown={() => setUploadActive(true)}
                   onMouseUp={() => setUploadActive(false)}
