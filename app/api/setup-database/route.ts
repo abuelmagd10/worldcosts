@@ -2,24 +2,30 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database.types";
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
-}
-if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
-}
+// تحقق من وجود متغيرات البيئة فقط عند استدعاء الوظيفة وليس أثناء التحميل
+// هذا يمنع حدوث أخطاء أثناء عملية البناء
 
-// Create a typed Supabase client with additional options
-const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
+// سنقوم بإنشاء عميل Supabase فقط عند الحاجة إليه
+const getSupabaseAdmin = () => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL');
   }
-);
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
+  }
+
+  // Create a typed Supabase client with additional options
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
+};
 
 export async function POST() {
   try {
@@ -50,6 +56,7 @@ export async function POST() {
         );
       `;
 
+      const supabaseAdmin = getSupabaseAdmin();
       const { error: createError } = await supabaseAdmin
         .from('_postgres')
         .select('*')
@@ -92,6 +99,7 @@ export async function POST() {
         CREATE POLICY "anyone can delete files" ON files FOR DELETE USING (true);
       `;
 
+      const supabaseAdmin = getSupabaseAdmin();
       const { error: policyError } = await supabaseAdmin
         .from('_postgres')
         .select('*')
@@ -108,7 +116,7 @@ export async function POST() {
     await createTables();
     await setupPolicies();
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "تم إعداد قاعدة البيانات بنجاح"
     });
   } catch (error) {
