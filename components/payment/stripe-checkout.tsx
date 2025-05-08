@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { loadStripe } from "@stripe/stripe-js"
 import { STRIPE_PUBLIC_KEY } from "@/lib/stripe/config"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, CreditCard } from "lucide-react"
+import { Loader2, CreditCard, LogIn } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
+import { supabase } from "@/lib/supabase-client"
 
 // تهيئة Stripe
 // استخدام متغير عام لتخزين وعد Stripe
@@ -43,6 +45,31 @@ export function StripeCheckout({
   const { toast } = useToast()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  // التحقق من حالة تسجيل الدخول عند تحميل المكون
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
+
+        if (error) {
+          console.error("Error checking auth status:", error)
+          setIsLoggedIn(false)
+        } else {
+          setIsLoggedIn(!!data.session)
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error)
+        setIsLoggedIn(false)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuthStatus()
+  }, [])
 
   const handleCheckout = async () => {
     setIsLoading(true)
@@ -154,6 +181,38 @@ export function StripeCheckout({
     }
   }
 
+  // إذا كان جاري التحقق من حالة تسجيل الدخول
+  if (isCheckingAuth) {
+    return (
+      <TeslaButton className="w-full" disabled>
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </TeslaButton>
+    )
+  }
+
+  // إذا كان المستخدم غير مسجل الدخول
+  if (!isLoggedIn) {
+    return (
+      <div className="space-y-2">
+        <TeslaButton
+          className="w-full"
+          variant="outline"
+          onClick={() => {
+            const currentUrl = window.location.pathname
+            router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+          }}
+        >
+          <LogIn className="h-4 w-4 mr-2" />
+          {t.loginToSubscribe || "تسجيل الدخول للاشتراك"}
+        </TeslaButton>
+        <p className="text-xs text-center text-muted-foreground">
+          {t.loginRequiredForSubscription || "يجب تسجيل الدخول أولاً للاشتراك في هذه الخطة"}
+        </p>
+      </div>
+    )
+  }
+
+  // إذا كان المستخدم مسجل الدخول
   return (
     <TeslaButton
       className="w-full"

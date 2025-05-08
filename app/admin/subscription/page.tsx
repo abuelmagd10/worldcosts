@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowLeft, Check, CreditCard, Shield, Zap } from "lucide-react"
+import { ArrowLeft, Check, CreditCard, Shield, Zap, LogIn } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import { TeslaCard, TeslaCardContent, TeslaCardDescription, TeslaCardFooter, TeslaCardHeader, TeslaCardTitle } from "@/components/ui/tesla-card"
@@ -14,11 +14,39 @@ import { StripeCheckout } from "@/components/payment/stripe-checkout"
 import { StripeProvider } from "@/components/payment/stripe-provider"
 import { STRIPE_PRODUCTS } from "@/lib/stripe/config"
 import { PaymentMethods } from "@/components/payment/payment-methods"
+import { supabase } from "@/lib/supabase-client"
+import { useRouter } from "next/navigation"
 
 export default function SubscriptionPage() {
   const { t, dir } = useLanguage()
   const { toast } = useToast()
+  const router = useRouter()
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
+
+        if (error) {
+          console.error("Error checking auth status:", error)
+          setIsLoggedIn(false)
+        } else {
+          setIsLoggedIn(!!data.session)
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error)
+        setIsLoggedIn(false)
+      } finally {
+        setIsCheckingAuth(false)
+      }
+    }
+
+    checkAuthStatus()
+  }, [])
 
   // لا نحتاج إلى وظائف معالجة الدفع لأن Stripe Checkout سيتعامل مع عملية الدفع
 
@@ -46,52 +74,82 @@ export default function SubscriptionPage() {
           <AppLogo size={40} />
         </div>
 
-        <TeslaCard className="max-w-4xl mx-auto mb-8">
-          <TeslaCardHeader>
-            <TeslaCardTitle className="text-2xl">{t.upgradeToProVersion}</TeslaCardTitle>
-            <TeslaCardDescription>{t.proFeatures}</TeslaCardDescription>
-          </TeslaCardHeader>
-          <TeslaCardContent>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-500" />
-                <span>{t.unlimitedItems}</span>
+        {isCheckingAuth ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : !isLoggedIn ? (
+          <TeslaCard className="max-w-4xl mx-auto mb-8">
+            <TeslaCardHeader>
+              <TeslaCardTitle className="text-2xl">{t.loginRequired || "تسجيل الدخول مطلوب"}</TeslaCardTitle>
+              <TeslaCardDescription>{t.loginRequiredDesc || "يجب عليك تسجيل الدخول أولاً للوصول إلى خطط الاشتراك"}</TeslaCardDescription>
+            </TeslaCardHeader>
+            <TeslaCardContent className="flex flex-col items-center">
+              <div className="mb-6 text-center">
+                <LogIn className="h-16 w-16 mx-auto mb-4 text-primary" />
+                <p className="text-muted-foreground">{t.loginToAccessSubscriptions || "قم بتسجيل الدخول للوصول إلى خطط الاشتراك المتاحة والميزات المتقدمة"}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-500" />
-                <span>{t.advancedReports}</span>
+              <TeslaButton
+                className="w-full max-w-md"
+                onClick={() => {
+                  const currentUrl = window.location.pathname
+                  router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+                }}
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                {t.login || "تسجيل الدخول"}
+              </TeslaButton>
+            </TeslaCardContent>
+          </TeslaCard>
+        ) : (
+          <TeslaCard className="max-w-4xl mx-auto mb-8">
+            <TeslaCardHeader>
+              <TeslaCardTitle className="text-2xl">{t.upgradeToProVersion}</TeslaCardTitle>
+              <TeslaCardDescription>{t.proFeatures}</TeslaCardDescription>
+            </TeslaCardHeader>
+            <TeslaCardContent>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <span>{t.unlimitedItems}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <span>{t.advancedReports}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <span>{t.customBranding}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <span>{t.dataSync}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="h-5 w-5 text-green-500" />
+                  <span>{t.prioritySupport}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-500" />
-                <span>{t.customBranding}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-500" />
-                <span>{t.dataSync}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-500" />
-                <span>{t.prioritySupport}</span>
-              </div>
-            </div>
-          </TeslaCardContent>
-        </TeslaCard>
+            </TeslaCardContent>
+          </TeslaCard>
+        )}
 
-        <div className="max-w-4xl mx-auto">
-          <Tabs defaultValue="monthly" className="w-full">
-            <div className="flex justify-center mb-6">
-              <TabsList>
-                <TabsTrigger value="monthly" onClick={() => setBillingCycle("monthly")}>
-                  {t.monthlyBilling}
-                </TabsTrigger>
-                <TabsTrigger value="yearly" onClick={() => setBillingCycle("yearly")}>
-                  {t.yearlyBilling}
-                  <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                    -20%
-                  </Badge>
-                </TabsTrigger>
-              </TabsList>
-            </div>
+        {!isCheckingAuth && isLoggedIn && (
+          <div className="max-w-4xl mx-auto">
+            <Tabs defaultValue="monthly" className="w-full">
+              <div className="flex justify-center mb-6">
+                <TabsList>
+                  <TabsTrigger value="monthly" onClick={() => setBillingCycle("monthly")}>
+                    {t.monthlyBilling}
+                  </TabsTrigger>
+                  <TabsTrigger value="yearly" onClick={() => setBillingCycle("yearly")}>
+                    {t.yearlyBilling}
+                    <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                      -20%
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {/* Free Plan */}
@@ -214,8 +272,9 @@ export default function SubscriptionPage() {
                 </TeslaCardFooter>
               </TeslaCard>
             </div>
-          </Tabs>
-        </div>
+            </Tabs>
+          </div>
+        )}
       </div>
     </div>
   )
