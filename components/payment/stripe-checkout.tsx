@@ -72,6 +72,13 @@ export function StripeCheckout({
   }, [])
 
   const handleCheckout = async () => {
+    // التحقق من حالة تسجيل الدخول قبل بدء عملية الدفع
+    if (!isLoggedIn) {
+      const currentUrl = window.location.pathname
+      router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -92,20 +99,18 @@ export function StripeCheckout({
       if (!response.ok) {
         // قراءة النص الأصلي للاستجابة
         const responseText = await response.text()
-        console.error("Checkout error response text:", responseText)
 
         // محاولة تحليل النص كـ JSON إذا كان ممكنًا
         let errorMessage = "Network response was not ok"
         try {
           if (responseText) {
             const errorData = JSON.parse(responseText)
-            console.error("Checkout error data:", errorData)
             if (errorData && errorData.error) {
               errorMessage = errorData.error
             }
           }
         } catch (parseError) {
-          console.error("Error parsing response:", parseError)
+          // تجاهل أخطاء التحليل
         }
 
         // التحقق من نوع الخطأ
@@ -148,8 +153,6 @@ export function StripeCheckout({
         throw error
       }
     } catch (error: any) {
-      console.error("Error during checkout:", error)
-
       // تخصيص رسالة الخطأ بناءً على نوع الخطأ
       let errorTitle = t.paymentError || "خطأ في الدفع"
       let errorDescription = error.message || t.paymentErrorDesc || "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى."
