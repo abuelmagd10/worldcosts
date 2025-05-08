@@ -12,25 +12,25 @@ export const STRIPE_PUBLIC_KEY = typeof window !== 'undefined' && process.env.NE
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_YOUR_SECRET_KEY';
 
 // تكوين المنتجات والأسعار
-// ملاحظة: يجب استبدال معرفات الأسعار التالية بالمعرفات الحقيقية من لوحة تحكم Stripe الخاصة بك
+// سيتم إنشاء هذه المنتجات والأسعار تلقائيًا عند أول استخدام إذا لم تكن موجودة
 export const STRIPE_PRODUCTS = {
   PRO: {
     monthly: {
-      priceId: 'price_XXXXXXXXXXXXXXXXXXXXXXXX', // استبدل بمعرف السعر الشهري لخطة Pro
+      priceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID || 'price_1RMCXXBnPy08qUQBXXXXXXXX', // سيتم إنشاؤه تلقائيًا
       amount: 9.99,
     },
     yearly: {
-      priceId: 'price_XXXXXXXXXXXXXXXXXXXXXXXX', // استبدل بمعرف السعر السنوي لخطة Pro
+      priceId: process.env.STRIPE_PRO_YEARLY_PRICE_ID || 'price_1RMCXXBnPy08qUQBXXXXXXXX', // سيتم إنشاؤه تلقائيًا
       amount: 95.88,
     },
   },
   BUSINESS: {
     monthly: {
-      priceId: 'price_XXXXXXXXXXXXXXXXXXXXXXXX', // استبدل بمعرف السعر الشهري لخطة Business
+      priceId: process.env.STRIPE_BUSINESS_MONTHLY_PRICE_ID || 'price_1RMCXXBnPy08qUQBXXXXXXXX', // سيتم إنشاؤه تلقائيًا
       amount: 19.99,
     },
     yearly: {
-      priceId: 'price_XXXXXXXXXXXXXXXXXXXXXXXX', // استبدل بمعرف السعر السنوي لخطة Business
+      priceId: process.env.STRIPE_BUSINESS_YEARLY_PRICE_ID || 'price_1RMCXXBnPy08qUQBXXXXXXXX', // سيتم إنشاؤه تلقائيًا
       amount: 191.88,
     },
   },
