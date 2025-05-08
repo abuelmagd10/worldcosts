@@ -20,10 +20,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  
+
   // الحصول على URL الإحالة من معلمات البحث
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
-  
+
   // تعيين URL الإحالة عند تحميل الصفحة
   useState(() => {
     if (typeof window !== 'undefined') {
@@ -33,9 +33,45 @@ export default function LoginPage() {
     }
   })
 
+  // وظيفة لإعادة إرسال رابط تأكيد البريد الإلكتروني
+  const handleResendConfirmation = async (email: string) => {
+    if (!email) {
+      toast({
+        title: "خطأ",
+        description: "يرجى إدخال البريد الإلكتروني أولاً",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: "تم إرسال رابط التأكيد",
+        description: "تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
+      })
+    } catch (error: any) {
+      console.error("Resend confirmation error:", error)
+
+      toast({
+        title: "خطأ في إرسال رابط التأكيد",
+        description: error.message || "حدث خطأ أثناء إرسال رابط التأكيد. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email || !password) {
       toast({
         title: t.loginError || "خطأ في تسجيل الدخول",
@@ -44,24 +80,24 @@ export default function LoginPage() {
       })
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      
+
       if (error) {
         throw error
       }
-      
+
       toast({
         title: t.loginSuccess || "تم تسجيل الدخول بنجاح",
         description: t.welcomeBack || "مرحبًا بعودتك!",
       })
-      
+
       // إعادة التوجيه إلى الصفحة السابقة أو الصفحة الرئيسية
       if (redirectUrl) {
         router.push(redirectUrl)
@@ -70,17 +106,33 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error("Login error:", error)
-      
+
       let errorMessage = t.loginFailed || "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى."
-      
+      let errorTitle = t.loginError || "خطأ في تسجيل الدخول"
+      let errorVariant: "default" | "destructive" = "destructive"
+      let showResendButton = false
+
       if (error.message === "Invalid login credentials") {
         errorMessage = t.invalidCredentials || "بيانات الاعتماد غير صالحة. يرجى التحقق من البريد الإلكتروني وكلمة المرور."
+      } else if (error.message === "Email not confirmed") {
+        errorTitle = "البريد الإلكتروني غير مؤكد"
+        errorMessage = "يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد. أو انقر على زر إعادة إرسال رابط التأكيد أدناه."
+        errorVariant = "default"
+        showResendButton = true
       }
-      
+
       toast({
-        title: t.loginError || "خطأ في تسجيل الدخول",
+        title: errorTitle,
         description: errorMessage,
-        variant: "destructive",
+        variant: errorVariant,
+        action: showResendButton ? (
+          <button
+            className="bg-primary text-white px-3 py-1 rounded-md text-xs"
+            onClick={() => handleResendConfirmation(email)}
+          >
+            إعادة إرسال رابط التأكيد
+          </button>
+        ) : undefined,
       })
     } finally {
       setIsLoading(false)
@@ -106,7 +158,7 @@ export default function LoginPage() {
               {t.login || "تسجيل الدخول"}
             </TeslaCardTitle>
           </TeslaCardHeader>
-          
+
           <TeslaCardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
@@ -126,7 +178,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">
                   {t.password || "كلمة المرور"}
@@ -144,7 +196,7 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              
+
               <TeslaButton
                 type="submit"
                 className="w-full"
@@ -161,14 +213,65 @@ export default function LoginPage() {
               </TeslaButton>
             </form>
           </TeslaCardContent>
-          
-          <TeslaCardFooter className="text-center">
+
+          <TeslaCardFooter className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
               {t.dontHaveAccount || "ليس لديك حساب؟"}{" "}
               <Link href="/auth/register" className="text-primary hover:underline">
                 {t.register || "التسجيل"}
               </Link>
             </p>
+
+            {/* خيار لإعادة إرسال رابط التأكيد */}
+            <div>
+              <button
+                type="button"
+                onClick={() => handleResendConfirmation(email)}
+                className="text-xs text-primary hover:underline"
+                disabled={!email}
+              >
+                إعادة إرسال رابط تأكيد البريد الإلكتروني
+              </button>
+            </div>
+
+            {/* خيار لتسجيل الدخول بدون تأكيد البريد الإلكتروني (في بيئة التطوير فقط) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="border-t pt-4">
+                <p className="text-xs text-muted-foreground mb-2">خيارات المطور (بيئة التطوير فقط)</p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      // تسجيل الدخول باستخدام رابط سحري (يتجاوز تأكيد البريد الإلكتروني)
+                      const { error } = await supabase.auth.signInWithOtp({
+                        email,
+                      })
+
+                      if (error) {
+                        throw error
+                      }
+
+                      toast({
+                        title: "تم إرسال رابط تسجيل الدخول",
+                        description: "تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
+                      })
+                    } catch (error: any) {
+                      console.error("Magic link error:", error)
+
+                      toast({
+                        title: "خطأ في إرسال رابط تسجيل الدخول",
+                        description: error.message || "حدث خطأ أثناء إرسال رابط تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+                        variant: "destructive",
+                      })
+                    }
+                  }}
+                  className="text-xs text-yellow-500 hover:underline"
+                  disabled={!email}
+                >
+                  إرسال رابط تسجيل الدخول السحري
+                </button>
+              </div>
+            )}
           </TeslaCardFooter>
         </TeslaCard>
       </div>

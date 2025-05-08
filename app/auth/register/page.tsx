@@ -22,10 +22,10 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  
+
   // الحصول على URL الإحالة من معلمات البحث
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
-  
+
   // تعيين URL الإحالة عند تحميل الصفحة
   useState(() => {
     if (typeof window !== 'undefined') {
@@ -37,7 +37,7 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!name || !email || !password || !confirmPassword) {
       toast({
         title: t.registerError || "خطأ في التسجيل",
@@ -46,7 +46,7 @@ export default function RegisterPage() {
       })
       return
     }
-    
+
     if (password !== confirmPassword) {
       toast({
         title: t.registerError || "خطأ في التسجيل",
@@ -55,9 +55,9 @@ export default function RegisterPage() {
       })
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -68,27 +68,37 @@ export default function RegisterPage() {
           },
         },
       })
-      
+
       if (error) {
         throw error
       }
-      
+
+      // عرض رسالة نجاح مع معلومات إضافية
       toast({
         title: t.registerSuccess || "تم التسجيل بنجاح",
         description: t.checkEmail || "يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك",
+        duration: 10000, // عرض الرسالة لمدة 10 ثوانٍ
       })
-      
-      // إعادة التوجيه إلى صفحة تسجيل الدخول
-      router.push("/auth/login")
+
+      // عرض نافذة تأكيد مع معلومات إضافية
+      setTimeout(() => {
+        alert(
+          "تم إرسال رابط تأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني والنقر على الرابط لتأكيد حسابك.\n\n" +
+          "ملاحظة: لن تتمكن من تسجيل الدخول حتى تقوم بتأكيد بريدك الإلكتروني."
+        )
+
+        // إعادة التوجيه إلى صفحة تسجيل الدخول
+        router.push("/auth/login")
+      }, 1000)
     } catch (error: any) {
       console.error("Register error:", error)
-      
+
       let errorMessage = t.registerFailed || "فشل التسجيل. يرجى المحاولة مرة أخرى."
-      
+
       if (error.message === "User already registered") {
         errorMessage = t.userAlreadyRegistered || "البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول."
       }
-      
+
       toast({
         title: t.registerError || "خطأ في التسجيل",
         description: errorMessage,
@@ -118,7 +128,7 @@ export default function RegisterPage() {
               {t.register || "التسجيل"}
             </TeslaCardTitle>
           </TeslaCardHeader>
-          
+
           <TeslaCardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="space-y-2">
@@ -138,7 +148,7 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">
                   {t.email || "البريد الإلكتروني"}
@@ -156,7 +166,7 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">
                   {t.password || "كلمة المرور"}
@@ -174,7 +184,7 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
                   {t.confirmPassword || "تأكيد كلمة المرور"}
@@ -192,7 +202,7 @@ export default function RegisterPage() {
                   />
                 </div>
               </div>
-              
+
               <TeslaButton
                 type="submit"
                 className="w-full"
@@ -209,7 +219,7 @@ export default function RegisterPage() {
               </TeslaButton>
             </form>
           </TeslaCardContent>
-          
+
           <TeslaCardFooter className="text-center">
             <p className="text-sm text-muted-foreground">
               {t.alreadyHaveAccount || "لديك حساب بالفعل؟"}{" "}
