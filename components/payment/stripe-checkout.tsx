@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { loadStripe } from "@stripe/stripe-js"
 import { STRIPE_PUBLIC_KEY } from "@/lib/stripe/config"
 import { TeslaButton } from "@/components/ui/tesla-button"
@@ -40,6 +41,7 @@ export function StripeCheckout({
 }: StripeCheckoutProps) {
   const { t } = useLanguage()
   const { toast } = useToast()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleCheckout = async () => {
@@ -126,9 +128,20 @@ export function StripeCheckout({
       let errorDescription = error.message || t.paymentErrorDesc || "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى."
 
       // إذا كان الخطأ متعلق بعدم تسجيل الدخول
-      if (error.message === "يرجى تسجيل الدخول أولاً") {
+      if (error.message === "يرجى تسجيل الدخول أولاً" ||
+          error.message.includes("Auth session missing")) {
         errorTitle = "تسجيل الدخول مطلوب"
         errorDescription = "يجب عليك تسجيل الدخول أولاً قبل الاشتراك في أي خطة."
+
+        // عرض رسالة تأكيد قبل التوجيه إلى صفحة تسجيل الدخول
+        setTimeout(() => {
+          const confirmRedirect = window.confirm("هل ترغب في الانتقال إلى صفحة تسجيل الدخول؟")
+          if (confirmRedirect) {
+            // توجيه المستخدم إلى صفحة تسجيل الدخول مع URL الإحالة
+            const currentUrl = window.location.pathname
+            router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+          }
+        }, 1000) // تأخير لمدة ثانية واحدة للسماح بعرض رسالة الخطأ أولاً
       }
 
       toast({
