@@ -40,6 +40,7 @@
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.3.0",
     "@supabase/auth-helpers-nextjs": "latest",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "autoprefixer": "^10.4.20",
     "chart.js": "latest",

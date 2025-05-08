@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { STRIPE_SECRET_KEY, CURRENCY } from "@/lib/stripe/config"
-import { createClient } from "@/lib/supabase-client"
-import { cookies } from "next/headers"
+import { supabase } from "@/lib/supabase-client"
 
 // إنشاء كائن Stripe باستخدام المفتاح السري
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -22,18 +21,38 @@ export async function POST(request: Request) {
       )
     }
 
+    // التحقق من صحة معرف السعر
+    if (!priceId.startsWith('price_')) {
+      console.error("Invalid price ID format:", priceId)
+      return NextResponse.json(
+        { error: "Invalid price ID format. Price ID should start with 'price_'" },
+        { status: 400 }
+      )
+    }
+
     // الحصول على معلومات المستخدم الحالي من Supabase
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
-    const { data: { user } } = await supabase.auth.getUser()
+    // ملاحظة: في بيئة الإنتاج، يجب استخدام طريقة أكثر أمانًا للتحقق من المستخدم
+    const { data, error: authError } = await supabase.auth.getUser()
+
+    // التحقق من وجود خطأ في المصادقة
+    if (authError) {
+      console.error("Authentication error:", authError)
+      return NextResponse.json(
+        { error: "Authentication error: " + authError.message },
+        { status: 401 }
+      )
+    }
 
     // التحقق من وجود المستخدم
-    if (!user) {
+    if (!data.user) {
+      console.error("User not authenticated")
       return NextResponse.json(
         { error: "User not authenticated" },
         { status: 401 }
       )
     }
+
+    const user = data.user
 
     // الحصول على معلومات العميل الحالي في Stripe أو إنشاء عميل جديد
     let customerId: string
@@ -94,11 +113,29 @@ export async function POST(request: Request) {
 
     // إرجاع معرف الجلسة
     return NextResponse.json({ sessionId: session.id })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating checkout session:", error)
+
+    // تحديد نوع الخطأ ورمز الحالة المناسب
+    let statusCode = 500
+    let errorMessage = "Failed to create checkout session"
+
+    if (error.type === 'StripeCardError') {
+      statusCode = 400
+      errorMessage = error.message || "Card error"
+    } else if (error.type === 'StripeInvalidRequestError') {
+      statusCode = 400
+      errorMessage = error.message || "Invalid request"
+    } else if (error.type === 'StripeAuthenticationError') {
+      statusCode = 401
+      errorMessage = "Authentication with Stripe failed"
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     )
   }
 }

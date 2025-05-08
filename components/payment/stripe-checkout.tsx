@@ -61,7 +61,15 @@ export function StripeCheckout({
       })
 
       if (!response.ok) {
-        throw new Error("Network response was not ok")
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
+        console.error("Checkout error response:", errorData)
+
+        // التحقق من نوع الخطأ
+        if (response.status === 401) {
+          throw new Error("يرجى تسجيل الدخول أولاً")
+        } else {
+          throw new Error(errorData.error || "Network response was not ok")
+        }
       }
 
       const { sessionId } = await response.json()
@@ -78,11 +86,22 @@ export function StripeCheckout({
       if (error) {
         throw error
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error during checkout:", error)
+
+      // تخصيص رسالة الخطأ بناءً على نوع الخطأ
+      let errorTitle = t.paymentError || "خطأ في الدفع"
+      let errorDescription = error.message || t.paymentErrorDesc || "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى."
+
+      // إذا كان الخطأ متعلق بعدم تسجيل الدخول
+      if (error.message === "يرجى تسجيل الدخول أولاً") {
+        errorTitle = "تسجيل الدخول مطلوب"
+        errorDescription = "يجب عليك تسجيل الدخول أولاً قبل الاشتراك في أي خطة."
+      }
+
       toast({
-        title: t.paymentError || "خطأ في الدفع",
-        description: t.paymentErrorDesc || "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى.",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       })
     } finally {

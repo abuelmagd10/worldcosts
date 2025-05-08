@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 import Stripe from "stripe"
 import { STRIPE_SECRET_KEY } from "@/lib/stripe/config"
 
@@ -21,18 +21,18 @@ export class SubscriptionService {
   // الحصول على اشتراك المستخدم الحالي
   static async getUserSubscription(userId: string): Promise<Subscription | null> {
     try {
-      const supabase = createClient()
-      
+      // استخدام عميل Supabase
+
       // استخدام الوظيفة المخصصة للحصول على اشتراك المستخدم
       const { data, error } = await supabase
         .rpc('get_user_subscription', { user_id_param: userId })
         .single()
-      
+
       if (error || !data) {
         console.error("Error fetching user subscription:", error)
         return null
       }
-      
+
       return {
         planId: data.plan_id,
         billingCycle: data.billing_cycle,
@@ -45,7 +45,7 @@ export class SubscriptionService {
       return null
     }
   }
-  
+
   // التحقق مما إذا كان المستخدم لديه اشتراك نشط
   static async hasActiveSubscription(userId: string): Promise<boolean> {
     try {
@@ -56,12 +56,12 @@ export class SubscriptionService {
       return false
     }
   }
-  
+
   // إلغاء اشتراك المستخدم
   static async cancelSubscription(userId: string): Promise<boolean> {
     try {
-      const supabase = createClient()
-      
+      // استخدام عميل Supabase
+
       // الحصول على معرف اشتراك Stripe
       const { data, error } = await supabase
         .from('subscriptions')
@@ -70,43 +70,43 @@ export class SubscriptionService {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
-      
+
       if (error || !data) {
         console.error("Error fetching subscription for cancellation:", error)
         return false
       }
-      
+
       // إلغاء الاشتراك في Stripe
       await stripe.subscriptions.update(data.stripe_subscription_id, {
         cancel_at_period_end: true,
       })
-      
+
       // تحديث حالة الاشتراك في قاعدة البيانات
       const { error: updateError } = await supabase
         .from('subscriptions')
         .update({ cancel_at_period_end: true })
         .eq('stripe_subscription_id', data.stripe_subscription_id)
-      
+
       if (updateError) {
         console.error("Error updating subscription status:", updateError)
         return false
       }
-      
+
       return true
     } catch (error) {
       console.error("Error in cancelSubscription:", error)
       return false
     }
   }
-  
+
   // تحديث بيانات الاشتراك من Stripe
   static async syncSubscriptionFromStripe(subscriptionId: string): Promise<boolean> {
     try {
       // الحصول على بيانات الاشتراك من Stripe
       const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-      
-      const supabase = createClient()
-      
+
+      // استخدام عميل Supabase
+
       // تحديث بيانات الاشتراك في قاعدة البيانات
       const { error } = await supabase
         .from('subscriptions')
@@ -117,12 +117,12 @@ export class SubscriptionService {
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_subscription_id', subscriptionId)
-      
+
       if (error) {
         console.error("Error syncing subscription data:", error)
         return false
       }
-      
+
       return true
     } catch (error) {
       console.error("Error in syncSubscriptionFromStripe:", error)

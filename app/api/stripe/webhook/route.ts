@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { STRIPE_SECRET_KEY } from "@/lib/stripe/config"
-import { createClient } from "@/lib/supabase-client"
+import { supabase } from "@/lib/supabase-client"
 
 // إنشاء كائن Stripe باستخدام المفتاح السري
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
@@ -74,28 +74,25 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     // الحصول على معلومات الاشتراك
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    
-    // تخزين معلومات الاشتراك في Supabase
-    const supabase = createClient()
-    
+
     // التحقق من وجود المستخدم
     let userId: string | null = null
-    
+
     if (customerEmail) {
       const { data: userData } = await supabase
         .from('users')
         .select('id')
         .eq('email', customerEmail)
         .single()
-      
+
       userId = userData?.id || null
     }
-    
+
     if (!userId) {
       console.error("User not found for email:", customerEmail)
       return
     }
-    
+
     // تخزين معلومات الاشتراك
     const { error } = await supabase
       .from('subscriptions')
@@ -109,7 +106,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
       })
-    
+
     if (error) {
       console.error("Error storing subscription data:", error)
     }
@@ -122,7 +119,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log("Payment succeeded:", paymentIntent.id)
-    
+
     // يمكن إضافة منطق إضافي هنا مثل إرسال بريد إلكتروني للتأكيد
   } catch (error) {
     console.error("Error handling payment succeeded:", error)
@@ -133,7 +130,7 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log("Payment failed:", paymentIntent.id)
-    
+
     // يمكن إضافة منطق إضافي هنا مثل إرسال بريد إلكتروني للإشعار بالفشل
   } catch (error) {
     console.error("Error handling payment failed:", error)
