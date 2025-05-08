@@ -22,6 +22,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [cooldownTime, setCooldownTime] = useState(0)
+  const [isInCooldown, setIsInCooldown] = useState(false)
 
   // الحصول على URL الإحالة من معلمات البحث
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
@@ -34,6 +36,23 @@ export default function RegisterPage() {
       setRedirectUrl(redirect)
     }
   })
+
+  // وظيفة لبدء عداد تنازلي
+  const startCooldownTimer = (seconds: number) => {
+    setIsInCooldown(true)
+    setCooldownTime(seconds)
+
+    const interval = setInterval(() => {
+      setCooldownTime((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval)
+          setIsInCooldown(false)
+          return 0
+        }
+        return prevTime - 1
+      })
+    }, 1000)
+  }
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -94,13 +113,24 @@ export default function RegisterPage() {
       console.error("Register error:", error)
 
       let errorMessage = t.registerFailed || "فشل التسجيل. يرجى المحاولة مرة أخرى."
+      let errorTitle = t.registerError || "خطأ في التسجيل"
 
       if (error.message === "User already registered") {
         errorMessage = t.userAlreadyRegistered || "البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول."
+      } else if (error.message.includes("For security purposes, you can only request this after")) {
+        // استخراج عدد الثواني من رسالة الخطأ
+        const secondsMatch = error.message.match(/after (\d+) seconds/)
+        const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
+
+        errorTitle = "يرجى الانتظار"
+        errorMessage = `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${seconds} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`
+
+        // بدء عداد تنازلي
+        startCooldownTimer(seconds)
       }
 
       toast({
-        title: t.registerError || "خطأ في التسجيل",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       })
@@ -206,10 +236,15 @@ export default function RegisterPage() {
               <TeslaButton
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
+                disabled={isLoading || isInCooldown}
               >
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : isInCooldown ? (
+                  <>
+                    <div className="animate-pulse h-4 w-4 mr-2 rounded-full bg-white"></div>
+                    {`الرجاء الانتظار (${cooldownTime} ثانية)`}
+                  </>
                 ) : (
                   <>
                     <UserPlus className="h-4 w-4 mr-2" />

@@ -20,6 +20,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [cooldownTime, setCooldownTime] = useState(0)
+  const [isInCooldown, setIsInCooldown] = useState(false)
 
   // الحصول على URL الإحالة من معلمات البحث
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
@@ -33,6 +35,23 @@ export default function LoginPage() {
     }
   })
 
+  // وظيفة لبدء عداد تنازلي
+  const startCooldownTimer = (seconds: number) => {
+    setIsInCooldown(true)
+    setCooldownTime(seconds)
+
+    const interval = setInterval(() => {
+      setCooldownTime((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(interval)
+          setIsInCooldown(false)
+          return 0
+        }
+        return prevTime - 1
+      })
+    }, 1000)
+  }
+
   // وظيفة لإعادة إرسال رابط تأكيد البريد الإلكتروني
   const handleResendConfirmation = async (email: string) => {
     if (!email) {
@@ -40,6 +59,16 @@ export default function LoginPage() {
         title: "خطأ",
         description: "يرجى إدخال البريد الإلكتروني أولاً",
         variant: "destructive",
+      })
+      return
+    }
+
+    // التحقق من وجود فترة انتظار
+    if (isInCooldown) {
+      toast({
+        title: "يرجى الانتظار",
+        description: `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${cooldownTime} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`,
+        variant: "default",
       })
       return
     }
@@ -61,9 +90,25 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Resend confirmation error:", error)
 
+      let errorMessage = error.message || "حدث خطأ أثناء إرسال رابط التأكيد. يرجى المحاولة مرة أخرى."
+      let errorTitle = "خطأ في إرسال رابط التأكيد"
+
+      // التحقق من نوع الخطأ
+      if (error.message.includes("For security purposes, you can only request this after")) {
+        // استخراج عدد الثواني من رسالة الخطأ
+        const secondsMatch = error.message.match(/after (\d+) seconds/)
+        const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
+
+        errorTitle = "يرجى الانتظار"
+        errorMessage = `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${seconds} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`
+
+        // بدء عداد تنازلي
+        startCooldownTimer(seconds)
+      }
+
       toast({
-        title: "خطأ في إرسال رابط التأكيد",
-        description: error.message || "حدث خطأ أثناء إرسال رابط التأكيد. يرجى المحاولة مرة أخرى.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -228,9 +273,11 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => handleResendConfirmation(email)}
                 className="text-xs text-primary hover:underline"
-                disabled={!email}
+                disabled={!email || isInCooldown}
               >
-                إعادة إرسال رابط تأكيد البريد الإلكتروني
+                {isInCooldown
+                  ? `إعادة إرسال رابط التأكيد (${cooldownTime} ثانية)`
+                  : "إعادة إرسال رابط تأكيد البريد الإلكتروني"}
               </button>
             </div>
 
