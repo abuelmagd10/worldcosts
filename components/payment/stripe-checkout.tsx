@@ -61,18 +61,50 @@ export function StripeCheckout({
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }))
-        console.error("Checkout error response:", errorData)
+        // قراءة النص الأصلي للاستجابة
+        const responseText = await response.text()
+        console.error("Checkout error response text:", responseText)
+
+        // محاولة تحليل النص كـ JSON إذا كان ممكنًا
+        let errorMessage = "Network response was not ok"
+        try {
+          if (responseText) {
+            const errorData = JSON.parse(responseText)
+            console.error("Checkout error data:", errorData)
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error
+            }
+          }
+        } catch (parseError) {
+          console.error("Error parsing response:", parseError)
+        }
 
         // التحقق من نوع الخطأ
         if (response.status === 401) {
           throw new Error("يرجى تسجيل الدخول أولاً")
         } else {
-          throw new Error(errorData.error || "Network response was not ok")
+          throw new Error(errorMessage)
         }
       }
 
-      const { sessionId } = await response.json()
+      // قراءة النص الأصلي للاستجابة
+      const responseText = await response.text()
+
+      // محاولة تحليل النص كـ JSON
+      let sessionId
+      try {
+        if (responseText) {
+          const responseData = JSON.parse(responseText)
+          sessionId = responseData.sessionId
+        }
+      } catch (parseError) {
+        console.error("Error parsing success response:", parseError)
+        throw new Error("Invalid response format")
+      }
+
+      if (!sessionId) {
+        throw new Error("No session ID returned from server")
+      }
 
       // توجيه المستخدم إلى صفحة الدفع
       const stripe = await getStripe()

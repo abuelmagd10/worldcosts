@@ -15,18 +15,24 @@ export async function POST(request: Request) {
 
     // التحقق من وجود معرف السعر
     if (!priceId) {
-      return NextResponse.json(
-        { error: "Price ID is required" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Price ID is required" }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
     // التحقق من صحة معرف السعر
     if (!priceId.startsWith('price_')) {
       console.error("Invalid price ID format:", priceId)
-      return NextResponse.json(
-        { error: "Invalid price ID format. Price ID should start with 'price_'" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Invalid price ID format. Price ID should start with 'price_'" }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
@@ -37,18 +43,24 @@ export async function POST(request: Request) {
     // التحقق من وجود خطأ في المصادقة
     if (authError) {
       console.error("Authentication error:", authError)
-      return NextResponse.json(
-        { error: "Authentication error: " + authError.message },
-        { status: 401 }
+      return new Response(
+        JSON.stringify({ error: "Authentication error: " + authError.message }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
     // التحقق من وجود المستخدم
     if (!data.user) {
       console.error("User not authenticated")
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
+      return new Response(
+        JSON.stringify({ error: "User not authenticated" }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
@@ -112,7 +124,13 @@ export async function POST(request: Request) {
     })
 
     // إرجاع معرف الجلسة
-    return NextResponse.json({ sessionId: session.id })
+    return new Response(
+      JSON.stringify({ sessionId: session.id }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
   } catch (error: any) {
     console.error("Error creating checkout session:", error)
 
@@ -133,9 +151,12 @@ export async function POST(request: Request) {
       errorMessage = error.message
     }
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: statusCode }
+    return new Response(
+      JSON.stringify({ error: errorMessage }),
+      {
+        status: statusCode,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   }
 }
