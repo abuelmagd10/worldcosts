@@ -115,6 +115,33 @@ export default function LoginPage() {
     }
   }
 
+  // التحقق من وجود المستخدم قبل تسجيل الدخول
+  const checkUserExists = async (email: string) => {
+    try {
+      // محاولة إرسال رابط إعادة تعيين كلمة المرور للتحقق من وجود المستخدم
+      // لا يتم إرسال البريد الإلكتروني فعليًا إذا كان المستخدم غير موجود
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      })
+
+      // إذا لم يكن هناك خطأ، فهذا يعني أن المستخدم موجود
+      if (!error) {
+        return true
+      }
+
+      // التحقق من نوع الخطأ
+      if (error.message.includes("user not found")) {
+        return false
+      }
+
+      // في حالة حدوث خطأ آخر، نفترض أن المستخدم موجود
+      return true
+    } catch (error) {
+      console.error("Error checking user existence:", error)
+      return true // نفترض أن المستخدم موجود في حالة حدوث خطأ
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -130,6 +157,27 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // التحقق من وجود المستخدم قبل محاولة تسجيل الدخول
+      const userExists = await checkUserExists(email)
+
+      if (!userExists) {
+        // إذا كان المستخدم غير موجود، نعرض رسالة خطأ مع خيار إنشاء حساب جديد
+        toast({
+          title: "المستخدم غير موجود",
+          description: "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟",
+          variant: "destructive",
+          action: (
+            <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+              <button className="bg-primary text-white px-3 py-1 rounded-md text-xs">
+                إنشاء حساب جديد
+              </button>
+            </Link>
+          ),
+        })
+        setIsLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -162,9 +210,13 @@ export default function LoginPage() {
       let errorTitle = t.loginError || "خطأ في تسجيل الدخول"
       let errorVariant: "default" | "destructive" = "destructive"
       let showResendButton = false
+      let showCreateAccountButton = false
 
       if (error.message === "Invalid login credentials") {
-        errorMessage = t.invalidCredentials || "بيانات الاعتماد غير صالحة. يرجى التحقق من البريد الإلكتروني وكلمة المرور."
+        errorTitle = "بيانات الدخول غير صحيحة"
+        errorMessage = "قد يكون البريد الإلكتروني أو كلمة المرور غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد."
+        showResendButton = true
+        showCreateAccountButton = true
       } else if (error.message === "Email not confirmed") {
         errorTitle = "البريد الإلكتروني غير مؤكد"
         errorMessage = "يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد. أو انقر على زر إعادة إرسال رابط التأكيد أدناه."
@@ -177,12 +229,22 @@ export default function LoginPage() {
         description: errorMessage,
         variant: errorVariant,
         action: showResendButton ? (
-          <button
-            className="bg-primary text-white px-3 py-1 rounded-md text-xs"
-            onClick={() => handleResendConfirmation(email)}
-          >
-            إعادة إرسال رابط التأكيد
-          </button>
+          <div className="flex flex-col gap-2 mt-2">
+            <button
+              className="bg-primary text-white px-3 py-1 rounded-md text-xs"
+              onClick={() => handleResendConfirmation(email)}
+            >
+              إعادة إرسال رابط التأكيد
+            </button>
+
+            {showCreateAccountButton && (
+              <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+                <button className="bg-secondary text-white px-3 py-1 rounded-md text-xs w-full">
+                  إنشاء حساب جديد
+                </button>
+              </Link>
+            )}
+          </div>
         ) : undefined,
       })
     } finally {
@@ -231,9 +293,14 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">
-                  {t.password || "كلمة المرور"}
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">
+                    {t.password || "كلمة المرور"}
+                  </Label>
+                  <Link href="/auth/reset-password" className="text-xs text-primary hover:underline">
+                    {t.forgotPassword || "نسيت كلمة المرور؟"}
+                  </Link>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input

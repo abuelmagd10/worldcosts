@@ -28,13 +28,20 @@ export default function RegisterPage() {
   // الحصول على URL الإحالة من معلمات البحث
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
-  // تعيين URL الإحالة عند تحميل الصفحة
+  // تعيين URL الإحالة والبريد الإلكتروني عند تحميل الصفحة
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const redirect = urlParams.get('redirect')
+      const emailParam = urlParams.get('email')
+
       console.log("Redirect URL from query params:", redirect)
       setRedirectUrl(redirect)
+
+      // تعيين البريد الإلكتروني إذا كان موجودًا في معلمات البحث
+      if (emailParam) {
+        setEmail(emailParam)
+      }
     }
   }, [])
 
