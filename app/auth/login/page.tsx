@@ -288,6 +288,16 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={async () => {
+                    // التحقق من وجود فترة انتظار
+                    if (isInCooldown) {
+                      toast({
+                        title: "يرجى الانتظار",
+                        description: `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${cooldownTime} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`,
+                        variant: "default",
+                      })
+                      return
+                    }
+
                     try {
                       // تسجيل الدخول باستخدام رابط سحري (يتجاوز تأكيد البريد الإلكتروني)
                       const { error } = await supabase.auth.signInWithOtp({
@@ -303,19 +313,35 @@ export default function LoginPage() {
                         description: "تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
                       })
                     } catch (error: any) {
-                      console.error("Magic link error:", error)
+                      // التحقق من نوع الخطأ
+                      let errorTitle = "خطأ في إرسال رابط تسجيل الدخول"
+                      let errorMessage = error.message || "حدث خطأ أثناء إرسال رابط تسجيل الدخول. يرجى المحاولة مرة أخرى."
+
+                      if (error.message.includes("For security purposes, you can only request this after")) {
+                        // استخراج عدد الثواني من رسالة الخطأ
+                        const secondsMatch = error.message.match(/after (\d+) seconds/)
+                        const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
+
+                        errorTitle = "يرجى الانتظار"
+                        errorMessage = `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${seconds} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`
+
+                        // بدء عداد تنازلي
+                        startCooldownTimer(seconds)
+                      }
 
                       toast({
-                        title: "خطأ في إرسال رابط تسجيل الدخول",
-                        description: error.message || "حدث خطأ أثناء إرسال رابط تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+                        title: errorTitle,
+                        description: errorMessage,
                         variant: "destructive",
                       })
                     }
                   }}
                   className="text-xs text-yellow-500 hover:underline"
-                  disabled={!email}
+                  disabled={!email || isInCooldown}
                 >
-                  إرسال رابط تسجيل الدخول السحري
+                  {isInCooldown
+                    ? `إرسال رابط تسجيل الدخول (${cooldownTime} ثانية)`
+                    : "إرسال رابط تسجيل الدخول السحري"}
                 </button>
               </div>
             )}
