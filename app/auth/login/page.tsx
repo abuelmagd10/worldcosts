@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Mail, Lock, LogIn } from "lucide-react"
@@ -27,13 +27,14 @@ export default function LoginPage() {
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
   // تعيين URL الإحالة عند تحميل الصفحة
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const redirect = urlParams.get('redirect')
+      console.log("Redirect URL from query params:", redirect)
       setRedirectUrl(redirect)
     }
-  })
+  }, [])
 
   // وظيفة لبدء عداد تنازلي
   const startCooldownTimer = (seconds: number) => {
@@ -144,11 +145,16 @@ export default function LoginPage() {
       })
 
       // إعادة التوجيه إلى الصفحة السابقة أو الصفحة الرئيسية
-      if (redirectUrl) {
-        router.push(redirectUrl)
-      } else {
-        router.push("/admin")
-      }
+      console.log("Login successful, redirecting to:", redirectUrl || "/admin")
+
+      // تأخير قصير للسماح بعرض رسالة النجاح
+      setTimeout(() => {
+        if (redirectUrl) {
+          router.push(redirectUrl)
+        } else {
+          router.push("/admin")
+        }
+      }, 1000)
     } catch (error: any) {
       console.error("Login error:", error)
 

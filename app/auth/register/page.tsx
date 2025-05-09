@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Mail, Lock, User, UserPlus } from "lucide-react"
@@ -29,13 +29,14 @@ export default function RegisterPage() {
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null)
 
   // تعيين URL الإحالة عند تحميل الصفحة
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const redirect = urlParams.get('redirect')
+      console.log("Redirect URL from query params:", redirect)
       setRedirectUrl(redirect)
     }
-  })
+  }, [])
 
   // وظيفة لبدء عداد تنازلي
   const startCooldownTimer = (seconds: number) => {
@@ -106,8 +107,12 @@ export default function RegisterPage() {
           "ملاحظة: لن تتمكن من تسجيل الدخول حتى تقوم بتأكيد بريدك الإلكتروني."
         )
 
-        // إعادة التوجيه إلى صفحة تسجيل الدخول
-        router.push("/auth/login")
+        // إعادة التوجيه إلى صفحة تسجيل الدخول مع URL الإحالة
+        if (redirectUrl) {
+          router.push(`/auth/login?redirect=${encodeURIComponent(redirectUrl)}`)
+        } else {
+          router.push("/auth/login")
+        }
       }, 1000)
     } catch (error: any) {
       console.error("Register error:", error)
