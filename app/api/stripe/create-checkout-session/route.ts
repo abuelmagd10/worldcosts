@@ -91,11 +91,11 @@ export async function POST(request: Request) {
     }
 
     // تكوين URLs إعادة التوجيه
-    const success_url = new URL(process.env.NEXT_PUBLIC_STRIPE_SUCCESS_URL || 'http://localhost:3001/admin/subscription/success')
+    const success_url = new URL(process.env.NEXT_PUBLIC_STRIPE_SUCCESS_URL || 'http://localhost:3001/payment/success')
     success_url.searchParams.append('session_id', '{CHECKOUT_SESSION_ID}')
 
-    const cancel_url = new URL(process.env.NEXT_PUBLIC_STRIPE_CANCEL_URL || 'http://localhost:3001/admin/subscription/cancel')
-    cancel_url.searchParams.append('reason', '{CHECKOUT_SESSION_STATUS}')
+    const cancel_url = new URL(process.env.NEXT_PUBLIC_STRIPE_CANCEL_URL || 'http://localhost:3001/admin/subscription')
+    cancel_url.searchParams.append('canceled', 'true')
 
     // إنشاء جلسة Checkout
     const session = await stripe.checkout.sessions.create({
