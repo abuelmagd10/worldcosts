@@ -78,6 +78,9 @@ export default function LoginPage() {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        }
       })
 
       if (error) {
@@ -115,26 +118,127 @@ export default function LoginPage() {
     }
   }
 
+  // تسجيل الدخول باستخدام رابط سحري (Magic Link)
+  const handleMagicLinkLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email) {
+      toast({
+        title: t.error || "خطأ",
+        description: t.enterEmail || "يرجى إدخال البريد الإلكتروني",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // التحقق من وجود فترة انتظار
+    if (isInCooldown) {
+      toast({
+        title: "يرجى الانتظار",
+        description: `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${cooldownTime} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`,
+        variant: "default",
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      console.log("Attempting to sign in with magic link for email:", email)
+
+      // إرسال رابط تسجيل الدخول
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: redirectUrl ? `${window.location.origin}${redirectUrl}` : `${window.location.origin}/admin`,
+        },
+      })
+
+      console.log("Magic link response:", error ? `Error: ${error.message}` : "Success")
+
+      if (error) {
+        throw error
+      }
+
+      toast({
+        title: t.magicLinkSent || "تم إرسال رابط تسجيل الدخول",
+        description: t.magicLinkSentDesc || "تم إرسال رابط تسجيل الدخول إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
+      })
+    } catch (error: any) {
+      console.error("Error sending magic link:", error)
+
+      let errorMessage = error.message || "حدث خطأ أثناء إرسال رابط تسجيل الدخول. يرجى المحاولة مرة أخرى."
+      let errorTitle = "خطأ في إرسال رابط تسجيل الدخول"
+
+      // التحقق من نوع الخطأ
+      if (error.message.includes("For security purposes, you can only request this after")) {
+        // استخراج عدد الثواني من رسالة الخطأ
+        const secondsMatch = error.message.match(/after (\d+) seconds/)
+        const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
+
+        errorTitle = "يرجى الانتظار"
+        errorMessage = `لأسباب أمنية، يمكنك فقط إجراء هذا الطلب بعد ${seconds} ثانية. يرجى الانتظار والمحاولة مرة أخرى.`
+
+        // بدء عداد تنازلي
+        startCooldownTimer(seconds)
+      } else if (error.message.includes("user not found")) {
+        errorTitle = "المستخدم غير موجود"
+        errorMessage = "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟"
+
+        toast({
+          title: errorTitle,
+          description: errorMessage,
+          variant: "destructive",
+          action: (
+            <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+              <button className="bg-primary text-white px-3 py-1 rounded-md text-xs">
+                إنشاء حساب جديد
+              </button>
+            </Link>
+          ),
+        })
+
+        setIsLoading(false)
+        return
+      }
+
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   // التحقق من وجود المستخدم قبل تسجيل الدخول
   const checkUserExists = async (email: string) => {
     try {
-      // محاولة إرسال رابط إعادة تعيين كلمة المرور للتحقق من وجود المستخدم
-      // لا يتم إرسال البريد الإلكتروني فعليًا إذا كان المستخدم غير موجود
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      console.log("Checking if user exists:", email)
+
+      // استخدام signInWithOtp بدلاً من resetPasswordForEmail للتحقق من وجود المستخدم
+      // هذه الطريقة أكثر موثوقية للتحقق من وجود المستخدم
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false, // لا تقم بإنشاء مستخدم جديد إذا لم يكن موجودًا
+        },
       })
 
-      // إذا لم يكن هناك خطأ، فهذا يعني أن المستخدم موجود
-      if (!error) {
-        return true
-      }
+      console.log("Sign in with OTP response:", error ? error.message : "No error")
 
-      // التحقق من نوع الخطأ
-      if (error.message.includes("user not found")) {
+      // إذا كان هناك خطأ يشير إلى أن المستخدم غير موجود
+      if (error && (
+        error.message.includes("user not found") ||
+        error.message.includes("Invalid login credentials") ||
+        error.message.includes("Email not confirmed")
+      )) {
+        console.log("User does not exist or email not confirmed")
         return false
       }
 
-      // في حالة حدوث خطأ آخر، نفترض أن المستخدم موجود
+      // في حالة عدم وجود خطأ أو خطأ آخر، نفترض أن المستخدم موجود
       return true
     } catch (error) {
       console.error("Error checking user existence:", error)
@@ -178,12 +282,23 @@ export default function LoginPage() {
         return
       }
 
+      console.log("Attempting to sign in with password for email:", email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
+      console.log("Sign in response:", error ? `Error: ${error.message}` : "Success")
+
       if (error) {
+        // تسجيل معلومات إضافية عن الخطأ
+        console.error("Login error details:", {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+        })
+
         throw error
       }
 
@@ -213,10 +328,99 @@ export default function LoginPage() {
       let showCreateAccountButton = false
 
       if (error.message === "Invalid login credentials") {
-        errorTitle = "بيانات الدخول غير صحيحة"
-        errorMessage = "قد يكون البريد الإلكتروني أو كلمة المرور غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد."
-        showResendButton = true
-        showCreateAccountButton = true
+        // التحقق من سبب الخطأ بشكل أكثر تفصيلاً
+        const checkEmailConfirmation = async () => {
+          try {
+            // محاولة إرسال رابط تأكيد البريد الإلكتروني
+            const { error: resendError } = await supabase.auth.resend({
+              type: 'signup',
+              email,
+              options: {
+                emailRedirectTo: `${window.location.origin}/auth/confirm`,
+              }
+            })
+
+            // إذا لم يكن هناك خطأ، فهذا يعني أن البريد الإلكتروني غير مؤكد
+            if (!resendError) {
+              errorTitle = "البريد الإلكتروني غير مؤكد"
+              errorMessage = "يبدو أن حسابك موجود ولكن البريد الإلكتروني غير مؤكد. يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد."
+              errorVariant = "default"
+              showResendButton = true
+            } else if (resendError.message.includes("user not found")) {
+              // المستخدم غير موجود
+              errorTitle = "المستخدم غير موجود"
+              errorMessage = "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟"
+              showCreateAccountButton = true
+            } else {
+              // كلمة المرور غير صحيحة على الأرجح
+              errorTitle = "كلمة المرور غير صحيحة"
+              errorMessage = "يبدو أن كلمة المرور التي أدخلتها غير صحيحة. يرجى التحقق من كلمة المرور أو استخدام خيار 'نسيت كلمة المرور'."
+            }
+
+            // عرض رسالة الخطأ بعد التحقق
+            toast({
+              title: errorTitle,
+              description: errorMessage,
+              variant: errorVariant,
+              action: showResendButton || showCreateAccountButton ? (
+                <div className="flex flex-col gap-2 mt-2">
+                  {showResendButton && (
+                    <button
+                      className="bg-primary text-white px-3 py-1 rounded-md text-xs"
+                      onClick={() => handleResendConfirmation(email)}
+                    >
+                      إعادة إرسال رابط التأكيد
+                    </button>
+                  )}
+
+                  {showCreateAccountButton && (
+                    <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+                      <button className="bg-secondary text-white px-3 py-1 rounded-md text-xs w-full">
+                        إنشاء حساب جديد
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              ) : undefined,
+            })
+          } catch (checkError) {
+            console.error("Error checking email confirmation:", checkError)
+
+            // في حالة حدوث خطأ، نعرض رسالة الخطأ الافتراضية
+            errorTitle = "بيانات الدخول غير صحيحة"
+            errorMessage = "قد يكون البريد الإلكتروني أو كلمة المرور غير صحيحة، أو لم يتم تأكيد البريد الإلكتروني بعد."
+            showResendButton = true
+            showCreateAccountButton = true
+
+            toast({
+              title: errorTitle,
+              description: errorMessage,
+              variant: errorVariant,
+              action: (
+                <div className="flex flex-col gap-2 mt-2">
+                  <button
+                    className="bg-primary text-white px-3 py-1 rounded-md text-xs"
+                    onClick={() => handleResendConfirmation(email)}
+                  >
+                    إعادة إرسال رابط التأكيد
+                  </button>
+
+                  <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+                    <button className="bg-secondary text-white px-3 py-1 rounded-md text-xs w-full">
+                      إنشاء حساب جديد
+                    </button>
+                  </Link>
+                </div>
+              ),
+            })
+          }
+        }
+
+        // تنفيذ التحقق من سبب الخطأ
+        await checkEmailConfirmation()
+
+        // منع عرض رسالة الخطأ الافتراضية لأننا سنعرض رسالة مخصصة
+        return
       } else if (error.message === "Email not confirmed") {
         errorTitle = "البريد الإلكتروني غير مؤكد"
         errorMessage = "يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد. أو انقر على زر إعادة إرسال رابط التأكيد أدناه."
@@ -273,63 +477,107 @@ export default function LoginPage() {
           </TeslaCardHeader>
 
           <TeslaCardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">
-                  {t.email || "البريد الإلكتروني"}
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={t.enterEmail || "أدخل بريدك الإلكتروني"}
-                    className="pl-10"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password">
-                    {t.password || "كلمة المرور"}
+            <div className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">
+                    {t.email || "البريد الإلكتروني"}
                   </Label>
-                  <Link href="/auth/reset-password" className="text-xs text-primary hover:underline">
-                    {t.forgotPassword || "نسيت كلمة المرور؟"}
-                  </Link>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={t.enterEmail || "أدخل بريدك الإلكتروني"}
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t.enterPassword || "أدخل كلمة المرور"}
-                    className="pl-10"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password">
+                      {t.password || "كلمة المرور"}
+                    </Label>
+                    <Link href="/auth/reset-password" className="text-xs text-primary hover:underline">
+                      {t.forgotPassword || "نسيت كلمة المرور؟"}
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={t.enterPassword || "أدخل كلمة المرور"}
+                      className="pl-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <TeslaButton
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      {t.login || "تسجيل الدخول"}
+                    </>
+                  )}
+                </TeslaButton>
+              </form>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-muted-foreground/20"></span>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    {t.orContinueWith || "أو استمر باستخدام"}
+                  </span>
                 </div>
               </div>
 
-              <TeslaButton
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    {t.login || "تسجيل الدخول"}
-                  </>
-                )}
-              </TeslaButton>
-            </form>
+              <div>
+                <TeslaButton
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={isLoading || !email}
+                  onClick={(e) => {
+                    if (email) {
+                      e.preventDefault()
+                      const magicLinkEvent = new Event('submit')
+                      handleMagicLinkLogin(magicLinkEvent)
+                    } else {
+                      toast({
+                        title: t.error || "خطأ",
+                        description: t.enterEmail || "يرجى إدخال البريد الإلكتروني أولاً",
+                        variant: "destructive",
+                      })
+                    }
+                  }}
+                >
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  ) : (
+                    <>
+                      <Mail className="h-4 w-4 mr-2" />
+                      {t.loginWithMagicLink || "تسجيل الدخول برابط سحري"}
+                    </>
+                  )}
+                </TeslaButton>
+              </div>
+            </div>
           </TeslaCardContent>
 
           <TeslaCardFooter className="text-center space-y-4">
