@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Mail, Lock, KeyRound, Loader2 } from "lucide-react"
@@ -13,7 +13,8 @@ import { supabase } from "@/lib/supabase-client"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function ResetPasswordPage() {
+// مكون لعرض محتوى الصفحة مع استخدام useSearchParams
+function ResetPasswordContent() {
   const { t, dir } = useLanguage()
   const { toast } = useToast()
   const router = useRouter()
@@ -24,14 +25,14 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isResetMode, setIsResetMode] = useState(false)
   const [isTokenValid, setIsTokenValid] = useState(false)
-  
+
   // التحقق من وجود رمز إعادة تعيين كلمة المرور
   useEffect(() => {
     const token = searchParams.get("token")
-    
+
     if (token) {
       setIsResetMode(true)
-      
+
       // التحقق من صلاحية الرمز
       const checkToken = async () => {
         try {
@@ -42,15 +43,15 @@ export default function ResetPasswordPage() {
           setIsTokenValid(false)
         }
       }
-      
+
       checkToken()
     }
   }, [searchParams])
-  
+
   // طلب إعادة تعيين كلمة المرور
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!email) {
       toast({
         title: t.error || "خطأ",
@@ -59,32 +60,32 @@ export default function ResetPasswordPage() {
       })
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
-      
+
       if (error) {
         throw error
       }
-      
+
       toast({
         title: t.resetPasswordEmailSent || "تم إرسال بريد إعادة تعيين كلمة المرور",
         description: t.resetPasswordEmailSentDesc || "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
       })
     } catch (error: any) {
       console.error("Error requesting password reset:", error)
-      
+
       let errorMessage = t.resetPasswordFailed || "فشل طلب إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى."
-      
+
       // إذا كان المستخدم غير موجود، نعرض رسالة مختلفة
       if (error.message.includes("user not found")) {
         errorMessage = t.userNotFound || "لا يوجد حساب مسجل بهذا البريد الإلكتروني."
       }
-      
+
       toast({
         title: t.error || "خطأ",
         description: errorMessage,
@@ -94,11 +95,11 @@ export default function ResetPasswordPage() {
       setIsLoading(false)
     }
   }
-  
+
   // إعادة تعيين كلمة المرور
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!password || !confirmPassword) {
       toast({
         title: t.error || "خطأ",
@@ -107,7 +108,7 @@ export default function ResetPasswordPage() {
       })
       return
     }
-    
+
     if (password !== confirmPassword) {
       toast({
         title: t.error || "خطأ",
@@ -116,7 +117,7 @@ export default function ResetPasswordPage() {
       })
       return
     }
-    
+
     if (password.length < 6) {
       toast({
         title: t.error || "خطأ",
@@ -125,30 +126,30 @@ export default function ResetPasswordPage() {
       })
       return
     }
-    
+
     setIsLoading(true)
-    
+
     try {
       const { error } = await supabase.auth.updateUser({
         password,
       })
-      
+
       if (error) {
         throw error
       }
-      
+
       toast({
         title: t.passwordResetSuccess || "تم إعادة تعيين كلمة المرور",
         description: t.passwordResetSuccessDesc || "تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.",
       })
-      
+
       // توجيه المستخدم إلى صفحة تسجيل الدخول بعد إعادة تعيين كلمة المرور
       setTimeout(() => {
         router.push("/auth/login")
       }, 2000)
     } catch (error: any) {
       console.error("Error resetting password:", error)
-      
+
       toast({
         title: t.error || "خطأ",
         description: error.message || t.passwordResetFailed || "فشل إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى.",
@@ -160,136 +161,151 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground" dir={dir}>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <Link href="/auth/login">
-            <TeslaButton variant="secondary" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              {t.backToLogin || "العودة إلى تسجيل الدخول"}
-            </TeslaButton>
-          </Link>
-          <AppLogo size={40} />
-        </div>
-
-        <TeslaCard className="max-w-md mx-auto">
-          <TeslaCardHeader className="text-center">
-            <TeslaCardTitle className="text-2xl">
-              {isResetMode
-                ? t.resetPassword || "إعادة تعيين كلمة المرور"
-                : t.forgotPassword || "نسيت كلمة المرور"
-              }
-            </TeslaCardTitle>
-            <TeslaCardDescription>
-              {isResetMode
-                ? t.resetPasswordDesc || "يرجى إدخال كلمة المرور الجديدة"
-                : t.forgotPasswordDesc || "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور"
-              }
-            </TeslaCardDescription>
-          </TeslaCardHeader>
-          
-          <TeslaCardContent>
-            {isResetMode ? (
-              <form onSubmit={handleResetPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">
-                    {t.newPassword || "كلمة المرور الجديدة"}
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={t.enterNewPassword || "أدخل كلمة المرور الجديدة"}
-                      className="pl-10"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">
-                    {t.confirmPassword || "تأكيد كلمة المرور"}
-                  </Label>
-                  <div className="relative">
-                    <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder={t.confirmNewPassword || "تأكيد كلمة المرور الجديدة"}
-                      className="pl-10"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <TeslaButton
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading || !isTokenValid}
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    t.resetPassword || "إعادة تعيين كلمة المرور"
-                  )}
-                </TeslaButton>
-                
-                {!isTokenValid && (
-                  <p className="text-sm text-red-500 text-center">
-                    {t.invalidResetToken || "رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد."}
-                  </p>
-                )}
-              </form>
-            ) : (
-              <form onSubmit={handleRequestReset} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">
-                    {t.email || "البريد الإلكتروني"}
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder={t.enterEmail || "أدخل بريدك الإلكتروني"}
-                      className="pl-10"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <TeslaButton
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    t.sendResetLink || "إرسال رابط إعادة التعيين"
-                  )}
-                </TeslaButton>
-              </form>
-            )}
-          </TeslaCardContent>
-          
-          <TeslaCardFooter className="text-center">
-            <p className="text-sm text-muted-foreground">
-              {t.rememberPassword || "تذكرت كلمة المرور؟"}{" "}
-              <Link href="/auth/login" className="text-primary hover:underline">
-                {t.login || "تسجيل الدخول"}
-              </Link>
-            </p>
-          </TeslaCardFooter>
-        </TeslaCard>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-6">
+        <Link href="/auth/login">
+          <TeslaButton variant="secondary" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t.backToLogin || "العودة إلى تسجيل الدخول"}
+          </TeslaButton>
+        </Link>
+        <AppLogo size={40} />
       </div>
+
+      <TeslaCard className="max-w-md mx-auto">
+        <TeslaCardHeader className="text-center">
+          <TeslaCardTitle className="text-2xl">
+            {isResetMode
+              ? t.resetPassword || "إعادة تعيين كلمة المرور"
+              : t.forgotPassword || "نسيت كلمة المرور"
+            }
+          </TeslaCardTitle>
+          <TeslaCardDescription>
+            {isResetMode
+              ? t.resetPasswordDesc || "يرجى إدخال كلمة المرور الجديدة"
+              : t.forgotPasswordDesc || "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور"
+            }
+          </TeslaCardDescription>
+        </TeslaCardHeader>
+
+        <TeslaCardContent>
+          {isResetMode ? (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  {t.newPassword || "كلمة المرور الجديدة"}
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={t.enterNewPassword || "أدخل كلمة المرور الجديدة"}
+                    className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">
+                  {t.confirmPassword || "تأكيد كلمة المرور"}
+                </Label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder={t.confirmNewPassword || "تأكيد كلمة المرور الجديدة"}
+                    className="pl-10"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <TeslaButton
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !isTokenValid}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t.resetPassword || "إعادة تعيين كلمة المرور"
+                )}
+              </TeslaButton>
+
+              {!isTokenValid && (
+                <p className="text-sm text-red-500 text-center">
+                  {t.invalidResetToken || "رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد."}
+                </p>
+              )}
+            </form>
+          ) : (
+            <form onSubmit={handleRequestReset} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">
+                  {t.email || "البريد الإلكتروني"}
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder={t.enterEmail || "أدخل بريدك الإلكتروني"}
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <TeslaButton
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  t.sendResetLink || "إرسال رابط إعادة التعيين"
+                )}
+              </TeslaButton>
+            </form>
+          )}
+        </TeslaCardContent>
+
+        <TeslaCardFooter className="text-center">
+          <p className="text-sm text-muted-foreground">
+            {t.rememberPassword || "تذكرت كلمة المرور؟"}{" "}
+            <Link href="/auth/login" className="text-primary hover:underline">
+              {t.login || "تسجيل الدخول"}
+            </Link>
+          </p>
+        </TeslaCardFooter>
+      </TeslaCard>
+    </div>
+  )
+}
+
+// مكون الصفحة الرئيسي
+export default function ResetPasswordPage() {
+  const { dir } = useLanguage()
+
+  return (
+    <div className="min-h-screen bg-background text-foreground" dir={dir}>
+      <Suspense fallback={
+        <div className="container mx-auto py-8 px-4 text-center">
+          <div className="animate-pulse">جاري التحميل...</div>
+        </div>
+      }>
+        <ResetPasswordContent />
+      </Suspense>
     </div>
   )
 }
