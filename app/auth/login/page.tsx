@@ -338,12 +338,15 @@ export default function LoginPage() {
           // إذا كان URL الإحالة هو صفحة الاشتراك، نتأكد من تحديث الصفحة بدلاً من استخدام التنقل العادي
           // هذا يضمن إعادة تحميل الصفحة بالكامل وإعادة تهيئة جميع المكونات
           if (redirectUrl.includes("/admin/subscription")) {
-            window.location.href = redirectUrl
+            // إضافة معلمة refresh=true لإعادة تحميل الصفحة
+            const separator = redirectUrl.includes("?") ? "&" : "?"
+            window.location.href = `${redirectUrl}${separator}refresh=true`
           } else {
-            router.push(redirectUrl)
+            // استخدام window.location.href بدلاً من router.push لإعادة تحميل الصفحة بالكامل
+            window.location.href = redirectUrl
           }
         } else {
-          router.push("/admin")
+          window.location.href = "/admin"
         }
       }, 1000)
     } catch (error: any) {

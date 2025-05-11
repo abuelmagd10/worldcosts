@@ -10,9 +10,9 @@ import { AppLogo } from "@/components/app-logo"
 import { useToast } from "@/components/ui/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { StripeCheckout } from "@/components/payment/stripe-checkout"
-import { StripeProvider } from "@/components/payment/stripe-provider"
-import { STRIPE_PRODUCTS } from "@/lib/stripe/config"
+import { PaddleCheckout } from "@/components/payment/paddle-checkout"
+import { PaddleProvider } from "@/components/payment/paddle-provider"
+import { PADDLE_PRODUCTS } from "@/lib/paddle/config"
 import { PaymentMethods } from "@/components/payment/payment-methods"
 import { supabase } from "@/lib/supabase-client"
 import { useRouter } from "next/navigation"
@@ -242,11 +242,11 @@ export default function SubscriptionPage() {
                   </ul>
                 </TeslaCardContent>
                 <TeslaCardFooter>
-                  <StripeCheckout
+                  <PaddleCheckout
                     planId="pro"
-                    priceId={billingCycle === "monthly" ? STRIPE_PRODUCTS.PRO.monthly.priceId : STRIPE_PRODUCTS.PRO.yearly.priceId}
+                    priceId={billingCycle === "monthly" ? PADDLE_PRODUCTS.PRO.monthly.priceId : PADDLE_PRODUCTS.PRO.yearly.priceId}
                     planName={t.proPlan || "Pro Plan"}
-                    amount={billingCycle === "monthly" ? STRIPE_PRODUCTS.PRO.monthly.amount : STRIPE_PRODUCTS.PRO.yearly.amount}
+                    amount={billingCycle === "monthly" ? PADDLE_PRODUCTS.PRO.monthly.amount : PADDLE_PRODUCTS.PRO.yearly.amount}
                     billingCycle={billingCycle}
                   />
                 </TeslaCardFooter>
@@ -292,11 +292,11 @@ export default function SubscriptionPage() {
                   </ul>
                 </TeslaCardContent>
                 <TeslaCardFooter>
-                  <StripeCheckout
+                  <PaddleCheckout
                     planId="business"
-                    priceId={billingCycle === "monthly" ? STRIPE_PRODUCTS.BUSINESS.monthly.priceId : STRIPE_PRODUCTS.BUSINESS.yearly.priceId}
+                    priceId={billingCycle === "monthly" ? PADDLE_PRODUCTS.BUSINESS.monthly.priceId : PADDLE_PRODUCTS.BUSINESS.yearly.priceId}
                     planName={t.businessPlan || "Business Plan"}
-                    amount={billingCycle === "monthly" ? STRIPE_PRODUCTS.BUSINESS.monthly.amount : STRIPE_PRODUCTS.BUSINESS.yearly.amount}
+                    amount={billingCycle === "monthly" ? PADDLE_PRODUCTS.BUSINESS.monthly.amount : PADDLE_PRODUCTS.BUSINESS.yearly.amount}
                     billingCycle={billingCycle}
                   />
                 </TeslaCardFooter>
