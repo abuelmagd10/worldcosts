@@ -1,8 +1,32 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase-client"
+import { createClient } from "@supabase/supabase-js"
 
 export async function GET() {
   try {
+    // التحقق من وجود متغيرات البيئة المطلوبة
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      return NextResponse.json(
+        { error: "NEXT_PUBLIC_SUPABASE_URL is not defined" },
+        { status: 500 }
+      )
+    }
+
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        {
+          error: "SUPABASE_SERVICE_ROLE_KEY is not defined",
+          message: "Please add SUPABASE_SERVICE_ROLE_KEY to your environment variables in Vercel"
+        },
+        { status: 500 }
+      )
+    }
+
+    // إنشاء عميل Supabase باستخدام مفتاح الخدمة
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+
     // محاولة إنشاء جدول user_subscriptions يدويًا
     const { error: manualCreateError } = await supabase.query(`
       CREATE TABLE IF NOT EXISTS user_subscriptions (
@@ -96,15 +120,15 @@ export async function GET() {
       return NextResponse.json({ error: "Failed to create user subscription function", details: functionError }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "User subscriptions table and policies created successfully" 
+    return NextResponse.json({
+      success: true,
+      message: "User subscriptions table and policies created successfully"
     })
   } catch (error) {
     console.error("Error setting up user_subscriptions table:", error)
-    return NextResponse.json({ 
-      error: "Failed to set up user_subscriptions table", 
-      details: error 
+    return NextResponse.json({
+      error: "Failed to set up user_subscriptions table",
+      details: error
     }, { status: 500 })
   }
 }

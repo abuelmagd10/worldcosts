@@ -1,22 +1,32 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// إنشاء عميل Supabase باستخدام مفتاح الخدمة
-// ملاحظة: يجب استخدام مفتاح الخدمة فقط في بيئة الخادم وليس في العميل
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-)
-
 export async function GET() {
   try {
-    // التحقق من وجود مفتاح الخدمة
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    // التحقق من وجود متغيرات البيئة المطلوبة
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
       return NextResponse.json(
-        { error: "SUPABASE_SERVICE_ROLE_KEY is not defined" },
+        { error: "NEXT_PUBLIC_SUPABASE_URL is not defined" },
         { status: 500 }
       )
     }
+
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        {
+          error: "SUPABASE_SERVICE_ROLE_KEY is not defined",
+          message: "Please add SUPABASE_SERVICE_ROLE_KEY to your environment variables in Vercel"
+        },
+        { status: 500 }
+      )
+    }
+
+    // إنشاء عميل Supabase باستخدام مفتاح الخدمة
+    // ملاحظة: يجب استخدام مفتاح الخدمة فقط في بيئة الخادم وليس في العميل
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
 
     // إنشاء جدول لتخزين معلومات الاشتراكات
     const { error: subscriptionsError } = await supabaseAdmin.query(`
