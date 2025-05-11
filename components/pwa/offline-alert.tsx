@@ -15,17 +15,41 @@ export function OfflineAlert() {
 
     // Verificar si estamos en un entorno donde navigator.onLine está disponible
     if (typeof navigator !== "undefined" && "onLine" in navigator) {
-      setIsOffline(!navigator.onLine)
+      // Verificar la conexión a Internet mediante una solicitud de prueba
+      const checkConnection = async () => {
+        try {
+          // Intentar hacer una solicitud a un recurso pequeño con un parámetro aleatorio para evitar caché
+          const response = await fetch(`/api/ping?_=${Date.now()}`, {
+            method: 'HEAD',
+            cache: 'no-store'
+          })
+          setIsOffline(false)
+        } catch (error) {
+          console.log('Connection check failed:', error)
+          setIsOffline(!navigator.onLine)
+        }
+      }
 
+      // Verificar la conexión inicial
+      checkConnection()
+
+      // Configurar los controladores de eventos
       const handleOffline = () => setIsOffline(true)
-      const handleOnline = () => setIsOffline(false)
+      const handleOnline = () => {
+        // Cuando el navegador detecta que estamos en línea, verificar la conexión real
+        checkConnection()
+      }
 
       window.addEventListener("offline", handleOffline)
       window.addEventListener("online", handleOnline)
 
+      // Verificar la conexión periódicamente (cada 30 segundos)
+      const intervalId = setInterval(checkConnection, 30000)
+
       return () => {
         window.removeEventListener("offline", handleOffline)
         window.removeEventListener("online", handleOnline)
+        clearInterval(intervalId)
       }
     }
   }, [])
