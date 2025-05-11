@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, Suspense } from "react"
 import Link from "next/link"
 import { ArrowLeft, XCircle, AlertTriangle } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
@@ -10,7 +10,8 @@ import { AppLogo } from "@/components/app-logo"
 import { useToast } from "@/components/ui/use-toast"
 import { useSearchParams } from "next/navigation"
 
-export default function SubscriptionCancelPage() {
+// مكون لعرض محتوى الصفحة مع استخدام useSearchParams
+function CancelPageContent() {
   const { t, dir } = useLanguage()
   const { toast } = useToast()
   const searchParams = useSearchParams()
@@ -99,6 +100,23 @@ export default function SubscriptionCancelPage() {
           </TeslaCardFooter>
         </TeslaCard>
       </div>
+    </div>
+  )
+}
+
+// مكون الصفحة الرئيسي
+export default function SubscriptionCancelPage() {
+  const { dir } = useLanguage()
+
+  return (
+    <div className="min-h-screen bg-background text-foreground" dir={dir}>
+      <Suspense fallback={
+        <div className="container mx-auto py-8 px-4 text-center">
+          <div className="animate-pulse">جاري التحميل...</div>
+        </div>
+      }>
+        <CancelPageContent />
+      </Suspense>
     </div>
   )
 }
