@@ -65,11 +65,41 @@ function ConfirmEmailContent() {
           description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
         })
 
+        // التحقق من وجود معلمة redirect في URL
+        const redirectTo = searchParams.get("redirect_to")
+
         // إذا كان نوع التأكيد هو إعادة تعيين كلمة المرور، توجيه المستخدم إلى صفحة إعادة تعيين كلمة المرور
         if (type === "recovery") {
           setTimeout(() => {
             router.push("/auth/reset-password")
           }, 3000)
+        }
+        // إذا كان هناك URL إعادة توجيه محدد
+        else if (redirectTo) {
+          try {
+            // فك تشفير URL الإعادة التوجيه
+            const decodedRedirect = decodeURIComponent(redirectTo)
+
+            // التحقق مما إذا كان URL الإعادة التوجيه يحتوي على صفحة الاشتراك
+            const shouldRefresh = decodedRedirect.includes("/admin/subscription")
+
+            // إعادة توجيه المستخدم بعد تأخير قصير
+            setTimeout(() => {
+              if (shouldRefresh) {
+                // إضافة معلمة refresh=true إلى URL
+                const separator = decodedRedirect.includes("?") ? "&" : "?"
+                window.location.href = `${decodedRedirect}${separator}refresh=true`
+              } else {
+                router.push(decodedRedirect)
+              }
+            }, 3000)
+          } catch (error) {
+            console.error("Error redirecting after email confirmation:", error)
+            // في حالة حدوث خطأ، نوجه المستخدم إلى صفحة تسجيل الدخول
+            setTimeout(() => {
+              router.push("/auth/login")
+            }, 3000)
+          }
         }
       } catch (error: any) {
         console.error("Error confirming email:", error)

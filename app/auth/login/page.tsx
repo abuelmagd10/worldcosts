@@ -75,11 +75,14 @@ export default function LoginPage() {
     }
 
     try {
+      // إضافة معلمة redirect_to إذا كانت موجودة
+      const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
         }
       })
 
@@ -146,11 +149,26 @@ export default function LoginPage() {
     try {
       console.log("Attempting to sign in with magic link for email:", email)
 
+      // إضافة معلمة redirect_to إذا كانت موجودة
+      let redirectToUrl = `${window.location.origin}/admin`
+
+      if (redirectUrl) {
+        // إذا كان URL الإحالة هو صفحة الاشتراك، نضيف معلمة خاصة للتعامل معها بشكل مختلف
+        if (redirectUrl.includes("/admin/subscription")) {
+          redirectToUrl = `${window.location.origin}${redirectUrl}?refresh=true`
+        } else {
+          redirectToUrl = `${window.location.origin}${redirectUrl}`
+        }
+      }
+
+      // إضافة معلمة redirect_to للتعامل مع إعادة التوجيه بعد تأكيد البريد الإلكتروني
+      const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+
       // إرسال رابط تسجيل الدخول
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: redirectUrl ? `${window.location.origin}${redirectUrl}` : `${window.location.origin}/admin`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
         },
       })
 
@@ -217,12 +235,16 @@ export default function LoginPage() {
     try {
       console.log("Checking if user exists:", email)
 
+      // إضافة معلمة redirect_to إذا كانت موجودة
+      const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+
       // استخدام signInWithOtp بدلاً من resetPasswordForEmail للتحقق من وجود المستخدم
       // هذه الطريقة أكثر موثوقية للتحقق من وجود المستخدم
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false, // لا تقم بإنشاء مستخدم جديد إذا لم يكن موجودًا
+          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
         },
       })
 
@@ -313,7 +335,13 @@ export default function LoginPage() {
       // تأخير قصير للسماح بعرض رسالة النجاح
       setTimeout(() => {
         if (redirectUrl) {
-          router.push(redirectUrl)
+          // إذا كان URL الإحالة هو صفحة الاشتراك، نتأكد من تحديث الصفحة بدلاً من استخدام التنقل العادي
+          // هذا يضمن إعادة تحميل الصفحة بالكامل وإعادة تهيئة جميع المكونات
+          if (redirectUrl.includes("/admin/subscription")) {
+            window.location.href = redirectUrl
+          } else {
+            router.push(redirectUrl)
+          }
         } else {
           router.push("/admin")
         }
@@ -331,12 +359,15 @@ export default function LoginPage() {
         // التحقق من سبب الخطأ بشكل أكثر تفصيلاً
         const checkEmailConfirmation = async () => {
           try {
+            // إضافة معلمة redirect_to إذا كانت موجودة
+            const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+
             // محاولة إرسال رابط تأكيد البريد الإلكتروني
             const { error: resendError } = await supabase.auth.resend({
               type: 'signup',
               email,
               options: {
-                emailRedirectTo: `${window.location.origin}/auth/confirm`,
+                emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
               }
             })
 
