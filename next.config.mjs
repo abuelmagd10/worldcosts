@@ -9,11 +9,11 @@ const nextConfig = {
       }
     ];
   },
-  // Eliminar la configuración de webpack التي قد تكون تسبب مشاكل
+  // Eliminar la configuración de webpack
   webpack: (config, { isServer }) => {
     return config;
   },
-  // إضافة الإعدادات الجديدة لتجاوز أخطاء البناء
+  // Add new settings to bypass build errors
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -23,7 +23,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // تمكين المحتوى المختلط (Mixed Content)
+  // Enable mixed content
   async headers() {
     return [
       {
@@ -31,7 +31,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-    value: "upgrade-insecure-requests; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.exchangerate-api.com https://*.supabase.co https://mhrgktbewfojpspigkkg.supabase.co https://*.supabase.in https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google-analytics.com; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;", font-src 'self' data:; connect-src 'self' https://api.exchangerate-api.com https://*.supabase.co https://*.supabase.in; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;",
+            value: "upgrade-insecure-requests; default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.exchangerate-api.com https://*.supabase.co https://mhrgktbewfojpspigkkg.supabase.co https://*.supabase.in https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google-analytics.com; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com;",
           },
         ],
       },
