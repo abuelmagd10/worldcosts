@@ -16,6 +16,33 @@ export type Translation = {
   inputValue: string
   calculatedValue: string
 
+  // Subscription related
+  subscription: string
+  subscriptionPlans: string
+  proPlan: string
+  businessPlan: string
+  freePlan: string
+  monthlyBilling: string
+  yearlyBilling: string
+  subscribe: string
+  loginToSubscribe: string
+  loginRequiredForSubscription: string
+  subscriptionSuccess: string
+  subscriptionSuccessDesc: string
+  subscriptionDetails: string
+  plan: string
+  billingCycle: string
+  whatNext: string
+  subscriptionSuccessNextSteps: string
+  goToDashboard: string
+  upgradeToProVersion: string
+  proFeatures: string
+  unlimitedItems: string
+  advancedReports: string
+  customBranding: string
+  dataSync: string
+  currentPlan: string
+
   // Currency names
   usd: string
   egp: string
@@ -60,7 +87,7 @@ export type Translation = {
   selectTotalCurrency: string
 
   // Exchange rates
-  ratesLastUpdated: string
+  lastUpdated: string
   updateRates: string
 
   // PDF related
@@ -130,16 +157,17 @@ export type Translation = {
   chartTitleDistribution: string
   chartTitleCount: string
   chartTitleItems: string
-  chartTitleValues: string
+  chartTitleValues: string // جديد
   pieChartView: string
   barChartView: string
   itemsChartView: string
   itemCount: string
 
-  // Navigation links
+  // ترجمات جديدة للصفحات الإضافية
+  // روابط التنقل
   backToHome: string
 
-  // Privacy Policy
+  // سياسة الخصوصية
   privacyPolicyTitle: string
   privacyLastUpdated: string
   introductionTitle: string
@@ -165,7 +193,7 @@ export type Translation = {
   contactTitle: string
   contactInfo: string
 
-  // Terms and Conditions
+  // الشروط والأحكام
   termsAndConditionsTitle: string
   acceptanceTitle: string
   acceptanceText: string
@@ -186,7 +214,7 @@ export type Translation = {
   governingLawText: string
   contactInfoTerms: string
 
-  // About Us
+  // من نحن
   aboutUsSubtitle: string
   ourMissionTitle: string
   ourMissionText: string
@@ -204,22 +232,120 @@ export type Translation = {
   website: string
   copyrightText: string
   aboutUs: string
-  termsLink: string
-  privacyLink: string
+  footerTerms: string
+  footerPrivacy: string
 
   // Theme related
   toggleTheme: string
   lightTheme: string
   darkTheme: string
 
-  // Features
+  // ترجمات جديدة للميزات
   features: string
   feature1Description: string
   feature2Description: string
   feature3Description: string
   feature4Description: string
 
-  // Cookie consent
+  // ترجمات صفحات الموقع
+  pricing: string
+  refundPolicy: string
+  fileManagement: string
+
+  // ترجمات صفحة الإدارة
+  adminDashboard: string
+  manageSubscription: string
+  viewAndManageFiles: string
+  settings: string
+  configureAppSettings: string
+
+  // ترجمات صفحة الإعدادات
+  appSettings: string
+  fileSettings: string
+  enableFileTracking: string
+  trackAllUploadedFiles: string
+  maxFileSizeMB: string
+  allowedFileTypes: string
+  enterFileExtensions: string
+  autoDeleteOldFiles: string
+  deleteOldFilesAfterPeriod: string
+  deleteFilesAfterDays: string
+  saveSettings: string
+  settingsSaved: string
+  settingsSavedDesc: string
+  settingsError: string
+  settingsErrorDesc: string
+  backToAdmin: string
+
+  // ترجمات معلومات المستخدم
+  userInformation: string
+  userProfile: string
+  fullName: string
+  emailAddress: string
+  registrationDate: string
+  lastLogin: string
+  accountStatus: string
+  active: string
+  inactive: string
+
+  // ترجمات معلومات الاشتراك
+  subscriptionInformation: string
+  currentPlanDetails: string
+  planName: string
+  billingPeriod: string
+  nextBillingDate: string
+  subscriptionStatus: string
+  notSubscribed: string
+  freeUser: string
+  upgradeNow: string
+
+  // ترجمات صفحة إدارة الملفات
+  fileStatistics: string
+  totalFiles: string
+  totalSize: string
+  fileTypes: string
+  logos: string
+  other: string
+  manageUploadedFiles: string
+  clearAllFiles: string
+  uploadNewFile: string
+  refresh: string
+  name: string
+  type: string
+  size: string
+  uploadDate: string
+  downloadFile: string
+  viewFile: string
+  deleteFile: string
+  noFiles: string
+
+  // ترجمات صفحة الاشتراك
+  mostPopular: string
+  yearlyDiscount: string
+  basicCurrencyConversion: string
+  upToFiveItems: string
+  limitedPDFExports: string
+  standardSupport: string
+  advancedCurrencyConversion: string
+  unlimitedPDFExports: string
+  realtimeExchangeRates: string
+  dataVisualization: string
+  everythingInPro: string
+  teamCollaboration: string
+  advancedReporting: string
+  apiAccess: string
+  prioritySupport: string
+  frequentlyAskedQuestions: string
+  howDoesTrial: string
+  trialExplanation: string
+  canChangePlans: string
+  changePlansExplanation: string
+  paymentMethods: string
+  paymentMethodsExplanation: string
+  refundPolicyExplanation: string
+  readFullRefundPolicy: string
+
+  // إضافة ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText: string
   accept: string
   decline: string
@@ -232,89 +358,39 @@ export type Translation = {
   advertisingCookies: string
   functionalCookies: string
   savePreferences: string
-
-  // File management
-  fileManagement: string
-  fileStatistics: string
-  totalFiles: string
-  totalSize: string
-  fileTypes: string
-  pdfFiles: string
-  logoFiles: string
-  otherFiles: string
-  uploadedFilesManagement: string
-  clearAllFiles: string
-  uploadNewFile: string
-  refresh: string
-  noFiles: string
-  fileName: string
-  fileType: string
-  fileSize: string
-  uploadDate: string
-  downloadFile: string
-  viewFile: string
-  deleteFile: string
-  fileDeleted: string
-  fileDeletedDesc: string
-  fileUploaded: string
-  fileUploadedDesc: string
-  fileDownloaded: string
-  fileDownloadedDesc: string
-  fileViewError: string
-  fileViewErrorDesc: string
-  refreshed: string
-  refreshedDesc: string
-  allFilesCleared: string
-  allFilesClearedDesc: string
-  adminPanel: string
-  viewAndManageFiles: string
-
-  // Admin settings
-  settings: string
-  configureAppSettings: string
-  backToAdmin: string
-  appSettings: string
-  fileSettings: string
-  enableFileTracking: string
-  trackAllUploadedFiles: string
-  maxFileSizeLimit: string
-  maxFileSizeMB: string
-  allowedFileTypes: string
-  enterFileExtensions: string
-  autoDeleteOldFiles: string
-  deleteOldFilesAfterPeriod: string
-  deleteFilesAfterDays: string
-  saveSettings: string
-  settingsSaved: string
-  settingsSavedDesc: string
-  settingsError: string
-  settingsErrorDesc: string
-
-  // Subscription
-  subscription: string
-  upgradeAccount: string
-  upgradeToProVersion: string
-  proFeatures: string
-  unlimitedItems: string
-  advancedReports: string
-  customBranding: string
-  dataSync: string
-  prioritySupport: string
-  currentPlan: string
-  freePlan: string
-  proPlan: string
-  businessPlan: string
-  monthlyBilling: string
-  yearlyBilling: string
-  yearlyDiscount: string
-  subscribe: string
-  manageSubscription: string
 }
 
 // Arabic translations
 export const ar: Translation = {
   appTitle: "WorldCosts",
   appDescription: "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
+
+  // Subscription related
+  subscription: "الاشتراك",
+  subscriptionPlans: "خطط الاشتراك",
+  proPlan: "خطة برو",
+  businessPlan: "خطة الأعمال",
+  freePlan: "خطة مجانية",
+  monthlyBilling: "فوترة شهرية",
+  yearlyBilling: "فوترة سنوية",
+  subscribe: "اشترك الآن",
+  loginToSubscribe: "تسجيل الدخول للاشتراك",
+  loginRequiredForSubscription: "يجب تسجيل الدخول أولاً للاشتراك في هذه الخطة",
+  subscriptionSuccess: "تم الاشتراك بنجاح!",
+  subscriptionSuccessDesc: "شكرًا لاشتراكك في WorldCosts. تم تفعيل اشتراكك بنجاح.",
+  subscriptionDetails: "تفاصيل الاشتراك",
+  plan: "الخطة",
+  billingCycle: "دورة الفوترة",
+  whatNext: "ماذا بعد؟",
+  subscriptionSuccessNextSteps: "يمكنك الآن الاستمتاع بجميع ميزات الاشتراك المدفوع. استكشف الميزات الجديدة المتاحة لك الآن.",
+  goToDashboard: "الذهاب إلى لوحة التحكم",
+  upgradeToProVersion: "الترقية إلى النسخة الاحترافية",
+  proFeatures: "ميزات النسخة الاحترافية",
+  unlimitedItems: "عناصر غير محدودة",
+  advancedReports: "تقارير متقدمة",
+  customBranding: "علامة تجارية مخصصة",
+  dataSync: "مزامنة البيانات",
+  currentPlan: "الخطة الحالية",
 
   itemName: "اسم العنصر",
   itemValue: "القيمة (يمكن إجراء عمليات حسابية)",
@@ -367,7 +443,7 @@ export const ar: Translation = {
   totalCurrency: "عملة المجموع",
   selectTotalCurrency: "اختر عملة المجموع",
 
-  ratesLastUpdated: "آخر تحديث لأسعار الصرف",
+  lastUpdated: "آخر تحديث لأسعار الصرف",
   updateRates: "تحديث الأسعار",
 
   downloadPDF: "تحميل PDF",
@@ -439,10 +515,11 @@ export const ar: Translation = {
   itemsChartView: "عرض قيم العناصر",
   itemCount: "عدد العناصر",
 
-  // Navigation links
+  // ترجمات جديدة للصفحات الإضافية
+  // روابط التنقل
   backToHome: "العودة إلى الصفحة الرئيسية",
 
-  // Privacy Policy
+  // سياسة الخصوصية
   privacyPolicyTitle: "سياسة الخصوصية",
   privacyLastUpdated: "آخر تحديث",
   introductionTitle: "مقدمة",
@@ -473,7 +550,7 @@ export const ar: Translation = {
   contactTitle: "اتصل بنا",
   contactInfo: "إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى الاتصال بنا على info@worldcosts.com.",
 
-  // Terms and Conditions
+  // الشروط والأحكام
   termsAndConditionsTitle: "الشروط والأحكام",
   acceptanceTitle: "قبول الشروط",
   acceptanceText:
@@ -499,7 +576,7 @@ export const ar: Translation = {
     "تخضع هذه الشروط وتفسر وفقًا لقوانين البلد الذي تم تأسيس WorldCosts فيه، دون اعتبار لتعارض مبادئ القانون.",
   contactInfoTerms: "إذا كان لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على info@worldcosts.com.",
 
-  // About Us
+  // من نحن
   aboutUsSubtitle: "حاسبة العملات المتعددة السهلة الاستخدام",
   ourMissionTitle: "مهمتنا",
   ourMissionText:
@@ -519,22 +596,121 @@ export const ar: Translation = {
   website: "الموقع الإلكتروني",
   copyrightText: "جميع الحقوق محفوظة",
   aboutUs: "من نحن",
-  termsLink: "الشروط والأحكام",
-  privacyLink: "سياسة الخصوصية",
+  footerTerms: "الشروط والأحكام",
+  footerPrivacy: "سياسة الخصوصية",
 
   // Theme related
   toggleTheme: "تبديل المظهر",
   lightTheme: "وضع النهار",
   darkTheme: "وضع الليل",
 
-  // Features
+
+  // ترجمات جديدة للميزات
   features: "المميزات",
   feature1Description: "احسب تكلفة منتجاتك بدقة بما في ذلك تكلفة الوحدة والتعبئة والشحن والجمارك",
   feature2Description: "تحويل العملات في الوقت الفعلي باستخدام أحدث أسعار الصرف",
   feature3Description: "تصميم التقارير المهنية وتحميلها كملف PDF مع إمكانية إضافة شعار الشركة ومعلوماتها",
   feature4Description: "واجهة سهلة الاستخدام ومتوفرة بلغات متعددة",
 
-  // Cookie consent
+  // ترجمات صفحات الموقع
+  pricing: "الأسعار",
+  refundPolicy: "سياسة الاسترداد",
+  fileManagement: "إدارة الملفات",
+
+  // ترجمات صفحة الإدارة
+  adminDashboard: "لوحة الإدارة",
+  manageSubscription: "إدارة اشتراكك والترقية إلى خطط مميزة",
+  viewAndManageFiles: "عرض وإدارة الملفات المرفوعة",
+  settings: "الإعدادات",
+  configureAppSettings: "تكوين إعدادات التطبيق",
+
+  // ترجمات صفحة الإعدادات
+  appSettings: "إعدادات التطبيق",
+  fileSettings: "إعدادات الملفات",
+  enableFileTracking: "تمكين تتبع الملفات",
+  trackAllUploadedFiles: "تتبع جميع الملفات المرفوعة",
+  maxFileSizeMB: "الحد الأقصى لحجم الملف (ميجابايت)",
+  allowedFileTypes: "أنواع الملفات المسموح بها",
+  enterFileExtensions: "أدخل امتدادات الملفات مفصولة بفواصل",
+  autoDeleteOldFiles: "حذف الملفات القديمة تلقائيًا",
+  deleteOldFilesAfterPeriod: "حذف الملفات القديمة بعد فترة محددة",
+  deleteFilesAfterDays: "حذف الملفات بعد (أيام)",
+  saveSettings: "حفظ الإعدادات",
+  settingsSaved: "تم حفظ الإعدادات",
+  settingsSavedDesc: "تم حفظ إعدادات التطبيق بنجاح",
+  settingsError: "خطأ في حفظ الإعدادات",
+  settingsErrorDesc: "حدث خطأ أثناء محاولة حفظ الإعدادات. يرجى المحاولة مرة أخرى.",
+  backToAdmin: "العودة إلى لوحة الإدارة",
+
+  // ترجمات معلومات المستخدم
+  userInformation: "معلومات المستخدم",
+  userProfile: "الملف الشخصي",
+  fullName: "الاسم الكامل",
+  emailAddress: "البريد الإلكتروني",
+  registrationDate: "تاريخ التسجيل",
+  lastLogin: "آخر تسجيل دخول",
+  accountStatus: "حالة الحساب",
+  active: "نشط",
+  inactive: "غير نشط",
+
+  // ترجمات معلومات الاشتراك
+  subscriptionInformation: "معلومات الاشتراك",
+  currentPlanDetails: "تفاصيل الخطة الحالية",
+  planName: "اسم الخطة",
+  billingPeriod: "فترة الفوترة",
+  nextBillingDate: "تاريخ الفوترة القادم",
+  subscriptionStatus: "حالة الاشتراك",
+  notSubscribed: "غير مشترك",
+  freeUser: "مستخدم مجاني",
+  upgradeNow: "الترقية الآن",
+
+  // ترجمات صفحة إدارة الملفات
+  fileStatistics: "إحصائيات الملفات",
+  totalFiles: "إجمالي الملفات",
+  totalSize: "الحجم الإجمالي",
+  fileTypes: "أنواع الملفات",
+  logos: "شعارات",
+  other: "أخرى",
+  manageUploadedFiles: "إدارة الملفات المرفوعة",
+  clearAllFiles: "مسح جميع الملفات",
+  uploadNewFile: "رفع ملف جديد",
+  refresh: "تحديث",
+  name: "الاسم",
+  type: "النوع",
+  size: "الحجم",
+  uploadDate: "تاريخ الرفع",
+  downloadFile: "تحميل الملف",
+  viewFile: "عرض الملف",
+  deleteFile: "حذف الملف",
+  noFiles: "لا توجد ملفات",
+
+  // ترجمات صفحة الاشتراك
+  mostPopular: "الأكثر شعبية",
+  yearlyDiscount: "وفر 20% مع الاشتراك السنوي",
+  basicCurrencyConversion: "تحويل العملات الأساسي",
+  upToFiveItems: "حتى 5 عناصر لكل حساب",
+  limitedPDFExports: "تصدير PDF محدود",
+  standardSupport: "دعم قياسي",
+  advancedCurrencyConversion: "تحويل العملات المتقدم",
+  unlimitedPDFExports: "تصدير PDF غير محدود مع العلامة التجارية",
+  realtimeExchangeRates: "تحديثات أسعار الصرف في الوقت الفعلي",
+  dataVisualization: "تصور البيانات والرسوم البيانية",
+  everythingInPro: "كل ما في خطة برو",
+  teamCollaboration: "ميزات التعاون الجماعي",
+  advancedReporting: "تقارير وتحليلات متقدمة",
+  apiAccess: "وصول API للتكامل",
+  prioritySupport: "دعم ذو أولوية",
+  frequentlyAskedQuestions: "الأسئلة الشائعة",
+  howDoesTrial: "كيف تعمل فترة التجربة المجانية لمدة 14 يومًا؟",
+  trialExplanation: "تأتي جميع الخطط المدفوعة مع فترة تجربة مجانية لمدة 14 يومًا. لن يتم محاسبتك حتى تنتهي فترة التجربة، ويمكنك إلغاء الاشتراك في أي وقت قبل ذلك.",
+  canChangePlans: "هل يمكنني تغيير الخطة لاحقًا؟",
+  changePlansExplanation: "نعم، يمكنك ترقية أو تخفيض خطتك في أي وقت. إذا قمت بالترقية، سيتم محاسبتك على الفرق النسبي. إذا قمت بالتخفيض، سيتم تطبيق السعر الجديد في دورة الفوترة التالية.",
+  paymentMethods: "ما هي طرق الدفع المقبولة؟",
+  paymentMethodsExplanation: "نقبل جميع بطاقات الائتمان الرئيسية، وPayPal، ومختلف طرق الدفع المحلية من خلال معالج الدفع الخاص بنا، Paddle.",
+  refundPolicyExplanation: "نقدم ضمان استرداد الأموال لمدة 14 يومًا لجميع الاشتراكات الجديدة. إذا لم تكن راضيًا عن خدمتنا، يمكنك طلب استرداد كامل خلال 14 يومًا من تاريخ الشراء الأولي.",
+  readFullRefundPolicy: "اقرأ سياسة الاسترداد الكاملة",
+
+  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText: "نستخدم ملفات تعريف الارتباط لتحسين تجربتك. هل توافق على استخدامنا لملفات تعريف الارتباط؟",
   accept: "موافق",
   decline: "رفض",
@@ -547,83 +723,6 @@ export const ar: Translation = {
   advertisingCookies: "ملفات تعريف الارتباط الإعلانية",
   functionalCookies: "ملفات تعريف الارتباط الوظيفية",
   savePreferences: "حفظ التفضيلات",
-
-  // File management
-  fileManagement: "إدارة الملفات",
-  fileStatistics: "إحصائيات الملفات",
-  totalFiles: "إجمالي الملفات",
-  totalSize: "الحجم الإجمالي",
-  fileTypes: "أنواع الملفات",
-  pdfFiles: "PDF",
-  logoFiles: "شعارات",
-  otherFiles: "أخرى",
-  uploadedFilesManagement: "إدارة الملفات المرفوعة",
-  clearAllFiles: "مسح جميع الملفات",
-  uploadNewFile: "رفع ملف جديد",
-  refresh: "تحديث",
-  noFiles: "لا توجد ملفات",
-  fileName: "الاسم",
-  fileType: "النوع",
-  fileSize: "الحجم",
-  uploadDate: "تاريخ الرفع",
-  downloadFile: "تحميل الملف",
-  viewFile: "عرض الملف",
-  deleteFile: "حذف الملف",
-  fileDeleted: "تم الحذف",
-  fileDeletedDesc: "تم حذف الملف بنجاح",
-  fileUploaded: "تم الرفع",
-  fileUploadedDesc: "تم رفع الملف بنجاح",
-  fileDownloaded: "تم التحميل",
-  fileDownloadedDesc: "تم تحميل الملف بنجاح",
-  fileViewError: "خطأ",
-  fileViewErrorDesc: "لا يمكن عرض الملف، المحتوى غير متوفر",
-  refreshed: "تم التحديث",
-  refreshedDesc: "تم تحميل الملفات بنجاح",
-  allFilesCleared: "تم المسح",
-  allFilesClearedDesc: "تم مسح جميع الملفات بنجاح",
-  adminPanel: "لوحة الإدارة",
-  viewAndManageFiles: "عرض وإدارة الملفات المرفوعة",
-
-  // Admin settings
-  settings: "الإعدادات",
-  configureAppSettings: "تكوين إعدادات التطبيق",
-  backToAdmin: "العودة إلى لوحة الإدارة",
-  appSettings: "إعدادات التطبيق",
-  fileSettings: "إعدادات الملفات",
-  enableFileTracking: "تمكين تتبع الملفات",
-  trackAllUploadedFiles: "تتبع جميع الملفات المرفوعة وتخزين معلوماتها",
-  maxFileSizeLimit: "الحد الأقصى لحجم الملف",
-  maxFileSizeMB: "الحد الأقصى لحجم الملف (ميجابايت)",
-  allowedFileTypes: "أنواع الملفات المسموح بها",
-  enterFileExtensions: "أدخل امتدادات الملفات مفصولة بفواصل",
-  autoDeleteOldFiles: "حذف الملفات القديمة تلقائيًا",
-  deleteOldFilesAfterPeriod: "حذف الملفات القديمة بعد فترة محددة",
-  deleteFilesAfterDays: "حذف الملفات بعد (أيام)",
-  saveSettings: "حفظ الإعدادات",
-  settingsSaved: "تم الحفظ",
-  settingsSavedDesc: "تم حفظ الإعدادات بنجاح",
-  settingsError: "خطأ",
-  settingsErrorDesc: "حدث خطأ أثناء حفظ الإعدادات",
-
-  // Subscription
-  subscription: "الاشتراك",
-  upgradeAccount: "ترقية الحساب",
-  upgradeToProVersion: "الترقية إلى النسخة الاحترافية",
-  proFeatures: "ميزات النسخة الاحترافية",
-  unlimitedItems: "عناصر غير محدودة",
-  advancedReports: "تقارير متقدمة",
-  customBranding: "علامة تجارية مخصصة",
-  dataSync: "مزامنة البيانات",
-  prioritySupport: "دعم ذو أولوية",
-  currentPlan: "الخطة الحالية",
-  freePlan: "الخطة المجانية",
-  proPlan: "الخطة الاحترافية",
-  businessPlan: "خطة الأعمال",
-  monthlyBilling: "فوترة شهرية",
-  yearlyBilling: "فوترة سنوية",
-  yearlyDiscount: "خصم 20% على الفوترة السنوية",
-  subscribe: "اشترك الآن",
-  manageSubscription: "إدارة الاشتراك"
 }
 
 // English translations
@@ -631,8 +730,35 @@ export const en: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Add items with currency selection and calculate totals in different currencies",
 
+  // Subscription related
+  subscription: "Subscription",
+  subscriptionPlans: "Subscription Plans",
+  proPlan: "Pro Plan",
+  businessPlan: "Business Plan",
+  freePlan: "Free Plan",
+  monthlyBilling: "Monthly Billing",
+  yearlyBilling: "Yearly Billing",
+  subscribe: "Subscribe Now",
+  loginToSubscribe: "Login to Subscribe",
+  loginRequiredForSubscription: "You need to login first to subscribe to this plan",
+  subscriptionSuccess: "Subscription Successful!",
+  subscriptionSuccessDesc: "Thank you for subscribing to WorldCosts. Your subscription has been activated successfully.",
+  subscriptionDetails: "Subscription Details",
+  plan: "Plan",
+  billingCycle: "Billing Cycle",
+  whatNext: "What's Next?",
+  subscriptionSuccessNextSteps: "You can now enjoy all the premium features. Explore the new features available to you now.",
+  goToDashboard: "Go to Dashboard",
+  upgradeToProVersion: "Upgrade to Pro Version",
+  proFeatures: "Pro Features",
+  unlimitedItems: "Unlimited Items",
+  advancedReports: "Advanced Reports",
+  customBranding: "Custom Branding",
+  dataSync: "Data Synchronization",
+  currentPlan: "Current Plan",
+
   itemName: "Item Name",
-  itemValue: "Value (math expressions allowed)",
+  itemValue: "Value (mathematical expressions allowed)",
   currency: "Currency",
   addItem: "Add Item",
   reset: "Reset",
@@ -682,7 +808,7 @@ export const en: Translation = {
   totalCurrency: "Total Currency",
   selectTotalCurrency: "Select Total Currency",
 
-  ratesLastUpdated: "Exchange rates last updated",
+  lastUpdated: "Exchange rates last updated",
   updateRates: "Update Rates",
 
   downloadPDF: "Download PDF",
@@ -754,10 +880,11 @@ export const en: Translation = {
   itemsChartView: "Items Values View",
   itemCount: "Item Count",
 
-  // Navigation links
+  // ترجمات جديدة للصفحات الإضافية
+  // روابط التنقل
   backToHome: "Back to Home",
 
-  // Privacy Policy
+  // سياسة الخصوصية
   privacyPolicyTitle: "Privacy Policy",
   privacyLastUpdated: "Last Updated",
   introductionTitle: "Introduction",
@@ -788,7 +915,7 @@ export const en: Translation = {
   contactTitle: "Contact Us",
   contactInfo: "If you have any questions about this Privacy Policy, please contact us at info@worldcosts.com.",
 
-  // Terms and Conditions
+  // الشروط والأحكام
   termsAndConditionsTitle: "Terms and Conditions",
   acceptanceTitle: "Acceptance of Terms",
   acceptanceText:
@@ -816,7 +943,7 @@ export const en: Translation = {
     "These terms shall be governed by and construed in accordance with the laws of the country in which WorldCosts is established, without regard to conflict of law principles.",
   contactInfoTerms: "If you have any questions about these Terms, please contact us at info@worldcosts.com.",
 
-  // About Us
+  // من نحن
   aboutUsSubtitle: "Easy-to-use Multi-Currency Calculator",
   ourMissionTitle: "Our Mission",
   ourMissionText:
@@ -837,22 +964,120 @@ export const en: Translation = {
   website: "Website",
   copyrightText: "All rights reserved",
   aboutUs: "About Us",
-  termsLink: "Terms & Conditions",
-  privacyLink: "Privacy Policy",
+  footerTerms: "Terms & Conditions",
+  footerPrivacy: "Privacy Policy",
 
   // Theme related
   toggleTheme: "Toggle Theme",
   lightTheme: "Light Mode",
   darkTheme: "Dark Mode",
 
-  // Features
+  // ترجمات جديدة للميزات
   features: "Features",
   feature1Description: "Calculate your product costs accurately including unit cost, packaging, shipping, and customs",
   feature2Description: "Real-time currency conversion using the latest exchange rates",
   feature3Description: "Design professional reports and download them as PDF with company logo and information",
   feature4Description: "User-friendly interface available in multiple languages",
 
-  // Cookie consent
+  // ترجمات صفحات الموقع
+  pricing: "Pricing",
+  refundPolicy: "Refund Policy",
+  fileManagement: "File Management",
+
+  // ترجمات صفحة الإدارة
+  adminDashboard: "Admin Dashboard",
+  manageSubscription: "Manage your subscription and upgrade to premium plans",
+  viewAndManageFiles: "View and manage uploaded files",
+  settings: "Settings",
+  configureAppSettings: "Configure application settings",
+
+  // ترجمات صفحة الإعدادات
+  appSettings: "Application Settings",
+  fileSettings: "File Settings",
+  enableFileTracking: "Enable File Tracking",
+  trackAllUploadedFiles: "Track all uploaded files",
+  maxFileSizeMB: "Maximum File Size (MB)",
+  allowedFileTypes: "Allowed File Types",
+  enterFileExtensions: "Enter file extensions separated by commas",
+  autoDeleteOldFiles: "Auto-delete Old Files",
+  deleteOldFilesAfterPeriod: "Delete old files after a specified period",
+  deleteFilesAfterDays: "Delete Files After (days)",
+  saveSettings: "Save Settings",
+  settingsSaved: "Settings Saved",
+  settingsSavedDesc: "Application settings have been saved successfully",
+  settingsError: "Error Saving Settings",
+  settingsErrorDesc: "An error occurred while trying to save settings. Please try again.",
+  backToAdmin: "Back to Admin",
+
+  // ترجمات معلومات المستخدم
+  userInformation: "User Information",
+  userProfile: "User Profile",
+  fullName: "Full Name",
+  emailAddress: "Email Address",
+  registrationDate: "Registration Date",
+  lastLogin: "Last Login",
+  accountStatus: "Account Status",
+  active: "Active",
+  inactive: "Inactive",
+
+  // ترجمات معلومات الاشتراك
+  subscriptionInformation: "Subscription Information",
+  currentPlanDetails: "Current Plan Details",
+  planName: "Plan Name",
+  billingPeriod: "Billing Period",
+  nextBillingDate: "Next Billing Date",
+  subscriptionStatus: "Subscription Status",
+  notSubscribed: "Not Subscribed",
+  freeUser: "Free User",
+  upgradeNow: "Upgrade Now",
+
+  // ترجمات صفحة إدارة الملفات
+  fileStatistics: "File Statistics",
+  totalFiles: "Total Files",
+  totalSize: "Total Size",
+  fileTypes: "File Types",
+  logos: "Logos",
+  other: "Other",
+  manageUploadedFiles: "Manage Uploaded Files",
+  clearAllFiles: "Clear All Files",
+  uploadNewFile: "Upload New File",
+  refresh: "Refresh",
+  name: "Name",
+  type: "Type",
+  size: "Size",
+  uploadDate: "Upload Date",
+  downloadFile: "Download File",
+  viewFile: "View File",
+  deleteFile: "Delete File",
+  noFiles: "No Files",
+
+  // ترجمات صفحة الاشتراك
+  mostPopular: "Most Popular",
+  yearlyDiscount: "Save 20% with yearly billing",
+  basicCurrencyConversion: "Basic currency conversion",
+  upToFiveItems: "Up to 5 items per calculation",
+  limitedPDFExports: "Limited PDF exports",
+  standardSupport: "Standard support",
+  advancedCurrencyConversion: "Advanced currency conversion",
+  unlimitedPDFExports: "Unlimited PDF exports with branding",
+  realtimeExchangeRates: "Real-time exchange rate updates",
+  dataVisualization: "Data visualization and charts",
+  everythingInPro: "Everything in Pro plan",
+  teamCollaboration: "Team collaboration features",
+  advancedReporting: "Advanced reporting and analytics",
+  apiAccess: "API access for integration",
+  prioritySupport: "Priority support",
+  frequentlyAskedQuestions: "Frequently Asked Questions",
+  howDoesTrial: "How does the 14-day trial work?",
+  trialExplanation: "All paid plans come with a 14-day free trial. You won't be charged until the trial period ends, and you can cancel anytime before then.",
+  canChangePlans: "Can I change plans later?",
+  changePlansExplanation: "Yes, you can upgrade or downgrade your plan at any time. If you upgrade, you'll be charged the prorated difference. If you downgrade, the new rate will apply at the next billing cycle.",
+  paymentMethods: "What payment methods do you accept?",
+  paymentMethodsExplanation: "We accept all major credit cards, PayPal, and various local payment methods through our payment processor, Paddle.",
+  refundPolicyExplanation: "We offer a 14-day money-back guarantee for all new subscriptions. If you're not satisfied with our service, you can request a full refund within 14 days of your initial purchase.",
+  readFullRefundPolicy: "Read full refund policy",
+
+  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText: "We use cookies to enhance your experience. Do you consent to our use of cookies?",
   accept: "Accept",
   decline: "Decline",
@@ -865,89 +1090,39 @@ export const en: Translation = {
   advertisingCookies: "Advertising Cookies",
   functionalCookies: "Functional Cookies",
   savePreferences: "Save Preferences",
-
-  // File management
-  fileManagement: "File Management",
-  fileStatistics: "File Statistics",
-  totalFiles: "Total Files",
-  totalSize: "Total Size",
-  fileTypes: "File Types",
-  pdfFiles: "PDF",
-  logoFiles: "Logos",
-  otherFiles: "Others",
-  uploadedFilesManagement: "Uploaded Files Management",
-  clearAllFiles: "Clear All Files",
-  uploadNewFile: "Upload New File",
-  refresh: "Refresh",
-  noFiles: "No Files",
-  fileName: "Name",
-  fileType: "Type",
-  fileSize: "Size",
-  uploadDate: "Upload Date",
-  downloadFile: "Download File",
-  viewFile: "View File",
-  deleteFile: "Delete File",
-  fileDeleted: "Deleted",
-  fileDeletedDesc: "File has been successfully deleted",
-  fileUploaded: "Uploaded",
-  fileUploadedDesc: "File has been successfully uploaded",
-  fileDownloaded: "Downloaded",
-  fileDownloadedDesc: "File has been successfully downloaded",
-  fileViewError: "Error",
-  fileViewErrorDesc: "Cannot view file, content not available",
-  refreshed: "Refreshed",
-  refreshedDesc: "Files have been successfully loaded",
-  allFilesCleared: "Cleared",
-  allFilesClearedDesc: "All files have been successfully cleared",
-  adminPanel: "Admin Panel",
-  viewAndManageFiles: "View and manage uploaded files",
-
-  // Admin settings
-  settings: "Settings",
-  configureAppSettings: "Configure application settings",
-  backToAdmin: "Back to Admin Panel",
-  appSettings: "Application Settings",
-  fileSettings: "File Settings",
-  enableFileTracking: "Enable File Tracking",
-  trackAllUploadedFiles: "Track all uploaded files and store their information",
-  maxFileSizeLimit: "Maximum File Size",
-  maxFileSizeMB: "Maximum File Size (MB)",
-  allowedFileTypes: "Allowed File Types",
-  enterFileExtensions: "Enter file extensions separated by commas",
-  autoDeleteOldFiles: "Auto Delete Old Files",
-  deleteOldFilesAfterPeriod: "Delete old files after a specified period",
-  deleteFilesAfterDays: "Delete Files After (days)",
-  saveSettings: "Save Settings",
-  settingsSaved: "Saved",
-  settingsSavedDesc: "Settings have been saved successfully",
-  settingsError: "Error",
-  settingsErrorDesc: "An error occurred while saving settings",
-
-  // Subscription
-  subscription: "Subscription",
-  upgradeAccount: "Upgrade Account",
-  upgradeToProVersion: "Upgrade to Pro Version",
-  proFeatures: "Pro Features",
-  unlimitedItems: "Unlimited Items",
-  advancedReports: "Advanced Reports",
-  customBranding: "Custom Branding",
-  dataSync: "Data Synchronization",
-  prioritySupport: "Priority Support",
-  currentPlan: "Current Plan",
-  freePlan: "Free Plan",
-  proPlan: "Pro Plan",
-  businessPlan: "Business Plan",
-  monthlyBilling: "Monthly Billing",
-  yearlyBilling: "Yearly Billing",
-  yearlyDiscount: "20% discount with yearly billing",
-  subscribe: "Subscribe Now",
-  manageSubscription: "Manage Subscription"
 }
 
 // German translations
 export const de: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Fügen Sie Artikel mit Währungsauswahl hinzu und berechnen Sie Summen in verschiedenen Währungen",
+
+  // Subscription related
+  subscription: "Abonnement",
+  subscriptionPlans: "Abonnementpläne",
+  proPlan: "Pro-Plan",
+  businessPlan: "Business-Plan",
+  freePlan: "Kostenloser Plan",
+  monthlyBilling: "Monatliche Abrechnung",
+  yearlyBilling: "Jährliche Abrechnung",
+  subscribe: "Jetzt abonnieren",
+  loginToSubscribe: "Anmelden zum Abonnieren",
+  loginRequiredForSubscription: "Sie müssen sich zuerst anmelden, um diesen Plan zu abonnieren",
+  subscriptionSuccess: "Abonnement erfolgreich!",
+  subscriptionSuccessDesc: "Vielen Dank für Ihr Abonnement bei WorldCosts. Ihr Abonnement wurde erfolgreich aktiviert.",
+  subscriptionDetails: "Abonnementdetails",
+  plan: "Plan",
+  billingCycle: "Abrechnungszyklus",
+  whatNext: "Was kommt als Nächstes?",
+  subscriptionSuccessNextSteps: "Sie können jetzt alle Premium-Funktionen genießen. Entdecken Sie die neuen Funktionen, die Ihnen jetzt zur Verfügung stehen.",
+  goToDashboard: "Zum Dashboard",
+  upgradeToProVersion: "Upgrade auf Pro-Version",
+  proFeatures: "Pro-Funktionen",
+  unlimitedItems: "Unbegrenzte Artikel",
+  advancedReports: "Erweiterte Berichte",
+  customBranding: "Individuelles Branding",
+  dataSync: "Datensynchronisierung",
+  currentPlan: "Aktueller Plan",
 
   itemName: "Artikelname",
   itemValue: "Wert (mathematische Ausdrücke erlaubt)",
@@ -1000,7 +1175,7 @@ export const de: Translation = {
   totalCurrency: "Gesamtwährung",
   selectTotalCurrency: "Gesamtwährung auswählen",
 
-  ratesLastUpdated: "Wechselkurse zuletzt aktualisiert",
+  lastUpdated: "Wechselkurse zuletzt aktualisiert",
   updateRates: "Kurse aktualisieren",
 
   downloadPDF: "PDF herunterladen",
@@ -1008,7 +1183,7 @@ export const de: Translation = {
   addCompanyInfo: "Firmeninformationen hinzufügen",
   editCompanyInfo: "Firmeninformationen bearbeiten",
   pdfFileName: "PDF-Dateiname",
-  pdfFileNameHint: "Geben Sie einen Namen für die PDF-Datei ein",
+  pdfFileNameHint: "Dieser Name wird beim Herunterladen der PDF-Datei verwendet. Wenn Sie keinen Namen eingeben, wird ein Standardname verwendet.",
 
   companyInfoTitle: "Firmeninformationen",
   companyInfoDescription: "Geben Sie Firmeninformationen ein, die in der PDF-Datei angezeigt werden sollen",
@@ -1074,10 +1249,11 @@ export const de: Translation = {
   itemsChartView: "Artikelwerte anzeigen",
   itemCount: "Artikelanzahl",
 
-  // Navigation links
+  // ترجمات جديدة للصفحات الإضافية
+  // روابط التنقل
   backToHome: "Zurück zur Startseite",
 
-  // Privacy Policy
+  // سياسة الخصوصية
   privacyPolicyTitle: "Datenschutzrichtlinie",
   privacyLastUpdated: "Zuletzt aktualisiert",
   introductionTitle: "Einführung",
@@ -1109,7 +1285,7 @@ export const de: Translation = {
   contactInfo:
     "Wenn Sie Fragen zu dieser Datenschutzrichtlinie haben, kontaktieren Sie uns bitte unter info@worldcosts.com.",
 
-  // Terms and Conditions
+  // الشروط والأحكام
   termsAndConditionsTitle: "Allgemeine Geschäftsbedingungen",
   acceptanceTitle: "Annahme der Bedingungen",
   acceptanceText:
@@ -1138,7 +1314,7 @@ export const de: Translation = {
   contactInfoTerms:
     "Wenn Sie Fragen zu diesen Bedingungen haben, kontaktieren Sie uns bitte unter info@worldcosts.com.",
 
-  // About Us
+  // من نحن
   aboutUsSubtitle: "Benutzerfreundlicher Mehrwährungsrechner",
   ourMissionTitle: "Unsere Mission",
   ourMissionText:
@@ -1160,15 +1336,15 @@ export const de: Translation = {
   website: "Website",
   copyrightText: "Alle Rechte vorbehalten",
   aboutUs: "Über uns",
-  termsLink: "Allgemeine Geschäftsbedingungen",
-  privacyLink: "Datenschutzrichtlinie",
+  footerTerms: "Allgemeine Geschäftsbedingungen",
+  footerPrivacy: "Datenschutzrichtlinie",
 
   // Theme related
   toggleTheme: "Thema umschalten",
   lightTheme: "Heller Modus",
   darkTheme: "Dunkler Modus",
 
-  // Features
+  // ترجمات جديدة للميزات
   features: "Funktionen",
   feature1Description:
     "Berechnen Sie Ihre Produktkosten genau, einschließlich Stückkosten, Verpackung, Versand und Zoll",
@@ -1177,7 +1353,105 @@ export const de: Translation = {
     "Entwerfen Sie professionelle Berichte und laden Sie sie als PDF mit Firmenlogo und Informationen herunter",
   feature4Description: "Benutzerfreundliche Oberfläche in mehreren Sprachen verfügbar",
 
-  // Cookie consent
+  // ترجمات صفحات الموقع
+  pricing: "Preise",
+  refundPolicy: "Rückerstattungsrichtlinie",
+  fileManagement: "Dateiverwaltung",
+
+  // ترجمات صفحة الإدارة
+  adminDashboard: "Admin-Dashboard",
+  manageSubscription: "Verwalten Sie Ihr Abonnement und upgraden Sie auf Premium-Pläne",
+  viewAndManageFiles: "Hochgeladene Dateien anzeigen und verwalten",
+  settings: "Einstellungen",
+  configureAppSettings: "Anwendungseinstellungen konfigurieren",
+
+  // ترجمات صفحة الإعدادات
+  appSettings: "Anwendungseinstellungen",
+  fileSettings: "Dateieinstellungen",
+  enableFileTracking: "Dateiverfolgung aktivieren",
+  trackAllUploadedFiles: "Alle hochgeladenen Dateien verfolgen",
+  maxFileSizeMB: "Maximale Dateigröße (MB)",
+  allowedFileTypes: "Erlaubte Dateitypen",
+  enterFileExtensions: "Geben Sie Dateierweiterungen durch Kommas getrennt ein",
+  autoDeleteOldFiles: "Alte Dateien automatisch löschen",
+  deleteOldFilesAfterPeriod: "Alte Dateien nach einem bestimmten Zeitraum löschen",
+  deleteFilesAfterDays: "Dateien löschen nach (Tagen)",
+  saveSettings: "Einstellungen speichern",
+  settingsSaved: "Einstellungen gespeichert",
+  settingsSavedDesc: "Anwendungseinstellungen wurden erfolgreich gespeichert",
+  settingsError: "Fehler beim Speichern der Einstellungen",
+  settingsErrorDesc: "Beim Versuch, die Einstellungen zu speichern, ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+  backToAdmin: "Zurück zum Admin-Bereich",
+
+  // ترجمات معلومات المستخدم
+  userInformation: "Benutzerinformationen",
+  userProfile: "Benutzerprofil",
+  fullName: "Vollständiger Name",
+  emailAddress: "E-Mail-Adresse",
+  registrationDate: "Registrierungsdatum",
+  lastLogin: "Letzter Login",
+  accountStatus: "Kontostatus",
+  active: "Aktiv",
+  inactive: "Inaktiv",
+
+  // ترجمات معلومات الاشتراك
+  subscriptionInformation: "Abonnementinformationen",
+  currentPlanDetails: "Details zum aktuellen Plan",
+  planName: "Planname",
+  billingPeriod: "Abrechnungszeitraum",
+  nextBillingDate: "Nächstes Abrechnungsdatum",
+  subscriptionStatus: "Abonnementstatus",
+  notSubscribed: "Nicht abonniert",
+  freeUser: "Kostenloser Benutzer",
+  upgradeNow: "Jetzt upgraden",
+
+  // ترجمات صفحة إدارة الملفات
+  fileStatistics: "Dateistatistiken",
+  totalFiles: "Gesamtanzahl der Dateien",
+  totalSize: "Gesamtgröße",
+  fileTypes: "Dateitypen",
+  logos: "Logos",
+  other: "Andere",
+  manageUploadedFiles: "Hochgeladene Dateien verwalten",
+  clearAllFiles: "Alle Dateien löschen",
+  uploadNewFile: "Neue Datei hochladen",
+  refresh: "Aktualisieren",
+  name: "Name",
+  type: "Typ",
+  size: "Größe",
+  uploadDate: "Hochladedatum",
+  downloadFile: "Datei herunterladen",
+  viewFile: "Datei anzeigen",
+  deleteFile: "Datei löschen",
+  noFiles: "Keine Dateien",
+
+  // ترجمات صفحة الاشتراك
+  mostPopular: "Am beliebtesten",
+  yearlyDiscount: "Sparen Sie 20% mit jährlicher Abrechnung",
+  basicCurrencyConversion: "Grundlegende Währungsumrechnung",
+  upToFiveItems: "Bis zu 5 Artikel pro Berechnung",
+  limitedPDFExports: "Begrenzte PDF-Exporte",
+  standardSupport: "Standard-Support",
+  advancedCurrencyConversion: "Erweiterte Währungsumrechnung",
+  unlimitedPDFExports: "Unbegrenzte PDF-Exporte mit Branding",
+  realtimeExchangeRates: "Echtzeit-Wechselkursaktualisierungen",
+  dataVisualization: "Datenvisualisierung und Diagramme",
+  everythingInPro: "Alles im Pro-Plan",
+  teamCollaboration: "Team-Kollaborationsfunktionen",
+  advancedReporting: "Erweiterte Berichterstattung und Analyse",
+  apiAccess: "API-Zugriff für Integration",
+  prioritySupport: "Prioritäts-Support",
+  frequentlyAskedQuestions: "Häufig gestellte Fragen",
+  howDoesTrial: "Wie funktioniert die 14-tägige Testphase?",
+  trialExplanation: "Alle kostenpflichtigen Pläne kommen mit einer 14-tägigen kostenlosen Testphase. Ihnen wird nichts berechnet, bis die Testphase endet, und Sie können jederzeit vorher kündigen.",
+  canChangePlans: "Kann ich später den Plan wechseln?",
+  changePlansExplanation: "Ja, Sie können Ihren Plan jederzeit upgraden oder downgraden. Bei einem Upgrade wird Ihnen die anteilige Differenz berechnet. Bei einem Downgrade gilt der neue Tarif im nächsten Abrechnungszyklus.",
+  paymentMethods: "Welche Zahlungsmethoden akzeptieren Sie?",
+  paymentMethodsExplanation: "Wir akzeptieren alle gängigen Kreditkarten, PayPal und verschiedene lokale Zahlungsmethoden über unseren Zahlungsabwickler Paddle.",
+  refundPolicyExplanation: "Wir bieten eine 14-tägige Geld-zurück-Garantie für alle neuen Abonnements. Wenn Sie mit unserem Service nicht zufrieden sind, können Sie innerhalb von 14 Tagen nach Ihrem ersten Kauf eine vollständige Rückerstattung beantragen.",
+  readFullRefundPolicy: "Vollständige Rückerstattungsrichtlinie lesen",
+
+  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText:
     "Wir verwenden Cookies, um Ihre Erfahrung zu verbessern. Stimmen Sie der Verwendung von Cookies zu?",
   accept: "Akzeptieren",
@@ -1191,94 +1465,44 @@ export const de: Translation = {
   advertisingCookies: "Werbe-Cookies",
   functionalCookies: "Funktionale Cookies",
   savePreferences: "Einstellungen speichern",
-
-  // File management
-  fileManagement: "Dateiverwaltung",
-  fileStatistics: "Dateistatistiken",
-  totalFiles: "Gesamtanzahl Dateien",
-  totalSize: "Gesamtgröße",
-  fileTypes: "Dateitypen",
-  pdfFiles: "PDF",
-  logoFiles: "Logos",
-  otherFiles: "Andere",
-  uploadedFilesManagement: "Verwaltung hochgeladener Dateien",
-  clearAllFiles: "Alle Dateien löschen",
-  uploadNewFile: "Neue Datei hochladen",
-  refresh: "Aktualisieren",
-  noFiles: "Keine Dateien",
-  fileName: "Name",
-  fileType: "Typ",
-  fileSize: "Größe",
-  uploadDate: "Hochladedatum",
-  downloadFile: "Datei herunterladen",
-  viewFile: "Datei anzeigen",
-  deleteFile: "Datei löschen",
-  fileDeleted: "Gelöscht",
-  fileDeletedDesc: "Datei wurde erfolgreich gelöscht",
-  fileUploaded: "Hochgeladen",
-  fileUploadedDesc: "Datei wurde erfolgreich hochgeladen",
-  fileDownloaded: "Heruntergeladen",
-  fileDownloadedDesc: "Datei wurde erfolgreich heruntergeladen",
-  fileViewError: "Fehler",
-  fileViewErrorDesc: "Datei kann nicht angezeigt werden, Inhalt nicht verfügbar",
-  refreshed: "Aktualisiert",
-  refreshedDesc: "Dateien wurden erfolgreich geladen",
-  allFilesCleared: "Gelöscht",
-  allFilesClearedDesc: "Alle Dateien wurden erfolgreich gelöscht",
-  adminPanel: "Administrationsbereich",
-  viewAndManageFiles: "Hochgeladene Dateien anzeigen und verwalten",
-
-  // Admin settings
-  settings: "Einstellungen",
-  configureAppSettings: "Anwendungseinstellungen konfigurieren",
-  backToAdmin: "Zurück zum Administrationsbereich",
-  appSettings: "Anwendungseinstellungen",
-  fileSettings: "Dateieinstellungen",
-  enableFileTracking: "Dateiverfolgung aktivieren",
-  trackAllUploadedFiles: "Alle hochgeladenen Dateien verfolgen und ihre Informationen speichern",
-  maxFileSizeLimit: "Maximale Dateigröße",
-  maxFileSizeMB: "Maximale Dateigröße (MB)",
-  allowedFileTypes: "Erlaubte Dateitypen",
-  enterFileExtensions: "Geben Sie Dateierweiterungen durch Kommas getrennt ein",
-  autoDeleteOldFiles: "Alte Dateien automatisch löschen",
-  deleteOldFilesAfterPeriod: "Alte Dateien nach einem bestimmten Zeitraum löschen",
-  deleteFilesAfterDays: "Dateien löschen nach (Tagen)",
-  saveSettings: "Einstellungen speichern",
-  settingsSaved: "Gespeichert",
-  settingsSavedDesc: "Die Einstellungen wurden erfolgreich gespeichert",
-  settingsError: "Fehler",
-  settingsErrorDesc: "Beim Speichern der Einstellungen ist ein Fehler aufgetreten",
-
-  // Subscription
-  subscription: "Abonnement",
-  upgradeAccount: "Konto upgraden",
-  upgradeToProVersion: "Auf Pro-Version upgraden",
-  proFeatures: "Pro-Funktionen",
-  unlimitedItems: "Unbegrenzte Artikel",
-  advancedReports: "Erweiterte Berichte",
-  customBranding: "Individuelles Branding",
-  dataSync: "Datensynchronisierung",
-  prioritySupport: "Prioritäts-Support",
-  currentPlan: "Aktueller Plan",
-  freePlan: "Kostenloser Plan",
-  proPlan: "Pro-Plan",
-  businessPlan: "Business-Plan",
-  monthlyBilling: "Monatliche Abrechnung",
-  yearlyBilling: "Jährliche Abrechnung",
-  yearlyDiscount: "20% Rabatt bei jährlicher Abrechnung",
-  subscribe: "Jetzt abonnieren",
-  manageSubscription: "Abonnement verwalten"
 }
 
-// French translations
+// تحديث الترجمات الفرنسية
 export const fr: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
 
+  // Subscription related
+  subscription: "Abonnement",
+  subscriptionPlans: "Plans d'abonnement",
+  proPlan: "Plan Pro",
+  businessPlan: "Plan Business",
+  freePlan: "Plan Gratuit",
+  monthlyBilling: "Facturation mensuelle",
+  yearlyBilling: "Facturation annuelle",
+  subscribe: "S'abonner maintenant",
+  loginToSubscribe: "Connectez-vous pour vous abonner",
+  loginRequiredForSubscription: "Vous devez vous connecter d'abord pour vous abonner à ce plan",
+  subscriptionSuccess: "Abonnement réussi !",
+  subscriptionSuccessDesc: "Merci de vous être abonné à WorldCosts. Votre abonnement a été activé avec succès.",
+  subscriptionDetails: "Détails de l'abonnement",
+  plan: "Plan",
+  billingCycle: "Cycle de facturation",
+  whatNext: "Et maintenant ?",
+  subscriptionSuccessNextSteps: "Vous pouvez maintenant profiter de toutes les fonctionnalités premium. Explorez les nouvelles fonctionnalités qui vous sont désormais accessibles.",
+  goToDashboard: "Aller au tableau de bord",
+  upgradeToProVersion: "Passer à la version Pro",
+  proFeatures: "Fonctionnalités Pro",
+  unlimitedItems: "Articles illimités",
+  advancedReports: "Rapports avancés",
+  customBranding: "Personnalisation de la marque",
+  dataSync: "Synchronisation des données",
+  currentPlan: "Plan actuel",
+
   itemName: "Nom de l'article",
   itemValue: "Valeur (expressions mathématiques autorisées)",
   currency: "Devise",
-  addItem: "Ajouter un article",
+  addItem: "Ajouter l'article",
   reset: "Réinitialiser",
 
   addedItems: "Articles ajoutés",
@@ -1287,7 +1511,7 @@ export const fr: Translation = {
 
   usd: "Dollar américain",
   egp: "Livre égyptienne",
-  aed: "Dirham des Émirats",
+  aed: "Dirham des EAU",
   eur: "Euro",
   gbp: "Livre sterling",
   sar: "Riyal saoudien",
@@ -1323,25 +1547,25 @@ export const fr: Translation = {
   inKWD: "En KWD",
   inQAR: "En QAR",
   inMYR: "En MYR",
-  totalCurrency: "Devise totale",
-  selectTotalCurrency: "Sélectionner la devise totale",
+  totalCurrency: "Devise du total",
+  selectTotalCurrency: "Sélectionner la devise du total",
 
-  ratesLastUpdated: "Taux de change mis à jour le",
+  lastUpdated: "Taux de change mis à jour le",
   updateRates: "Mettre à jour les taux",
 
   downloadPDF: "Télécharger PDF",
-  companyInfo: "Infos société",
-  addCompanyInfo: "Ajouter infos société",
-  editCompanyInfo: "Modifier infos société",
+  companyInfo: "Infos de l'entreprise",
+  addCompanyInfo: "Ajouter infos de l'entreprise",
+  editCompanyInfo: "Modifier infos de l'entreprise",
   pdfFileName: "Nom du fichier PDF",
-  pdfFileNameHint: "Entrez un nom pour le fichier PDF",
+  pdfFileNameHint: "Ce nom sera utilisé lors du téléchargement du fichier PDF. Si vous n'entrez pas de nom, un nom par défaut sera utilisé.",
 
-  companyInfoTitle: "Informations de la société",
-  companyInfoDescription: "Entrez les informations de la société à afficher dans le fichier PDF",
-  companyName: "Nom de la société",
-  companyAddress: "Adresse de la société",
+  companyInfoTitle: "Informations de l'entreprise",
+  companyInfoDescription: "Entrez les informations de l'entreprise à afficher dans le fichier PDF",
+  companyName: "Nom de l'entreprise",
+  companyAddress: "Adresse de l'entreprise",
   companyPhone: "Numéro de téléphone",
-  companyLogo: "Logo de la société",
+  companyLogo: "Logo de l'entreprise",
   clickToUpload: "Cliquez pour télécharger",
   dragAndDrop: "ou glissez-déposez",
   maxFileSize: "PNG, JPG (Max: 2MB)",
@@ -1355,8 +1579,8 @@ export const fr: Translation = {
   fileDownloadSuccessDesc: "Le fichier PDF a été créé et téléchargé avec succès.",
   fileDownloadError: "Erreur lors de la création du fichier",
   fileDownloadErrorDesc: "Une erreur s'est produite lors de la création du fichier PDF. Veuillez réessayer.",
-  companyInfoSaved: "Informations de la société enregistrées",
-  companyInfoSavedDesc: "Les informations de la société seront ajoutées au fichier PDF lors du téléchargement.",
+  companyInfoSaved: "Informations de l'entreprise enregistrées",
+  companyInfoSavedDesc: "Les informations de l'entreprise seront ajoutées au fichier PDF lors du téléchargement.",
 
   reportDate: "Date du rapport",
   dollarToEGP: "Taux de change USD vers EGP",
@@ -1369,12 +1593,13 @@ export const fr: Translation = {
   actions: "Actions",
   edit: "Modifier",
   delete: "Supprimer",
-  updateItem: "Mettre à jour l'article",
+  updateItem: "Mettre à jour",
 
   // PWA translations
   installApp: "Installer l'application",
   offlineTitle: "Vous êtes hors ligne",
-  offlineDescription: "Certaines fonctionnalités peuvent ne pas fonctionner correctement. Veuillez vérifier votre connexion Internet.",
+  offlineDescription:
+    "Certaines fonctionnalités peuvent ne pas fonctionner correctement. Veuillez vérifier votre connexion Internet.",
   networkStatus: "État du réseau",
   online: "En ligne",
   offline: "Hors ligne",
@@ -1384,8 +1609,9 @@ export const fr: Translation = {
   ratesUpdatedDesc: "Les taux de change ont été mis à jour avec succès",
 
   // Empty state
-  emptyStateTitle: "Calculatrice multi-devises",
-  emptyStateDescription: "Ajoutez des articles à l'aide du formulaire ci-dessus pour commencer à calculer les valeurs en plusieurs devises.",
+  emptyStateTitle: "Calculatrice Multi-Devises",
+  emptyStateDescription:
+    "Ajoutez des éléments à l'aide du formulaire ci-dessus pour commencer à calculer des valeurs en plusieurs devises.",
 
   // Chart related
   chartTitle: "Graphique des articles",
@@ -1393,15 +1619,16 @@ export const fr: Translation = {
   chartTitleCount: "Nombre d'articles par devise",
   chartTitleItems: "Valeurs des articles ajoutés",
   chartTitleValues: "Valeurs totales par devise",
-  pieChartView: "Vue graphique circulaire des devises",
-  barChartView: "Graphique à barres des valeurs par devise",
+  pieChartView: "Vue en graphique circulaire par devise",
+  barChartView: "Vue en graphique à barres des valeurs par devise",
   itemsChartView: "Vue des valeurs des articles",
   itemCount: "Nombre d'articles",
 
-  // Navigation links
+  // ترجمات جديدة للصفحات الإضافية
+  // روابط التنقل
   backToHome: "Retour à l'accueil",
 
-  // Privacy Policy
+  // سياسة الخصوصية
   privacyPolicyTitle: "Politique de confidentialité",
   privacyLastUpdated: "Dernière mise à jour",
   introductionTitle: "Introduction",
@@ -1410,7 +1637,8 @@ export const fr: Translation = {
   informationCollectionTitle: "Informations que nous collectons",
   informationCollection: "Nous pouvons collecter différents types d'informations, notamment :",
   deviceInfo: "Informations sur l'appareil telles que le type d'appareil, le système d'exploitation et le navigateur",
-  usageData: "Données d'utilisation telles que la façon dont vous utilisez l'application et les fonctionnalités que vous utilisez",
+  usageData:
+    "Données d'utilisation telles que la façon dont vous utilisez l'application et les fonctionnalités que vous utilisez",
   preferences: "Vos préférences telles que la langue et la devise préférée",
   dataUsageTitle: "Comment nous utilisons vos données",
   dataUsage: "Nous utilisons les informations que nous collectons aux fins suivantes :",
@@ -1419,7 +1647,7 @@ export const fr: Translation = {
   analytics: "Pour analyser l'utilisation et les performances de l'application",
   dataStorageTitle: "Stockage des données",
   dataStorage:
-    "Nous utilisons le stockage local dans votre navigateur pour stocker vos préférences et vos données. Ces données ne sont pas transférées à nos serveurs, sauf si vous choisissez de les partager avec nous.",
+    "Nous utilisons le stockage local dans votre navigateur pour stocker vos préférences et données. Ces données ne sont pas transférées à nos serveurs sauf si vous choisissez de les partager avec nous.",
   thirdPartyServicesTitle: "Services tiers",
   thirdPartyServices:
     "Nous pouvons utiliser des services tiers tels que Google AdSense pour afficher des publicités. Ces services sont soumis à leurs propres politiques de confidentialité.",
@@ -1430,25 +1658,26 @@ export const fr: Translation = {
   policyChanges:
     "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle politique sur cette page.",
   contactTitle: "Contactez-nous",
-  contactInfo: "Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à info@worldcosts.com.",
+  contactInfo:
+    "Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à info@worldcosts.com.",
 
-  // Terms and Conditions
+  // الشروط والأحكام
   termsAndConditionsTitle: "Conditions générales",
   acceptanceTitle: "Acceptation des conditions",
   acceptanceText:
-    "En utilisant l'application WorldCosts, vous acceptez d'être lié par ces conditions générales. Si vous n'êtes pas d'accord avec une partie de ces conditions, veuillez ne pas utiliser l'application.",
+    "En utilisant l'application WorldCosts, vous acceptez d'être lié par ces conditions générales. Si vous n'acceptez pas une partie de ces conditions, veuillez ne pas utiliser l'application.",
   useOfServiceTitle: "Utilisation du service",
   useOfServiceText:
     "Vous devez utiliser l'application conformément aux lois applicables et aux conditions énoncées ici. Vous acceptez de ne pas :",
   useRestriction1: "Utiliser l'application à des fins illégales ou interdites",
   useRestriction2: "Tenter d'accéder sans autorisation à nos systèmes ou réseaux",
-  useRestriction3: "Publier ou transmettre tout contenu nuisible ou abusif",
+  useRestriction3: "Publier ou transmettre du contenu nuisible ou abusif",
   intellectualPropertyTitle: "Propriété intellectuelle",
   intellectualPropertyText:
     "L'application et tout le contenu, les fonctionnalités et les fonctionnalités disponibles par son intermédiaire sont la propriété de WorldCosts ou de ses concédants de licence et sont protégés par les lois sur la propriété intellectuelle.",
-  disclaimerTitle: "Avertissement",
+  disclaimerTitle: "Avis de non-responsabilité",
   disclaimerText:
-    "L'application est fournie 'telle quelle' et 'selon disponibilité' sans aucune garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas l'exactitude des taux de change ou d'autres données fournies dans l'application.",
+    "L'application est fournie 'telle quelle' et 'selon disponibilité' sans garantie d'aucune sorte, expresse ou implicite. Nous ne garantissons pas l'exactitude des taux de change ou d'autres données fournies dans l'application.",
   limitationOfLiabilityTitle: "Limitation de responsabilité",
   limitationOfLiabilityText:
     "WorldCosts ne sera pas responsable des dommages directs, indirects, accessoires, spéciaux ou consécutifs résultant de votre utilisation de l'application.",
@@ -1457,16 +1686,18 @@ export const fr: Translation = {
     "Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications prendront effet immédiatement après leur publication sur cette page.",
   governingLawTitle: "Loi applicable",
   governingLawText:
-    "Ces conditions sont régies par et interprétées conformément aux lois du pays dans lequel WorldCosts est établi, sans égard aux principes de conflit de lois.",
-  contactInfoTerms: "Si vous avez des questions concernant ces conditions, veuillez nous contacter à info@worldcosts.com.",
+    "Ces conditions sont régies et interprétées conformément aux lois du pays dans lequel WorldCosts est établi, sans égard aux principes de conflit de lois.",
+  contactInfoTerms:
+    "Si vous avez des questions concernant ces conditions, veuillez nous contacter à info@worldcosts.com.",
 
-  // About Us
-  aboutUsSubtitle: "Calculatrice multi-devises facile à utiliser",
+  // من نحن
+  aboutUsSubtitle: "Calculateur multi-devises facile à utiliser",
   ourMissionTitle: "Notre mission",
   ourMissionText:
-    "Chez WorldCosts, notre mission est de simplifier la gestion des coûts en plusieurs devises pour les particuliers et les entreprises. Nous nous efforçons de fournir un outil facile à utiliser et fiable qui aide les utilisateurs à calculer et à suivre les dépenses dans différentes devises avec facilité.",
+    "Chez WorldCosts, notre mission est de simplifier la gestion des coûts multi-devises pour les particuliers et les entreprises. Nous nous efforçons de fournir un outil facile à utiliser et fiable qui aide les utilisateurs à calculer et à suivre les dépenses dans différentes devises avec facilité.",
   whatWeOfferTitle: "Ce que nous offrons",
-  whatWeOfferText: "Notre application offre une gamme de fonctionnalités conçues pour répondre aux besoins de gestion multi-devises :",
+  whatWeOfferText:
+    "Notre application offre une gamme de fonctionnalités conçues pour répondre aux besoins de gestion multi-devises :",
   feature1: "Calcul rapide et précis des valeurs en plusieurs devises",
   feature2: "Conversion de devises en temps réel utilisant les derniers taux de change",
   feature3: "Possibilité d'exporter des données vers des fichiers PDF pour le partage et l'impression",
@@ -1481,80 +1712,40 @@ export const fr: Translation = {
   website: "Site web",
   copyrightText: "Tous droits réservés",
   aboutUs: "À propos de nous",
-  termsLink: "Conditions générales",
-  privacyLink: "Politique de confidentialité",
+  footerTerms: "Conditions générales",
+  footerPrivacy: "Politique de confidentialité",
 
   // Theme related
   toggleTheme: "Changer de thème",
   lightTheme: "Mode clair",
   darkTheme: "Mode sombre",
 
-  // Features
+  // ترجمات جديدة للميزات
   features: "Fonctionnalités",
-  feature1Description: "Calculez vos coûts de produits avec précision, y compris le coût unitaire, l'emballage, l'expédition et les douanes",
+  feature1Description:
+    "Calculez avec précision les coûts de vos produits, y compris le coût unitaire, l'emballage, l'expédition et les douanes",
   feature2Description: "Conversion de devises en temps réel utilisant les derniers taux de change",
-  feature3Description: "Concevez des rapports professionnels et téléchargez-les au format PDF avec le logo et les informations de l'entreprise",
+  feature3Description:
+    "Concevez des rapports professionnels et téléchargez-les au format PDF avec le logo et les informations de l'entreprise",
   feature4Description: "Interface conviviale disponible en plusieurs langues",
 
-  // Cookie consent
-  cookieConsentText: "Nous utilisons des cookies pour améliorer votre expérience. Consentez-vous à notre utilisation des cookies ?",
-  accept: "Accepter",
-  decline: "Refuser",
-  privacySettings: "Paramètres de confidentialité",
-  storagePreferences: "Préférences de stockage",
-  analyticsPreferences: "Préférences d'analyse",
-  advertisingPreferences: "Préférences publicitaires",
-  necessaryCookies: "Cookies nécessaires",
-  analyticsCookies: "Cookies d'analyse",
-  advertisingCookies: "Cookies publicitaires",
-  functionalCookies: "Cookies fonctionnels",
-  savePreferences: "Enregistrer les préférences",
-
-  // File management
+  // ترجمات صفحات الموقع
+  pricing: "Tarifs",
+  refundPolicy: "Politique de remboursement",
   fileManagement: "Gestion des fichiers",
-  fileStatistics: "Statistiques des fichiers",
-  totalFiles: "Total des fichiers",
-  totalSize: "Taille totale",
-  fileTypes: "Types de fichiers",
-  pdfFiles: "PDF",
-  logoFiles: "Logos",
-  otherFiles: "Autres",
-  uploadedFilesManagement: "Gestion des fichiers téléchargés",
-  clearAllFiles: "Effacer tous les fichiers",
-  uploadNewFile: "Télécharger un nouveau fichier",
-  refresh: "Actualiser",
-  noFiles: "Aucun fichier",
-  fileName: "Nom",
-  fileType: "Type",
-  fileSize: "Taille",
-  uploadDate: "Date de téléchargement",
-  downloadFile: "Télécharger le fichier",
-  viewFile: "Voir le fichier",
-  deleteFile: "Supprimer le fichier",
-  fileDeleted: "Supprimé",
-  fileDeletedDesc: "Le fichier a été supprimé avec succès",
-  fileUploaded: "Téléchargé",
-  fileUploadedDesc: "Le fichier a été téléchargé avec succès",
-  fileDownloaded: "Téléchargé",
-  fileDownloadedDesc: "Le fichier a été téléchargé avec succès",
-  fileViewError: "Erreur",
-  fileViewErrorDesc: "Impossible d'afficher le fichier, le contenu n'est pas disponible",
-  refreshed: "Actualisé",
-  refreshedDesc: "Les fichiers ont été chargés avec succès",
-  allFilesCleared: "Effacé",
-  allFilesClearedDesc: "Tous les fichiers ont été effacés avec succès",
-  adminPanel: "Panneau d'administration",
-  viewAndManageFiles: "Afficher et gérer les fichiers téléchargés",
 
-  // Admin settings
+  // ترجمات صفحة الإدارة
+  adminDashboard: "Tableau de bord d'administration",
+  manageSubscription: "Gérez votre abonnement et passez aux forfaits premium",
+  viewAndManageFiles: "Afficher et gérer les fichiers téléchargés",
   settings: "Paramètres",
   configureAppSettings: "Configurer les paramètres de l'application",
-  backToAdmin: "Retour au panneau d'administration",
+
+  // ترجمات صفحة الإعدادات
   appSettings: "Paramètres de l'application",
   fileSettings: "Paramètres des fichiers",
   enableFileTracking: "Activer le suivi des fichiers",
-  trackAllUploadedFiles: "Suivre tous les fichiers téléchargés et stocker leurs informations",
-  maxFileSizeLimit: "Taille maximale de fichier",
+  trackAllUploadedFiles: "Suivre tous les fichiers téléchargés",
   maxFileSizeMB: "Taille maximale de fichier (MB)",
   allowedFileTypes: "Types de fichiers autorisés",
   enterFileExtensions: "Entrez les extensions de fichiers séparées par des virgules",
@@ -1562,42 +1753,95 @@ export const fr: Translation = {
   deleteOldFilesAfterPeriod: "Supprimer les anciens fichiers après une période spécifiée",
   deleteFilesAfterDays: "Supprimer les fichiers après (jours)",
   saveSettings: "Enregistrer les paramètres",
-  settingsSaved: "Enregistré",
-  settingsSavedDesc: "Les paramètres ont été enregistrés avec succès",
-  settingsError: "Erreur",
-  settingsErrorDesc: "Une erreur s'est produite lors de l'enregistrement des paramètres",
+  settingsSaved: "Paramètres enregistrés",
+  settingsSavedDesc: "Les paramètres de l'application ont été enregistrés avec succès",
+  settingsError: "Erreur lors de l'enregistrement des paramètres",
+  settingsErrorDesc: "Une erreur s'est produite lors de la tentative d'enregistrement des paramètres. Veuillez réessayer.",
+  backToAdmin: "Retour à l'administration",
 
-  // Subscription
-  subscription: "Abonnement",
-  upgradeAccount: "Mettre à niveau le compte",
-  upgradeToProVersion: "Passer à la version Pro",
-  proFeatures: "Fonctionnalités Pro",
-  unlimitedItems: "Articles illimités",
-  advancedReports: "Rapports avancés",
-  customBranding: "Personnalisation de la marque",
-  dataSync: "Synchronisation des données",
+  // ترجمات معلومات المستخدم
+  userInformation: "Informations utilisateur",
+  userProfile: "Profil utilisateur",
+  fullName: "Nom complet",
+  emailAddress: "Adresse e-mail",
+  registrationDate: "Date d'inscription",
+  lastLogin: "Dernière connexion",
+  accountStatus: "Statut du compte",
+  active: "Actif",
+  inactive: "Inactif",
+
+  // ترجمات معلومات الاشتراك
+  subscriptionInformation: "Informations d'abonnement",
+  currentPlanDetails: "Détails du forfait actuel",
+  planName: "Nom du forfait",
+  billingPeriod: "Période de facturation",
+  nextBillingDate: "Prochaine date de facturation",
+  subscriptionStatus: "Statut de l'abonnement",
+  notSubscribed: "Non abonné",
+  freeUser: "Utilisateur gratuit",
+  upgradeNow: "Mettre à niveau maintenant",
+
+  // ترجمات صفحة إدارة الملفات
+  fileStatistics: "Statistiques des fichiers",
+  totalFiles: "Total des fichiers",
+  totalSize: "Taille totale",
+  fileTypes: "Types de fichiers",
+  logos: "Logos",
+  other: "Autres",
+  manageUploadedFiles: "Gérer les fichiers téléchargés",
+  clearAllFiles: "Effacer tous les fichiers",
+  uploadNewFile: "Télécharger un nouveau fichier",
+  refresh: "Actualiser",
+  name: "Nom",
+  type: "Type",
+  size: "Taille",
+  uploadDate: "Date de téléchargement",
+  downloadFile: "Télécharger le fichier",
+  viewFile: "Voir le fichier",
+  deleteFile: "Supprimer le fichier",
+  noFiles: "Aucun fichier",
+
+  // ترجمات صفحة الاشتراك
+  mostPopular: "Le plus populaire",
+  yearlyDiscount: "Économisez 20% avec la facturation annuelle",
+  basicCurrencyConversion: "Conversion de devises de base",
+  upToFiveItems: "Jusqu'à 5 articles par calcul",
+  limitedPDFExports: "Exportations PDF limitées",
+  standardSupport: "Support standard",
+  advancedCurrencyConversion: "Conversion de devises avancée",
+  unlimitedPDFExports: "Exportations PDF illimitées avec branding",
+  realtimeExchangeRates: "Mises à jour des taux de change en temps réel",
+  dataVisualization: "Visualisation des données et graphiques",
+  everythingInPro: "Tout ce qui est dans le plan Pro",
+  teamCollaboration: "Fonctionnalités de collaboration d'équipe",
+  advancedReporting: "Rapports et analyses avancés",
+  apiAccess: "Accès API pour l'intégration",
   prioritySupport: "Support prioritaire",
-  currentPlan: "Forfait actuel",
-  freePlan: "Forfait gratuit",
-  proPlan: "Forfait Pro",
-  businessPlan: "Forfait Business",
-  monthlyBilling: "Facturation mensuelle",
-  yearlyBilling: "Facturation annuelle",
-  yearlyDiscount: "20% de réduction avec la facturation annuelle",
-  subscribe: "S'abonner maintenant",
-  manageSubscription: "Gérer l'abonnement"
+  frequentlyAskedQuestions: "Questions fréquemment posées",
+  howDoesTrial: "Comment fonctionne l'essai gratuit de 14 jours?",
+  trialExplanation: "Tous les plans payants sont accompagnés d'un essai gratuit de 14 jours. Vous ne serez pas facturé avant la fin de la période d'essai, et vous pouvez annuler à tout moment avant cela.",
+  canChangePlans: "Puis-je changer de plan plus tard?",
+  changePlansExplanation: "Oui, vous pouvez mettre à niveau ou rétrograder votre plan à tout moment. Si vous effectuez une mise à niveau, la différence proportionnelle vous sera facturée. Si vous rétrogradez, le nouveau tarif s'appliquera au prochain cycle de facturation.",
+  paymentMethods: "Quels modes de paiement acceptez-vous?",
+  paymentMethodsExplanation: "Nous acceptons toutes les principales cartes de crédit, PayPal et diverses méthodes de paiement locales via notre processeur de paiement, Paddle.",
+  refundPolicyExplanation: "Nous offrons une garantie de remboursement de 14 jours pour tous les nouveaux abonnements. Si vous n'êtes pas satisfait de notre service, vous pouvez demander un remboursement complet dans les 14 jours suivant votre achat initial.",
+  readFullRefundPolicy: "Lire la politique de remboursement complète",
+
+  // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
+  cookieConsentText:
+    "Nous utilisons des cookies pour améliorer votre expérience. Acceptez-vous notre utilisation des cookies ?",
+  accept: "Accepter",
+  decline: "Refuser",
+  privacySettings: "Paramètres de confidentialité",
+  storagePreferences: "Préférences de stockage",
+  analyticsPreferences: "Préférences d'analyse",
+  advertisingPreferences: "Préférences de publicité",
+  necessaryCookies: "Cookies nécessaires",
+  analyticsCookies: "Cookies analytiques",
+  advertisingCookies: "Cookies publicitaires",
+  functionalCookies: "Cookies fonctionnels",
+  savePreferences: "Enregistrer les préférences",
 }
-
-// Define language codes
-export type LanguageCode = 'ar' | 'en' | 'de' | 'fr';
-
-// Define available languages
-export const languages = [
-  { code: 'ar', name: 'العربية' },
-  { code: 'en', name: 'English' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'fr', name: 'Français' },
-];
 
 // Export all translations
 export const translations = {
@@ -1606,3 +1850,14 @@ export const translations = {
   de,
   fr,
 }
+
+// Export language metadata
+export const languages = [
+  { code: "ar", name: "العربية", dir: "rtl" },
+  { code: "en", name: "English", dir: "ltr" },
+  { code: "de", name: "Deutsch", dir: "ltr" },
+  { code: "fr", name: "Français", dir: "ltr" },
+]
+
+// Export language codes type
+export type LanguageCode = keyof typeof translations
