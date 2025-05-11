@@ -26,7 +26,7 @@ export default function AdminPage() {
 
         <TeslaCard className="max-w-6xl mx-auto mb-4 sm:mb-6">
           <TeslaCardHeader className="pb-2 sm:pb-4">
-            <TeslaCardTitle className="text-xl sm:text-2xl">{t.adminPanel}</TeslaCardTitle>
+            <TeslaCardTitle className="text-xl sm:text-2xl">{t.adminDashboard || "لوحة الإدارة"}</TeslaCardTitle>
           </TeslaCardHeader>
           <TeslaCardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
@@ -65,8 +65,8 @@ export default function AdminPage() {
                       <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-tesla-blue" />
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-medium">{t.upgradeAccount}</h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{t.upgradeToProVersion}</p>
+                      <h3 className="text-base sm:text-lg font-medium">{t.upgradeToProVersion || "الترقية إلى النسخة الاحترافية"}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">{t.manageSubscription || "إدارة اشتراكك والترقية إلى خطط مميزة"}</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
