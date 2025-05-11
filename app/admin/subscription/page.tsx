@@ -25,6 +25,26 @@ export default function SubscriptionPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
+  // التحقق من وجود معلمة refresh في URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const shouldRefresh = urlParams.get('refresh')
+
+      if (shouldRefresh === 'true') {
+        // إزالة معلمة refresh من URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
+
+        // عرض رسالة للمستخدم
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: "يمكنك الآن الاشتراك في الخطة المختارة.",
+        })
+      }
+    }
+  }, [toast])
+
   // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -35,7 +55,17 @@ export default function SubscriptionPage() {
           console.error("Error checking auth status:", error)
           setIsLoggedIn(false)
         } else {
-          setIsLoggedIn(!!data.session)
+          const hasSession = !!data.session
+          setIsLoggedIn(hasSession)
+
+          // إذا كان المستخدم غير مسجل الدخول، نقوم بتوجيهه إلى صفحة تسجيل الدخول مباشرة
+          if (!hasSession) {
+            console.log("User not logged in, redirecting to login page")
+            const currentUrl = window.location.pathname
+            setTimeout(() => {
+              router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+            }, 1000) // تأخير قصير للسماح بعرض حالة التحميل
+          }
         }
       } catch (error) {
         console.error("Error checking auth status:", error)
@@ -46,7 +76,7 @@ export default function SubscriptionPage() {
     }
 
     checkAuthStatus()
-  }, [])
+  }, [router])
 
   // لا نحتاج إلى وظائف معالجة الدفع لأن Stripe Checkout سيتعامل مع عملية الدفع
 

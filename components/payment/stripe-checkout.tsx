@@ -48,23 +48,30 @@ export function StripeCheckout({
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
-  // التحقق من حالة تسجيل الدخول عند تحميل المكون
+  // نفترض أن المستخدم مسجل الدخول لأن هذا المكون يظهر فقط عندما يكون المستخدم مسجل الدخول في صفحة الاشتراك
   useEffect(() => {
+    // تعيين حالة تسجيل الدخول إلى true مباشرة لأن هذا المكون يظهر فقط للمستخدمين المسجلين
+    setIsLoggedIn(true)
+    setIsCheckingAuth(false)
+
+    // للتأكيد، نتحقق من حالة تسجيل الدخول في الخلفية
     const checkAuthStatus = async () => {
       try {
         const { data, error } = await supabase.auth.getSession()
 
         if (error) {
           console.error("Error checking auth status:", error)
-          setIsLoggedIn(false)
+          // لا نقوم بتغيير حالة تسجيل الدخول هنا لتجنب إعادة العرض غير الضرورية
         } else {
-          setIsLoggedIn(!!data.session)
+          // نقوم بتحديث حالة تسجيل الدخول فقط إذا كانت مختلفة عن الحالة الحالية
+          if (!data.session) {
+            console.warn("User session not found in background check")
+            setIsLoggedIn(false)
+          }
         }
       } catch (error) {
         console.error("Error checking auth status:", error)
-        setIsLoggedIn(false)
-      } finally {
-        setIsCheckingAuth(false)
+        // لا نقوم بتغيير حالة تسجيل الدخول هنا لتجنب إعادة العرض غير الضرورية
       }
     }
 
@@ -73,10 +80,28 @@ export function StripeCheckout({
 
   const handleCheckout = async () => {
     // التحقق من حالة تسجيل الدخول قبل بدء عملية الدفع
-    if (!isLoggedIn) {
-      const currentUrl = window.location.pathname
-      router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
-      return
+    // نتحقق مرة أخرى من حالة تسجيل الدخول في الوقت الفعلي
+    try {
+      const { data, error } = await supabase.auth.getSession()
+
+      if (error || !data.session) {
+        console.error("Error checking auth status before checkout:", error || "No session found")
+        toast({
+          title: "تسجيل الدخول مطلوب",
+          description: "يبدو أن جلستك قد انتهت. يرجى تسجيل الدخول مرة أخرى للاستمرار.",
+          variant: "destructive",
+        })
+
+        // تأخير قصير قبل إعادة التوجيه
+        setTimeout(() => {
+          const currentUrl = window.location.pathname
+          router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+        }, 1500)
+        return
+      }
+    } catch (error) {
+      console.error("Error checking auth status before checkout:", error)
+      // نستمر في العملية على افتراض أن المستخدم مسجل الدخول
     }
 
     setIsLoading(true)
@@ -193,16 +218,36 @@ export function StripeCheckout({
     )
   }
 
-  // إذا كان المستخدم غير مسجل الدخول
+  // إذا كان المستخدم غير مسجل الدخول (هذا لن يحدث عادة لأننا نفترض أن المستخدم مسجل الدخول)
+  // ولكن نحتفظ بهذا الكود كإجراء احترازي
   if (!isLoggedIn) {
     return (
       <div className="space-y-2">
         <TeslaButton
           className="w-full"
-          variant="outline"
-          onClick={() => {
-            const currentUrl = window.location.pathname
-            router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+          onClick={async () => {
+            // نتحقق مرة أخرى من حالة تسجيل الدخول في الوقت الفعلي
+            try {
+              const { data, error } = await supabase.auth.getSession()
+
+              if (error || !data.session) {
+                // إذا لم يكن المستخدم مسجل الدخول، نوجهه إلى صفحة تسجيل الدخول
+                const currentUrl = window.location.pathname
+                router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+              } else {
+                // إذا كان المستخدم مسجل الدخول بالفعل، نقوم بتحديث الحالة وإعادة المحاولة
+                setIsLoggedIn(true)
+                toast({
+                  title: "تم التحقق من تسجيل الدخول",
+                  description: "يمكنك الآن الاشتراك في الخطة المختارة.",
+                })
+              }
+            } catch (error) {
+              console.error("Error checking auth status:", error)
+              // في حالة حدوث خطأ، نوجه المستخدم إلى صفحة تسجيل الدخول
+              const currentUrl = window.location.pathname
+              router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+            }
           }}
         >
           <LogIn className="h-4 w-4 mr-2" />
