@@ -75,6 +75,17 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
+  | "SGD"
+  | "ZAR"
+  | "SEK"
+  | "NOK"
+  | "DKK"
+  | "ILS"
+  | "JOD"
+  | "BHD"
+  | "OMR"
+  | "MAD"
+  | "TND"
 type Item = {
   id: number
   name: string
@@ -280,6 +291,17 @@ export default function CurrencyCalculator() {
         KWD: 0,
         QAR: 0,
         MYR: 0,
+        SGD: 0,
+        ZAR: 0,
+        SEK: 0,
+        NOK: 0,
+        DKK: 0,
+        ILS: 0,
+        JOD: 0,
+        BHD: 0,
+        OMR: 0,
+        MAD: 0,
+        TND: 0,
       }
 
     const totalInUSD = items.reduce((sum, item) => {
@@ -306,6 +328,17 @@ export default function CurrencyCalculator() {
       KWD: totalInUSD * rates.KWD,
       QAR: totalInUSD * rates.QAR,
       MYR: totalInUSD * rates.MYR,
+      SGD: totalInUSD * rates.SGD,
+      ZAR: totalInUSD * rates.ZAR,
+      SEK: totalInUSD * rates.SEK,
+      NOK: totalInUSD * rates.NOK,
+      DKK: totalInUSD * rates.DKK,
+      ILS: totalInUSD * rates.ILS,
+      JOD: totalInUSD * rates.JOD,
+      BHD: totalInUSD * rates.BHD,
+      OMR: totalInUSD * rates.OMR,
+      MAD: totalInUSD * rates.MAD,
+      TND: totalInUSD * rates.TND,
     }
   }
 
@@ -671,6 +704,28 @@ export default function CurrencyCalculator() {
         return "ر.ق"
       case "MYR":
         return "RM"
+      case "SGD":
+        return "S$"
+      case "ZAR":
+        return "R"
+      case "SEK":
+        return "kr"
+      case "NOK":
+        return "kr"
+      case "DKK":
+        return "kr"
+      case "ILS":
+        return "₪"
+      case "JOD":
+        return "د.أ"
+      case "BHD":
+        return "د.ب"
+      case "OMR":
+        return "ر.ع"
+      case "MAD":
+        return "د.م."
+      case "TND":
+        return "د.ت"
       default:
         return ""
     }
@@ -680,43 +735,54 @@ export default function CurrencyCalculator() {
   const currencyGroups = [
     {
       label: "الشرق الأوسط وشمال أفريقيا",
-      currencies: ["EGP", "AED", "SAR", "KWD", "QAR"],
+      currencies: ["EGP", "AED", "SAR", "KWD", "QAR", "JOD", "BHD", "OMR", "MAD", "TND", "ILS"],
     },
     {
       label: "أمريكا وأوروبا",
-      currencies: ["USD", "EUR", "GBP", "CAD", "CHF"],
+      currencies: ["USD", "EUR", "GBP", "CAD", "CHF", "SEK", "NOK", "DKK"],
     },
     {
       label: "آسيا والمحيط الهادئ",
-      currencies: ["JPY", "CNY", "AUD", "INR", "MYR"],
+      currencies: ["JPY", "CNY", "AUD", "INR", "MYR", "SGD"],
     },
     {
       label: "أخرى",
-      currencies: ["RUB", "TRY", "BRL"],
+      currencies: ["RUB", "TRY", "BRL", "ZAR"],
     },
   ]
 
   // Get currency name
   const getCurrencyName = (code: Currency): string => {
     const names: Record<Currency, string> = {
-      USD: t.usd,
-      EGP: t.egp,
-      AED: t.aed,
-      EUR: t.eur,
-      GBP: t.gbp,
-      SAR: t.sar,
-      JPY: t.jpy,
-      CNY: t.cny,
-      CAD: t.cad,
-      AUD: t.aud,
-      CHF: t.chf,
-      INR: t.inr,
-      RUB: t.rub,
-      TRY: t.try,
-      BRL: t.brl,
-      KWD: t.kwd,
-      QAR: t.qar,
-      MYR: t.myr,
+      USD: t.usd || "دولار أمريكي",
+      EGP: t.egp || "جنيه مصري",
+      AED: t.aed || "درهم إماراتي",
+      EUR: t.eur || "يورو",
+      GBP: t.gbp || "جنيه إسترليني",
+      SAR: t.sar || "ريال سعودي",
+      JPY: t.jpy || "ين ياباني",
+      CNY: t.cny || "يوان صيني",
+      CAD: t.cad || "دولار كندي",
+      AUD: t.aud || "دولار أسترالي",
+      CHF: t.chf || "فرنك سويسري",
+      INR: t.inr || "روبية هندية",
+      RUB: t.rub || "روبل روسي",
+      TRY: t.try || "ليرة تركية",
+      BRL: t.brl || "ريال برازيلي",
+      KWD: t.kwd || "دينار كويتي",
+      QAR: t.qar || "ريال قطري",
+      MYR: t.myr || "رينغيت ماليزي",
+      SGD: t.sgd || "دولار سنغافوري",
+      ZAR: t.zar || "راند جنوب أفريقي",
+      SEK: t.sek || "كرونة سويدية",
+      NOK: t.nok || "كرونة نرويجية",
+      DKK: t.dkk || "كرونة دنماركية",
+      ILS: t.ils || "شيكل إسرائيلي",
+      JOD: t.jod || "دينار أردني",
+      BHD: t.bhd || "دينار بحريني",
+      OMR: t.omr || "ريال عماني",
+      MAD: t.mad || "درهم مغربي",
+      TND: t.tnd || "دينار تونسي",
     }
     return names[code]
   }
