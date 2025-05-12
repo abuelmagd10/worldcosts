@@ -17,6 +17,17 @@ export type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
+  | "SGD"
+  | "ZAR"
+  | "SEK"
+  | "NOK"
+  | "DKK"
+  | "ILS"
+  | "JOD"
+  | "BHD"
+  | "OMR"
+  | "MAD"
+  | "TND"
 
 export interface ExchangeRates {
   USD: number
@@ -37,6 +48,17 @@ export interface ExchangeRates {
   KWD: number
   QAR: number
   MYR: number
+  SGD: number
+  ZAR: number
+  SEK: number
+  NOK: number
+  DKK: number
+  ILS: number
+  JOD: number
+  BHD: number
+  OMR: number
+  MAD: number
+  TND: number
   lastUpdated: string
 }
 
@@ -77,6 +99,17 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
       KWD: data.rates.KWD,
       QAR: data.rates.QAR,
       MYR: data.rates.MYR,
+      SGD: data.rates.SGD,
+      ZAR: data.rates.ZAR,
+      SEK: data.rates.SEK,
+      NOK: data.rates.NOK,
+      DKK: data.rates.DKK,
+      ILS: data.rates.ILS,
+      JOD: data.rates.JOD,
+      BHD: data.rates.BHD,
+      OMR: data.rates.OMR,
+      MAD: data.rates.MAD,
+      TND: data.rates.TND,
       lastUpdated: new Date().toISOString(),
     }
 
@@ -103,6 +136,17 @@ export async function getExchangeRates(): Promise<ExchangeRates> {
       KWD: 0.31,
       QAR: 3.64,
       MYR: 4.69,
+      SGD: 1.35,
+      ZAR: 18.5,
+      SEK: 10.5,
+      NOK: 10.7,
+      DKK: 6.9,
+      ILS: 3.7,
+      JOD: 0.71,
+      BHD: 0.38,
+      OMR: 0.38,
+      MAD: 10.0,
+      TND: 3.1,
       lastUpdated: new Date().toISOString(),
     }
   }
