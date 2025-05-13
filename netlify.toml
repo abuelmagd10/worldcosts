@@ -1,6 +1,29 @@
 [build]
-  publish = "dist"
+  publish = ".next"
   command = "npm run build"
 
 [[plugins]]
   package = "@netlify/visual-editor"
+
+# إضافة قواعد الرأس
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.googleadservices.com https://adservice.google.com https://cdn.paddle.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://mhrgktbewfojpspigkkg.supabase.co https://checkout.paddle.com; font-src 'self'; frame-src 'self' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://checkout.paddle.com; object-src 'none';"
+
+# إضافة قواعد إعادة التوجيه
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = ["admin"]}
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
