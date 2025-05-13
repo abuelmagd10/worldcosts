@@ -78,14 +78,35 @@
             "sizes": "1280x720",
             "type": "image/png",
             "platform": "wide",
-            "label": "الشاشة الرئيسية لتطبيق WorldCosts"
+            "label": "شاشة إدخال معلومات الشركة"
         },
         {
             "src": "screenshots/screenshot2.png",
             "sizes": "1280x720",
             "type": "image/png",
             "platform": "wide",
-            "label": "حاسبة العملات المتعددة"
+            "label": "صفحة المهمة والميزات"
+        },
+        {
+            "src": "screenshots/screenshot3.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "صفحة إدارة الملفات"
+        },
+        {
+            "src": "screenshots/screenshot4.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "شاشة العناصر المضافة والحسابات"
+        },
+        {
+            "src": "screenshots/screenshot5.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "الشاشة الرئيسية مع العناصر المضافة"
         }
     ],
     "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
