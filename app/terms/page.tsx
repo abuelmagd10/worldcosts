@@ -76,6 +76,21 @@ export default function TermsAndConditions() {
             </div>
 
             <div className="space-y-4">
+              <h2 className="text-xl font-semibold">{t.refundPolicyTitle || "سياسة الاسترداد"}</h2>
+              <p className="text-muted-foreground">{t.refundPolicyText || "نحن نقدم سياسة استرداد عادلة لعملائنا."}</p>
+              <p className="text-muted-foreground">
+                {dir === "rtl"
+                  ? "يمكن للمشتركين طلب استرداد كامل خلال 14 يومًا من تاريخ الشراء إذا لم يكونوا راضين عن الخدمة لأي سبب من الأسباب. بعد فترة 14 يومًا، لا يمكن استرداد المدفوعات. لطلب استرداد، يرجى التواصل معنا عبر البريد الإلكتروني مع ذكر سبب طلب الاسترداد ومعلومات الحساب الخاصة بك."
+                  : "Subscribers can request a full refund within 14 days of purchase if they are not satisfied with the service for any reason. After the 14-day period, payments are non-refundable. To request a refund, please contact us via email with the reason for your refund request and your account information."}
+              </p>
+              <p className="text-muted-foreground">
+                {dir === "rtl"
+                  ? "في حالة الاشتراكات السنوية، يمكن للمشتركين طلب استرداد جزئي بناءً على المدة المتبقية من الاشتراك، مع خصم رسوم إدارية بنسبة 15%. نحتفظ بالحق في رفض طلبات الاسترداد إذا كان هناك دليل على إساءة استخدام الخدمة أو انتهاك شروط الاستخدام."
+                  : "For annual subscriptions, subscribers can request a partial refund based on the remaining subscription period, minus a 15% administrative fee. We reserve the right to refuse refund requests if there is evidence of service abuse or violation of the terms of use."}
+              </p>
+            </div>
+
+            <div className="space-y-4">
               <h2 className="text-xl font-semibold">{t.contactTitle}</h2>
               <p className="text-muted-foreground">{t.contactInfoTerms}</p>
               <p className="text-muted-foreground">
