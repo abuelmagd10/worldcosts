@@ -4,6 +4,10 @@ export type Translation = {
   appTitle: string
   appDescription: string
 
+  // Refund policy
+  refundPolicyTitle: string
+  refundPolicyText: string
+
   // Form labels
   itemName: string
   itemValue: string
@@ -364,6 +368,10 @@ export type Translation = {
 export const ar: Translation = {
   appTitle: "WorldCosts",
   appDescription: "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
+
+  // Refund policy
+  refundPolicyTitle: "سياسة الاسترداد",
+  refundPolicyText: "نحن نقدم سياسة استرداد عادلة لعملائنا.",
 
   // Subscription related
   subscription: "الاشتراك",
@@ -729,6 +737,10 @@ export const ar: Translation = {
 export const en: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Add items with currency selection and calculate totals in different currencies",
+
+  // Refund policy
+  refundPolicyTitle: "Refund Policy",
+  refundPolicyText: "We offer a fair refund policy for our customers.",
 
   // Subscription related
   subscription: "Subscription",
@@ -1096,6 +1108,10 @@ export const en: Translation = {
 export const de: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Fügen Sie Artikel mit Währungsauswahl hinzu und berechnen Sie Summen in verschiedenen Währungen",
+
+  // Refund policy
+  refundPolicyTitle: "Rückerstattungsrichtlinie",
+  refundPolicyText: "Wir bieten eine faire Rückerstattungsrichtlinie für unsere Kunden.",
 
   // Subscription related
   subscription: "Abonnement",
@@ -1471,6 +1487,10 @@ export const de: Translation = {
 export const fr: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
+
+  // Refund policy
+  refundPolicyTitle: "Politique de Remboursement",
+  refundPolicyText: "Nous offrons une politique de remboursement équitable pour nos clients.",
 
   // Subscription related
   subscription: "Abonnement",
