@@ -28,6 +28,7 @@ import {
   Plus,
   Calculator,
   Settings,
+  CreditCard,
 } from "lucide-react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
@@ -667,86 +668,56 @@ export default function CurrencyCalculator() {
 
   // Get currency symbol
   const getCurrencySymbol = (currency: Currency): string => {
-    switch (currency) {
-      case "USD":
-        return "$"
-      case "EGP":
-        return "ج.م"
-      case "AED":
-        return "د.إ"
-      case "EUR":
-        return "€"
-      case "GBP":
-        return "£"
-      case "SAR":
-        return "ر.س"
-      case "JPY":
-        return "¥"
-      case "CNY":
-        return "¥"
-      case "CAD":
-        return "C$"
-      case "AUD":
-        return "A$"
-      case "CHF":
-        return "CHF"
-      case "INR":
-        return "₹"
-      case "RUB":
-        return "₽"
-      case "TRY":
-        return "₺"
-      case "BRL":
-        return "R$"
-      case "KWD":
-        return "د.ك"
-      case "QAR":
-        return "ر.ق"
-      case "MYR":
-        return "RM"
-      case "SGD":
-        return "S$"
-      case "ZAR":
-        return "R"
-      case "SEK":
-        return "kr"
-      case "NOK":
-        return "kr"
-      case "DKK":
-        return "kr"
-      case "ILS":
-        return "₪"
-      case "JOD":
-        return "د.أ"
-      case "BHD":
-        return "د.ب"
-      case "OMR":
-        return "ر.ع"
-      case "MAD":
-        return "د.م."
-      case "TND":
-        return "د.ت"
-      default:
-        return ""
+    const symbols: Record<Currency, string> = {
+      USD: t.symbolUSD || "$",
+      EGP: t.symbolEGP || "ج.م",
+      AED: t.symbolAED || "د.إ",
+      EUR: t.symbolEUR || "€",
+      GBP: t.symbolGBP || "£",
+      SAR: t.symbolSAR || "ر.س",
+      JPY: t.symbolJPY || "¥",
+      CNY: t.symbolCNY || "¥",
+      CAD: t.symbolCAD || "C$",
+      AUD: t.symbolAUD || "A$",
+      CHF: t.symbolCHF || "CHF",
+      INR: t.symbolINR || "₹",
+      RUB: t.symbolRUB || "₽",
+      TRY: t.symbolTRY || "₺",
+      BRL: t.symbolBRL || "R$",
+      KWD: t.symbolKWD || "د.ك",
+      QAR: t.symbolQAR || "ر.ق",
+      MYR: t.symbolMYR || "RM",
+      SGD: t.symbolSGD || "S$",
+      ZAR: t.symbolZAR || "R",
+      SEK: t.symbolSEK || "kr",
+      NOK: t.symbolNOK || "kr",
+      DKK: t.symbolDKK || "kr",
+      ILS: t.symbolILS || "₪",
+      JOD: t.symbolJOD || "د.أ",
+      BHD: t.symbolBHD || "د.ب",
+      OMR: t.symbolOMR || "ر.ع",
+      MAD: t.symbolMAD || "د.م.",
+      TND: t.symbolTND || "د.ت",
     }
+    return symbols[currency] || ""
   }
 
   // Currency groups
   const currencyGroups = [
     {
-      label: "الشرق الأوسط وشمال أفريقيا",
+      label: t.currencyGroupMENA,
       currencies: ["EGP", "AED", "SAR", "KWD", "QAR", "JOD", "BHD", "OMR", "MAD", "TND", "ILS"],
     },
     {
-      label: "أمريكا وأوروبا",
+      label: t.currencyGroupAmericasEurope,
       currencies: ["USD", "EUR", "GBP", "CAD", "CHF", "SEK", "NOK", "DKK"],
     },
     {
-      label: "آسيا والمحيط الهادئ",
+      label: t.currencyGroupAsiaPacific,
       currencies: ["JPY", "CNY", "AUD", "INR", "MYR", "SGD"],
     },
     {
-      label: "أخرى",
+      label: t.currencyGroupOthers,
       currencies: ["RUB", "TRY", "BRL", "ZAR"],
     },
   ]
@@ -1142,6 +1113,12 @@ export default function CurrencyCalculator() {
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
               <Info className="h-3 w-3 sm:h-4 sm:w-4" />
               {t.aboutUs}
+            </TeslaButton>
+          </Link>
+          <Link href="/pricing">
+            <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
+              {t.pricing}
             </TeslaButton>
           </Link>
           <Link href="/privacy">
