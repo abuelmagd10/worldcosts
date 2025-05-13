@@ -148,6 +148,8 @@ export default function LoginPage() {
 
     try {
       console.log("Attempting to sign in with magic link for email:", email)
+      console.log("Supabase client:", supabase ? "Initialized" : "Not initialized")
+      console.log("Supabase auth:", supabase.auth ? "Available" : "Not available")
 
       // إضافة معلمة redirect_to إذا كانت موجودة
       let redirectToUrl = `${window.location.origin}/admin`
@@ -163,16 +165,19 @@ export default function LoginPage() {
 
       // إضافة معلمة redirect_to للتعامل مع إعادة التوجيه بعد تأكيد البريد الإلكتروني
       const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+      const emailRedirectTo = `${window.location.origin}/auth/confirm${redirectParam}`
+
+      console.log("Email redirect URL:", emailRedirectTo)
 
       // إرسال رابط تسجيل الدخول
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
+          emailRedirectTo: emailRedirectTo,
         },
       })
 
-      console.log("Magic link response:", error ? `Error: ${error.message}` : "Success")
+      console.log("Magic link response:", error ? `Error: ${error.message}` : "Success", data)
 
       if (error) {
         throw error
@@ -184,12 +189,18 @@ export default function LoginPage() {
       })
     } catch (error: any) {
       console.error("Error sending magic link:", error)
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        stack: error.stack
+      })
 
       let errorMessage = error.message || "حدث خطأ أثناء إرسال رابط تسجيل الدخول. يرجى المحاولة مرة أخرى."
       let errorTitle = "خطأ في إرسال رابط تسجيل الدخول"
 
       // التحقق من نوع الخطأ
-      if (error.message.includes("For security purposes, you can only request this after")) {
+      if (error.message && error.message.includes("For security purposes, you can only request this after")) {
         // استخراج عدد الثواني من رسالة الخطأ
         const secondsMatch = error.message.match(/after (\d+) seconds/)
         const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
@@ -199,7 +210,7 @@ export default function LoginPage() {
 
         // بدء عداد تنازلي
         startCooldownTimer(seconds)
-      } else if (error.message.includes("user not found")) {
+      } else if (error.message && error.message.includes("user not found")) {
         errorTitle = "المستخدم غير موجود"
         errorMessage = "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟"
 
@@ -218,6 +229,9 @@ export default function LoginPage() {
 
         setIsLoading(false)
         return
+      } else if (error.message && error.message.includes("network")) {
+        errorTitle = "خطأ في الاتصال بالشبكة"
+        errorMessage = "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
       }
 
       toast({
@@ -234,27 +248,32 @@ export default function LoginPage() {
   const checkUserExists = async (email: string) => {
     try {
       console.log("Checking if user exists:", email)
+      console.log("Supabase client:", supabase ? "Initialized" : "Not initialized")
+      console.log("Supabase auth:", supabase.auth ? "Available" : "Not available")
 
       // إضافة معلمة redirect_to إذا كانت موجودة
       const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+      const emailRedirectTo = `${window.location.origin}/auth/confirm${redirectParam}`
+
+      console.log("Email redirect URL for user check:", emailRedirectTo)
 
       // استخدام signInWithOtp بدلاً من resetPasswordForEmail للتحقق من وجود المستخدم
       // هذه الطريقة أكثر موثوقية للتحقق من وجود المستخدم
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false, // لا تقم بإنشاء مستخدم جديد إذا لم يكن موجودًا
-          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
+          emailRedirectTo: emailRedirectTo,
         },
       })
 
-      console.log("Sign in with OTP response:", error ? error.message : "No error")
+      console.log("Sign in with OTP response:", error ? `Error: ${error.message}` : "Success", data)
 
       // إذا كان هناك خطأ يشير إلى أن المستخدم غير موجود
       if (error && (
-        error.message.includes("user not found") ||
-        error.message.includes("Invalid login credentials") ||
-        error.message.includes("Email not confirmed")
+        (error.message && error.message.includes("user not found")) ||
+        (error.message && error.message.includes("Invalid login credentials")) ||
+        (error.message && error.message.includes("Email not confirmed"))
       )) {
         console.log("User does not exist or email not confirmed")
         return false
@@ -262,8 +281,24 @@ export default function LoginPage() {
 
       // في حالة عدم وجود خطأ أو خطأ آخر، نفترض أن المستخدم موجود
       return true
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error checking user existence:", error)
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        stack: error.stack
+      })
+
+      // في حالة حدوث خطأ في الشبكة، نعرض رسالة خطأ
+      if (error.message && error.message.includes("network")) {
+        toast({
+          title: "خطأ في الاتصال بالشبكة",
+          description: "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+          variant: "destructive",
+        })
+      }
+
       return true // نفترض أن المستخدم موجود في حالة حدوث خطأ
     }
   }
@@ -283,6 +318,11 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // طباعة معلومات التصحيح
+      console.log("Login attempt with email:", email)
+      console.log("Supabase client:", supabase ? "Initialized" : "Not initialized")
+      console.log("Supabase auth:", supabase.auth ? "Available" : "Not available")
+
       // التحقق من وجود المستخدم قبل محاولة تسجيل الدخول
       const userExists = await checkUserExists(email)
 
@@ -306,12 +346,13 @@ export default function LoginPage() {
 
       console.log("Attempting to sign in with password for email:", email)
 
+      // محاولة تسجيل الدخول باستخدام البريد الإلكتروني وكلمة المرور
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log("Sign in response:", error ? `Error: ${error.message}` : "Success")
+      console.log("Sign in response:", error ? `Error: ${error.message}` : "Success", data)
 
       if (error) {
         // تسجيل معلومات إضافية عن الخطأ
@@ -323,6 +364,10 @@ export default function LoginPage() {
 
         throw error
       }
+
+      // تسجيل معلومات المستخدم للتصحيح
+      console.log("User session:", data.session ? "Created" : "Not created")
+      console.log("User data:", data.user ? "Available" : "Not available")
 
       toast({
         title: t.loginSuccess || "تم تسجيل الدخول بنجاح",
@@ -351,6 +396,12 @@ export default function LoginPage() {
       }, 1000)
     } catch (error: any) {
       console.error("Login error:", error)
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        stack: error.stack
+      })
 
       let errorMessage = t.loginFailed || "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى."
       let errorTitle = t.loginError || "خطأ في تسجيل الدخول"
@@ -362,17 +413,24 @@ export default function LoginPage() {
         // التحقق من سبب الخطأ بشكل أكثر تفصيلاً
         const checkEmailConfirmation = async () => {
           try {
+            console.log("Checking email confirmation for:", email)
+
             // إضافة معلمة redirect_to إذا كانت موجودة
             const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+            const emailRedirectTo = `${window.location.origin}/auth/confirm${redirectParam}`
+
+            console.log("Email redirect URL for confirmation:", emailRedirectTo)
 
             // محاولة إرسال رابط تأكيد البريد الإلكتروني
-            const { error: resendError } = await supabase.auth.resend({
+            const { data: resendData, error: resendError } = await supabase.auth.resend({
               type: 'signup',
               email,
               options: {
-                emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
+                emailRedirectTo: emailRedirectTo,
               }
             })
+
+            console.log("Resend confirmation response:", resendError ? `Error: ${resendError.message}` : "Success", resendData)
 
             // إذا لم يكن هناك خطأ، فهذا يعني أن البريد الإلكتروني غير مؤكد
             if (!resendError) {
@@ -380,11 +438,15 @@ export default function LoginPage() {
               errorMessage = "يبدو أن حسابك موجود ولكن البريد الإلكتروني غير مؤكد. يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد."
               errorVariant = "default"
               showResendButton = true
-            } else if (resendError.message.includes("user not found")) {
+            } else if (resendError.message && resendError.message.includes("user not found")) {
               // المستخدم غير موجود
               errorTitle = "المستخدم غير موجود"
               errorMessage = "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟"
               showCreateAccountButton = true
+            } else if (resendError.message && resendError.message.includes("network")) {
+              // خطأ في الاتصال بالشبكة
+              errorTitle = "خطأ في الاتصال بالشبكة"
+              errorMessage = "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
             } else {
               // كلمة المرور غير صحيحة على الأرجح
               errorTitle = "كلمة المرور غير صحيحة"
@@ -417,8 +479,14 @@ export default function LoginPage() {
                 </div>
               ) : undefined,
             })
-          } catch (checkError) {
+          } catch (checkError: any) {
             console.error("Error checking email confirmation:", checkError)
+            console.error("Check error details:", {
+              name: checkError.name,
+              message: checkError.message,
+              status: checkError.status,
+              stack: checkError.stack
+            })
 
             // في حالة حدوث خطأ، نعرض رسالة الخطأ الافتراضية
             errorTitle = "بيانات الدخول غير صحيحة"
@@ -460,6 +528,9 @@ export default function LoginPage() {
         errorMessage = "يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد. أو انقر على زر إعادة إرسال رابط التأكيد أدناه."
         errorVariant = "default"
         showResendButton = true
+      } else if (error.message && error.message.includes("network")) {
+        errorTitle = "خطأ في الاتصال بالشبكة"
+        errorMessage = "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
       }
 
       toast({
