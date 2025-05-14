@@ -1,0 +1,168 @@
+import { NextRequest, NextResponse } from "next/server"
+import { createServerClient } from "@supabase/ssr"
+import { cookies } from "next/headers"
+
+// تعريف نوع البيانات المرسلة في الطلب
+interface RequestBody {
+  priceId: string
+  planId: string
+  planName: string
+  billingCycle: "monthly" | "yearly"
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // التحقق من صحة الطلب
+    if (!request.body) {
+      return NextResponse.json(
+        { error: "No request body provided" },
+        { status: 400 }
+      )
+    }
+
+    // قراءة بيانات الطلب
+    const body: RequestBody = await request.json()
+    const { priceId, planId, planName, billingCycle } = body
+
+    // التحقق من وجود معرف السعر
+    if (!priceId) {
+      return NextResponse.json(
+        { error: "Price ID is required" },
+        { status: 400 }
+      )
+    }
+
+    // إنشاء عميل Supabase للتحقق من المستخدم
+    const cookieStore = cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set({ name, value, ...options })
+          },
+          remove(name: string, options: any) {
+            cookieStore.set({ name, value: "", ...options })
+          },
+        },
+      }
+    )
+
+    // التحقق من المستخدم الحالي
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      )
+    }
+
+    // الحصول على معلومات المستخدم
+    const userEmail = user.email
+
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      )
+    }
+
+    // إنشاء طلب إلى Paddle API
+    const apiKey = process.env.PADDLE_API_KEY
+
+    if (!apiKey) {
+      console.error("Paddle API key is missing")
+      return NextResponse.json(
+        { error: "Payment service configuration error" },
+        { status: 500 }
+      )
+    }
+
+    // بناء عنوان URL للنجاح والإلغاء
+    const origin = request.headers.get("origin") || "http://localhost:3000"
+    const successUrl = `${origin}/admin/subscription/success?plan_name=${encodeURIComponent(planName)}&billing_cycle=${billingCycle}`
+    const cancelUrl = `${origin}/admin/subscription/cancel`
+
+    try {
+      // استخدام Paddle API لإنشاء جلسة دفع
+
+      // طباعة معلومات الطلب للتصحيح
+      console.log("Creating checkout with:", {
+        priceId,
+        userEmail,
+        successUrl,
+        cancelUrl,
+        userId: user.id,
+        planId,
+        billingCycle
+      })
+
+      // إعداد بيانات الطلب لـ Paddle API
+      const paddleApiUrl = 'https://api.paddle.com/checkout/custom'
+
+      const requestData = {
+        items: [
+          {
+            price_id: priceId,
+            quantity: 1
+          }
+        ],
+        customer_email: userEmail,
+        customer_id: user.id,
+        custom_data: {
+          userId: user.id,
+          planId,
+          planName,
+          billingCycle
+        },
+        success_url: successUrl,
+        cancel_url: cancelUrl
+      }
+
+      // إرسال الطلب إلى Paddle API
+      const response = await fetch(paddleApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(requestData)
+      })
+
+      // التحقق من استجابة Paddle
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("Paddle API error:", errorData)
+        return NextResponse.json(
+          { error: "Error creating checkout session" },
+          { status: response.status }
+        )
+      }
+
+      // قراءة بيانات الاستجابة
+      const data = await response.json()
+
+      // إرجاع رابط الدفع
+      return NextResponse.json({
+        checkoutUrl: data.url
+      })
+    } catch (error: any) {
+      console.error("Error calling Paddle API:", error)
+      return NextResponse.json(
+        { error: error.message || "Error creating checkout session" },
+        { status: 500 }
+      )
+    }
+  } catch (error: any) {
+    console.error("Unexpected error:", error)
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 }
+    )
+  }
+}

@@ -113,44 +113,45 @@ export function PaddleCheckout({
     setIsLoading(true)
 
     try {
-      // استخدام رابط اختبار مؤقت في جميع الحالات للتبسيط
-      console.log("Using simplified checkout approach")
+      // استخدام Paddle API لإنشاء جلسة دفع
+      console.log("Creating Paddle checkout session")
 
       toast({
-        title: "جاري فتح صفحة الدفع",
+        title: "جاري إنشاء جلسة الدفع",
+        description: "يرجى الانتظار بينما نقوم بإعداد عملية الدفع.",
+      })
+
+      // إنشاء جلسة دفع باستخدام API
+      const response = await fetch('/api/paddle/create-checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId,
+          planId,
+          planName,
+          billingCycle,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'فشل في إنشاء جلسة الدفع')
+      }
+
+      const { checkoutUrl } = await response.json()
+
+      // عرض رسالة للمستخدم
+      toast({
+        title: "تم إنشاء جلسة الدفع",
         description: "سيتم فتح صفحة الدفع في نافذة جديدة.",
       })
 
-      // فتح صفحة Paddle مباشرة بدون استخدام واجهة API
-      setTimeout(() => {
-        try {
-          // فتح صفحة Paddle مباشرة
-          const paddleUrl = "https://paddle.com"
-          window.open(paddleUrl, '_blank')
+      // فتح صفحة الدفع
+      window.open(checkoutUrl, '_blank')
 
-          // عرض رسالة للمستخدم
-          toast({
-            title: "تم فتح موقع Paddle",
-            description: "تم فتح موقع Paddle في نافذة جديدة. في الإصدار النهائي، سيتم توجيهك مباشرة إلى صفحة الدفع.",
-            duration: 5000,
-          })
-
-          // توجيه المستخدم إلى صفحة نجاح الاشتراك بعد فترة قصيرة
-          setTimeout(() => {
-            // توجيه المستخدم إلى صفحة نجاح الاشتراك
-            router.push(`/admin/subscription/success?plan_name=${encodeURIComponent(planName)}&billing_cycle=${billingCycle}`)
-          }, 3000)
-
-          console.log("Paddle website opened")
-        } catch (error) {
-          console.error("Error opening Paddle website:", error)
-          toast({
-            title: "خطأ في فتح موقع Paddle",
-            description: "حدث خطأ أثناء محاولة فتح موقع Paddle. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
-            variant: "destructive",
-          })
-        }
-      }, 500)
+      console.log("Paddle checkout opened")
     } catch (error: any) {
       console.error("Checkout error:", error)
       toast({
