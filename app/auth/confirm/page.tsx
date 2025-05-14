@@ -6,14 +6,14 @@ import Link from "next/link"
 import { ArrowLeft, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { TeslaButton } from "@/components/ui/tesla-button"
-import { TeslaCard, TeslaCardContent, TeslaCardDescription, TeslaCardFooter, TeslaCardHeader, TeslaCardTitle } from "@/components/ui/tesla-card"
+import { TeslaCard, TeslaCardContent, TeslaCardFooter, TeslaCardHeader, TeslaCardTitle, TeslaCardDescription } from "@/components/ui/tesla-card"
 import { AppLogo } from "@/components/app-logo"
 import { useToast } from "@/components/ui/use-toast"
 import { supabase } from "@/lib/supabase-client"
 
-// مكون لعرض محتوى الصفحة مع استخدام useSearchParams
+// مكون محتوى الصفحة
 function ConfirmEmailContent() {
-  const { t, dir } = useLanguage()
+  const { t } = useLanguage()
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -28,12 +28,12 @@ function ConfirmEmailContent() {
         let token = searchParams.get("token")
         let type = searchParams.get("type") || "signup"
         let redirectTo = searchParams.get("redirect_to") || null
-
+        
         // التحقق من وجود رمز الخطأ في URL
         let error = searchParams.get("error")
         let error_code = searchParams.get("error_code")
         let error_description = searchParams.get("error_description")
-
+        
         // إذا لم يتم العثور على المعلمات في searchParams، نحاول استخراجها من الهاش
         if ((!token || !type) && window.location.hash) {
           console.log("Trying to extract parameters from hash:", window.location.hash)
@@ -44,10 +44,10 @@ function ConfirmEmailContent() {
           error = hashParams.get("error") || error
           error_code = hashParams.get("error_code") || error_code
           error_description = hashParams.get("error_description") || error_description
-
+          
           console.log("Extracted from hash:", { token, type, redirectTo, error, error_code, error_description })
         }
-
+        
         // إذا كان هناك معلمات في URL ولكن ليس في الهاش، نقوم بتحديث الهاش
         if (token && !window.location.hash.includes("token")) {
           // إنشاء هاش جديد بالمعلمات
@@ -55,10 +55,10 @@ function ConfirmEmailContent() {
           if (token) newHash.set("token", token)
           if (type) newHash.set("type", type)
           if (redirectTo) newHash.set("redirect_to", redirectTo)
-
+          
           // تحديث الهاش في URL
           window.location.hash = newHash.toString()
-
+          
           // إعادة تحميل الصفحة للتأكد من استخدام المعلمات الجديدة
           return
         }
@@ -79,7 +79,7 @@ function ConfirmEmailContent() {
 
         // تأكيد البريد الإلكتروني باستخدام Supabase
         let result
-
+        
         if (type === "recovery") {
           // إعادة تعيين كلمة المرور
           result = await supabase.auth.verifyOtp({
@@ -93,22 +93,22 @@ function ConfirmEmailContent() {
             type: "email",
           })
         }
-
+        
         const { error: resultError } = result
-
+        
         if (resultError) {
           throw resultError
         }
-
+        
         setIsSuccess(true)
         setIsLoading(false)
-
+        
         // عرض رسالة نجاح
         toast({
           title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
           description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
         })
-
+        
         // إنشاء مكون لعرض رسالة النجاح
         const SuccessDialog = () => (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -137,18 +137,16 @@ function ConfirmEmailContent() {
             </div>
           </div>
         );
-
+        
         // إضافة مكون النجاح إلى الصفحة
         const dialogContainer = document.createElement('div');
         dialogContainer.id = 'success-dialog';
         document.body.appendChild(dialogContainer);
-
+        
         // استخدام ReactDOM.render لعرض المكون
         const ReactDOM = require('react-dom');
         ReactDOM.render(<SuccessDialog />, dialogContainer);
-
-        // استخدام متغير redirectTo الذي تم تعريفه سابقًا
-
+        
         // تحديث زر تسجيل الدخول في مكون النجاح
         const loginButton = document.querySelector('#success-dialog button');
         if (loginButton) {
@@ -162,10 +160,10 @@ function ConfirmEmailContent() {
               try {
                 // فك تشفير URL الإعادة التوجيه
                 const decodedRedirect = decodeURIComponent(redirectTo);
-
+                
                 // التحقق مما إذا كان URL الإعادة التوجيه يحتوي على صفحة الاشتراك
                 const shouldRefresh = decodedRedirect.includes("/admin/subscription");
-
+                
                 if (shouldRefresh) {
                   // إضافة معلمة refresh=true إلى URL
                   const separator = decodedRedirect.includes("?") ? "&" : "?";
@@ -184,12 +182,12 @@ function ConfirmEmailContent() {
             }
           });
         }
-
+        
         // إعادة توجيه المستخدم بعد تأخير
         setTimeout(() => {
           // إزالة مكون النجاح
           document.getElementById('success-dialog')?.remove();
-
+          
           // إذا كان نوع التأكيد هو إعادة تعيين كلمة المرور، توجيه المستخدم إلى صفحة إعادة تعيين كلمة المرور
           if (type === "recovery") {
             router.push("/auth/reset-password");
@@ -199,10 +197,10 @@ function ConfirmEmailContent() {
             try {
               // فك تشفير URL الإعادة التوجيه
               const decodedRedirect = decodeURIComponent(redirectTo);
-
+              
               // التحقق مما إذا كان URL الإعادة التوجيه يحتوي على صفحة الاشتراك
               const shouldRefresh = decodedRedirect.includes("/admin/subscription");
-
+              
               if (shouldRefresh) {
                 // إضافة معلمة refresh=true إلى URL
                 const separator = decodedRedirect.includes("?") ? "&" : "?";
@@ -222,9 +220,9 @@ function ConfirmEmailContent() {
         }, 5000);
       } catch (error: any) {
         console.error("Error confirming email:", error)
-
+        
         setErrorMessage(error.message || t.emailConfirmationFailed || "فشل تأكيد البريد الإلكتروني. يرجى المحاولة مرة أخرى.")
-
+        
         toast({
           title: t.error || "خطأ",
           description: error.message || t.emailConfirmationFailed || "فشل تأكيد البريد الإلكتروني. يرجى المحاولة مرة أخرى.",
@@ -234,7 +232,7 @@ function ConfirmEmailContent() {
         setIsLoading(false)
       }
     }
-
+    
     confirmEmail()
   }, [searchParams, router, t, toast])
 
