@@ -24,14 +24,27 @@ function ConfirmEmailContent() {
   useEffect(() => {
     const confirmEmail = async () => {
       try {
-        // الحصول على رمز التأكيد من معلمات البحث
-        const token = searchParams.get("token")
-        const type = searchParams.get("type") || "signup"
+        // الحصول على رمز التأكيد من معلمات البحث أو من الهاش
+        let token = searchParams.get("token")
+        let type = searchParams.get("type") || "signup"
 
         // التحقق من وجود رمز الخطأ في URL
-        const error = searchParams.get("error")
-        const error_code = searchParams.get("error_code")
-        const error_description = searchParams.get("error_description")
+        let error = searchParams.get("error")
+        let error_code = searchParams.get("error_code")
+        let error_description = searchParams.get("error_description")
+
+        // إذا لم يتم العثور على المعلمات في searchParams، نحاول استخراجها من الهاش
+        if (!token && window.location.hash) {
+          console.log("Trying to extract parameters from hash:", window.location.hash)
+          const hashParams = new URLSearchParams(window.location.hash.substring(1))
+          token = hashParams.get("token") || token
+          type = hashParams.get("type") || type
+          error = hashParams.get("error") || error
+          error_code = hashParams.get("error_code") || error_code
+          error_description = hashParams.get("error_description") || error_description
+
+          console.log("Extracted from hash:", { token, type, error, error_code, error_description })
+        }
 
         // إذا كان هناك خطأ في URL، نعرضه للمستخدم
         if (error) {

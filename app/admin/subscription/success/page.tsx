@@ -20,8 +20,17 @@ function SuccessPageContent() {
 
   useEffect(() => {
     // استخراج معلومات الاشتراك من معلمات البحث
-    const planNameParam = searchParams.get("plan_name")
-    const billingCycleParam = searchParams.get("billing_cycle")
+    let planNameParam = searchParams.get("plan_name")
+    let billingCycleParam = searchParams.get("billing_cycle")
+
+    // إذا لم يتم العثور على المعلمات في searchParams، نحاول استخراجها من الهاش
+    if ((!planNameParam || !billingCycleParam) && window.location.hash) {
+      console.log("Trying to extract parameters from hash:", window.location.hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      planNameParam = hashParams.get("plan_name") || planNameParam
+      billingCycleParam = hashParams.get("billing_cycle") || billingCycleParam
+      console.log("Extracted from hash:", { planNameParam, billingCycleParam })
+    }
 
     if (planNameParam) {
       setPlanName(planNameParam)

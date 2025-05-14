@@ -28,7 +28,16 @@ function ResetPasswordContent() {
 
   // التحقق من وجود رمز إعادة تعيين كلمة المرور
   useEffect(() => {
-    const token = searchParams.get("token")
+    // محاولة الحصول على الرمز من معلمات البحث
+    let token = searchParams.get("token")
+
+    // إذا لم يتم العثور على الرمز في searchParams، نحاول استخراجه من الهاش
+    if (!token && window.location.hash) {
+      console.log("Trying to extract token from hash:", window.location.hash)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      token = hashParams.get("token")
+      console.log("Extracted token from hash:", token)
+    }
 
     if (token) {
       setIsResetMode(true)
