@@ -151,49 +151,113 @@ function ConfirmEmailContent() {
         
         console.log("Verifying token with type:", verifyType);
 
-        // تأكيد البريد الإلكتروني باستخدام Supabase
-        const { error: resultError } = await supabase.auth.verifyOtp({
-          token,
-          type: verifyType,
-        });
-        
-        if (resultError) {
-          console.error("Error verifying token:", resultError);
-          throw resultError;
-        }
-        
-        console.log("Email confirmed successfully!");
-        setIsSuccess(true);
-        setIsLoading(false);
-        
-        // عرض رسالة نجاح
-        toast({
-          title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
-          description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
-        });
-        
-        // إعادة توجيه المستخدم بعد تأخير
-        setTimeout(() => {
-          // إعادة التوجيه إلى صفحة تسجيل الدخول
-          if (redirectTo) {
-            try {
-              const decodedRedirect = decodeURIComponent(redirectTo);
-              const shouldRefresh = decodedRedirect.includes("/admin/subscription");
+        try {
+          // تأكيد البريد الإلكتروني باستخدام Supabase
+          const { error: resultError } = await supabase.auth.verifyOtp({
+            token,
+            type: verifyType,
+          });
+          
+          if (resultError) {
+            console.error("Error verifying token:", resultError);
+            
+            // التحقق من حالة المستخدم الحالي
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user && user.email_confirmed_at) {
+              // إذا كان البريد الإلكتروني مؤكدًا بالفعل، نعتبر العملية ناجحة
+              console.log("Email already confirmed:", user.email_confirmed_at);
+              setIsSuccess(true);
               
-              if (shouldRefresh) {
-                const separator = decodedRedirect.includes("?") ? "&" : "?";
-                window.location.href = `${decodedRedirect}${separator}refresh=true`;
-              } else {
-                window.location.href = decodedRedirect;
-              }
-            } catch (error) {
-              console.error("Error redirecting after email confirmation:", error);
-              window.location.href = "/auth/login";
+              toast({
+                title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
+                description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
+              });
+            } else {
+              // إذا لم يكن البريد الإلكتروني مؤكدًا، نعرض رسالة الخطأ
+              throw resultError;
             }
           } else {
-            window.location.href = "/auth/login";
+            // تأكيد البريد الإلكتروني بنجاح
+            console.log("Email confirmed successfully!");
+            setIsSuccess(true);
+            
+            toast({
+              title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
+              description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
+            });
           }
-        }, 3000);
+        } catch (verifyError) {
+          console.error("Error in verifyOtp:", verifyError);
+          
+          // محاولة تسجيل الدخول للتحقق من حالة البريد الإلكتروني
+          try {
+            // محاولة تسجيل الدخول باستخدام البريد الإلكتروني من الرابط
+            const emailFromToken = await extractEmailFromToken(token);
+            
+            if (emailFromToken) {
+              console.log("Extracted email from token:", emailFromToken);
+              
+              // التحقق من حالة البريد الإلكتروني باستخدام API
+              const response = await fetch('/api/auth/check-user-exists', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: emailFromToken }),
+              });
+              
+              const data = await response.json();
+              console.log("Check user exists response:", data);
+              
+              if (data.exists && data.emailConfirmed) {
+                // إذا كان البريد الإلكتروني مؤكدًا بالفعل، نعتبر العملية ناجحة
+                console.log("Email already confirmed according to API");
+                setIsSuccess(true);
+                
+                toast({
+                  title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
+                  description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
+                });
+              } else {
+                // إذا لم يكن البريد الإلكتروني مؤكدًا، نعرض رسالة الخطأ
+                throw new Error("Email not confirmed");
+              }
+            } else {
+              throw new Error("Could not extract email from token");
+            }
+          } catch (fallbackError) {
+            console.error("Fallback error:", fallbackError);
+            throw verifyError;
+          }
+        }
+        
+        setIsLoading(false);
+        
+        // إعادة توجيه المستخدم بعد تأخير
+        if (isSuccess) {
+          setTimeout(() => {
+            // إعادة التوجيه إلى صفحة تسجيل الدخول
+            if (redirectTo) {
+              try {
+                const decodedRedirect = decodeURIComponent(redirectTo);
+                const shouldRefresh = decodedRedirect.includes("/admin/subscription");
+                
+                if (shouldRefresh) {
+                  const separator = decodedRedirect.includes("?") ? "&" : "?";
+                  window.location.href = `${decodedRedirect}${separator}refresh=true`;
+                } else {
+                  window.location.href = decodedRedirect;
+                }
+              } catch (error) {
+                console.error("Error redirecting after email confirmation:", error);
+                window.location.href = "/auth/login";
+              }
+            } else {
+              window.location.href = "/auth/login";
+            }
+          }, 3000);
+        }
       } catch (error: any) {
         console.error("Error confirming email:", error);
         
@@ -209,8 +273,27 @@ function ConfirmEmailContent() {
       }
     };
     
+    // دالة لاستخراج البريد الإلكتروني من الرمز
+    const extractEmailFromToken = async (token: string): Promise<string | null> => {
+      try {
+        // محاولة استخراج البريد الإلكتروني من الرمز باستخدام JWT
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload.email) {
+            return payload.email;
+          }
+        }
+        
+        return null;
+      } catch (error) {
+        console.error("Error extracting email from token:", error);
+        return null;
+      }
+    };
+    
     confirmEmail();
-  }, [searchParams, router, t, toast]);
+  }, [searchParams, router, t, toast, isSuccess]);
 
   return (
     <div className="container mx-auto py-8 px-4">
