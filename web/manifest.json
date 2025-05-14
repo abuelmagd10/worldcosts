@@ -1,27 +1,55 @@
 {
-    "name": "worldcosts",
-    "short_name": "worldcosts",
-    "start_url": ".",
+    "name": "WorldCosts",
+    "short_name": "WorldCosts",
+    "id": "com.worldcosts.app",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
+    "display_override": ["window-controls-overlay"],
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "description": "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
+    "orientation": "any",
+    "dir": "rtl",
+    "lang": "ar",
+    "categories": ["finance", "utilities", "productivity"],
     "prefer_related_applications": false,
+    "related_applications": [],
+    "handle_links": "preferred",
+    "launch_handler": {
+        "client_mode": ["navigate-existing", "auto"]
+    },
+    "scope_extensions": [
+        {"origin": "https://worldcosts.com"}
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/Icon-384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
             "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-384.png",
+            "sizes": "384x384",
             "type": "image/png",
             "purpose": "maskable"
         },
@@ -31,5 +59,55 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "file_handlers": [
+        {
+            "action": "/open-file",
+            "accept": {
+                "text/csv": [".csv"],
+                "application/json": [".json"]
+            }
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "screenshots/screenshot1.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "شاشة إدخال معلومات الشركة"
+        },
+        {
+            "src": "screenshots/screenshot2.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "صفحة المهمة والميزات"
+        },
+        {
+            "src": "screenshots/screenshot3.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "صفحة إدارة الملفات"
+        },
+        {
+            "src": "screenshots/screenshot4.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "شاشة العناصر المضافة والحسابات"
+        },
+        {
+            "src": "screenshots/screenshot5.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "الشاشة الرئيسية مع العناصر المضافة"
+        }
+    ],
+    "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
 }

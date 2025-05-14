@@ -4,6 +4,10 @@ export type Translation = {
   appTitle: string
   appDescription: string
 
+  // Refund policy
+  refundPolicyTitle: string
+  refundPolicyText: string
+
   // Form labels
   itemName: string
   itemValue: string
@@ -62,6 +66,17 @@ export type Translation = {
   kwd: string
   qar: string
   myr: string
+  sgd: string
+  zar: string
+  sek: string
+  nok: string
+  dkk: string
+  ils: string
+  jod: string
+  bhd: string
+  omr: string
+  mad: string
+  tnd: string
 
   // Totals section
   totalAmount: string
@@ -345,6 +360,57 @@ export type Translation = {
   refundPolicyExplanation: string
   readFullRefundPolicy: string
 
+  // ترجمات إضافية لصفحة التسعير
+  subscriptionPlansDescription: string
+  allFeaturesInFreePlan: string
+  noAds: string
+  limitedFileStorage: string
+  oneGBStorage: string
+  fiveGBStorage: string
+  multipleAccounts: string
+  dedicatedSupport: string
+  canCancelAnytime: string
+  cancelExplanation: string
+  forMoreInfo: string
+  and: string
+
+  // ترجمات مجموعات العملات
+  currencyGroupMENA: string
+  currencyGroupAmericasEurope: string
+  currencyGroupAsiaPacific: string
+  currencyGroupOthers: string
+
+  // رموز العملات
+  symbolUSD: string
+  symbolEGP: string
+  symbolAED: string
+  symbolEUR: string
+  symbolGBP: string
+  symbolSAR: string
+  symbolJPY: string
+  symbolCNY: string
+  symbolCAD: string
+  symbolAUD: string
+  symbolCHF: string
+  symbolINR: string
+  symbolRUB: string
+  symbolTRY: string
+  symbolBRL: string
+  symbolKWD: string
+  symbolQAR: string
+  symbolMYR: string
+  symbolSGD: string
+  symbolZAR: string
+  symbolSEK: string
+  symbolNOK: string
+  symbolDKK: string
+  symbolILS: string
+  symbolJOD: string
+  symbolBHD: string
+  symbolOMR: string
+  symbolMAD: string
+  symbolTND: string
+
   // إضافة ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText: string
   accept: string
@@ -364,6 +430,10 @@ export type Translation = {
 export const ar: Translation = {
   appTitle: "WorldCosts",
   appDescription: "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
+
+  // Refund policy
+  refundPolicyTitle: "سياسة الاسترداد",
+  refundPolicyText: "نحن نقدم سياسة استرداد عادلة لعملائنا.",
 
   // Subscription related
   subscription: "الاشتراك",
@@ -420,6 +490,17 @@ export const ar: Translation = {
   kwd: "دينار كويتي",
   qar: "ريال قطري",
   myr: "رينجيت ماليزي",
+  sgd: "دولار سنغافوري",
+  zar: "راند جنوب أفريقي",
+  sek: "كرونة سويدية",
+  nok: "كرونة نرويجية",
+  dkk: "كرونة دنماركية",
+  ils: "شيكل إسرائيلي",
+  jod: "دينار أردني",
+  bhd: "دينار بحريني",
+  omr: "ريال عماني",
+  mad: "درهم مغربي",
+  tnd: "دينار تونسي",
 
   totalAmount: "المجموع الكلي",
   inUSD: "بالدولار الأمريكي",
@@ -710,6 +791,57 @@ export const ar: Translation = {
   refundPolicyExplanation: "نقدم ضمان استرداد الأموال لمدة 14 يومًا لجميع الاشتراكات الجديدة. إذا لم تكن راضيًا عن خدمتنا، يمكنك طلب استرداد كامل خلال 14 يومًا من تاريخ الشراء الأولي.",
   readFullRefundPolicy: "اقرأ سياسة الاسترداد الكاملة",
 
+  // ترجمات إضافية لصفحة التسعير
+  subscriptionPlansDescription: "اختر الخطة المناسبة لاحتياجاتك. جميع الخطط تشمل تحديثات مجانية وتحسينات مستمرة.",
+  allFeaturesInFreePlan: "كل ميزات الخطة المجانية",
+  noAds: "بدون إعلانات",
+  limitedFileStorage: "تخزين ملفات محدود",
+  oneGBStorage: "تخزين ملفات 1GB",
+  fiveGBStorage: "تخزين ملفات 5GB",
+  multipleAccounts: "حسابات متعددة",
+  dedicatedSupport: "دعم مخصص 24/7",
+  canCancelAnytime: "هل يمكنني إلغاء اشتراكي في أي وقت؟",
+  cancelExplanation: "نعم، يمكنك إلغاء اشتراكك في أي وقت. ستستمر في الوصول إلى الميزات المدفوعة حتى نهاية فترة الفوترة الحالية.",
+  forMoreInfo: "لمزيد من المعلومات، يرجى الاطلاع على",
+  and: "و",
+
+  // ترجمات مجموعات العملات
+  currencyGroupMENA: "الشرق الأوسط وشمال أفريقيا",
+  currencyGroupAmericasEurope: "أمريكا وأوروبا",
+  currencyGroupAsiaPacific: "آسيا والمحيط الهادئ",
+  currencyGroupOthers: "أخرى",
+
+  // رموز العملات
+  symbolUSD: "$",
+  symbolEGP: "ج.م",
+  symbolAED: "د.إ",
+  symbolEUR: "€",
+  symbolGBP: "£",
+  symbolSAR: "ر.س",
+  symbolJPY: "¥",
+  symbolCNY: "¥",
+  symbolCAD: "C$",
+  symbolAUD: "A$",
+  symbolCHF: "CHF",
+  symbolINR: "₹",
+  symbolRUB: "₽",
+  symbolTRY: "₺",
+  symbolBRL: "R$",
+  symbolKWD: "د.ك",
+  symbolQAR: "ر.ق",
+  symbolMYR: "RM",
+  symbolSGD: "S$",
+  symbolZAR: "R",
+  symbolSEK: "kr",
+  symbolNOK: "kr",
+  symbolDKK: "kr",
+  symbolILS: "₪",
+  symbolJOD: "د.أ",
+  symbolBHD: "د.ب",
+  symbolOMR: "ر.ع",
+  symbolMAD: "د.م.",
+  symbolTND: "د.ت",
+
   // ترجمات جديدة لمكون موافقة ملفات تعريف الارتباط
   cookieConsentText: "نستخدم ملفات تعريف الارتباط لتحسين تجربتك. هل توافق على استخدامنا لملفات تعريف الارتباط؟",
   accept: "موافق",
@@ -729,6 +861,10 @@ export const ar: Translation = {
 export const en: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Add items with currency selection and calculate totals in different currencies",
+
+  // Refund policy
+  refundPolicyTitle: "Refund Policy",
+  refundPolicyText: "We offer a fair refund policy for our customers.",
 
   // Subscription related
   subscription: "Subscription",
@@ -785,6 +921,17 @@ export const en: Translation = {
   kwd: "Kuwaiti Dinar",
   qar: "Qatari Riyal",
   myr: "Malaysian Ringgit",
+  sgd: "Singapore Dollar",
+  zar: "South African Rand",
+  sek: "Swedish Krona",
+  nok: "Norwegian Krone",
+  dkk: "Danish Krone",
+  ils: "Israeli Shekel",
+  jod: "Jordanian Dinar",
+  bhd: "Bahraini Dinar",
+  omr: "Omani Rial",
+  mad: "Moroccan Dirham",
+  tnd: "Tunisian Dinar",
 
   totalAmount: "Total Amount",
   inUSD: "In USD",
@@ -1090,12 +1237,67 @@ export const en: Translation = {
   advertisingCookies: "Advertising Cookies",
   functionalCookies: "Functional Cookies",
   savePreferences: "Save Preferences",
+
+  // Additional translations for pricing page
+  subscriptionPlansDescription: "Choose the plan that suits your needs. All plans include free updates and continuous improvements.",
+  allFeaturesInFreePlan: "All features in Free Plan",
+  noAds: "No Ads",
+  limitedFileStorage: "Limited File Storage",
+  oneGBStorage: "1GB File Storage",
+  fiveGBStorage: "5GB File Storage",
+  multipleAccounts: "Multiple Accounts",
+  dedicatedSupport: "Dedicated 24/7 Support",
+  canCancelAnytime: "Can I cancel my subscription at any time?",
+  cancelExplanation: "Yes, you can cancel your subscription at any time. You will continue to have access to paid features until the end of your current billing period.",
+  forMoreInfo: "For more information, please check our",
+  and: "and",
+
+  // Currency group translations
+  currencyGroupMENA: "Middle East & North Africa",
+  currencyGroupAmericasEurope: "Americas & Europe",
+  currencyGroupAsiaPacific: "Asia & Pacific",
+  currencyGroupOthers: "Others",
+
+  // Currency symbols
+  symbolUSD: "$",
+  symbolEGP: "EGP",
+  symbolAED: "AED",
+  symbolEUR: "€",
+  symbolGBP: "£",
+  symbolSAR: "SAR",
+  symbolJPY: "¥",
+  symbolCNY: "¥",
+  symbolCAD: "C$",
+  symbolAUD: "A$",
+  symbolCHF: "CHF",
+  symbolINR: "₹",
+  symbolRUB: "₽",
+  symbolTRY: "₺",
+  symbolBRL: "R$",
+  symbolKWD: "KWD",
+  symbolQAR: "QAR",
+  symbolMYR: "RM",
+  symbolSGD: "S$",
+  symbolZAR: "R",
+  symbolSEK: "kr",
+  symbolNOK: "kr",
+  symbolDKK: "kr",
+  symbolILS: "₪",
+  symbolJOD: "JOD",
+  symbolBHD: "BHD",
+  symbolOMR: "OMR",
+  symbolMAD: "MAD",
+  symbolTND: "TND",
 }
 
 // German translations
 export const de: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Fügen Sie Artikel mit Währungsauswahl hinzu und berechnen Sie Summen in verschiedenen Währungen",
+
+  // Refund policy
+  refundPolicyTitle: "Rückerstattungsrichtlinie",
+  refundPolicyText: "Wir bieten eine faire Rückerstattungsrichtlinie für unsere Kunden.",
 
   // Subscription related
   subscription: "Abonnement",
@@ -1152,6 +1354,17 @@ export const de: Translation = {
   kwd: "Kuwaitischer Dinar",
   qar: "Katar-Riyal",
   myr: "Malaysischer Ringgit",
+  sgd: "Singapur-Dollar",
+  zar: "Südafrikanischer Rand",
+  sek: "Schwedische Krone",
+  nok: "Norwegische Krone",
+  dkk: "Dänische Krone",
+  ils: "Israelischer Schekel",
+  jod: "Jordanischer Dinar",
+  bhd: "Bahrain-Dinar",
+  omr: "Omanischer Rial",
+  mad: "Marokkanischer Dirham",
+  tnd: "Tunesischer Dinar",
 
   totalAmount: "Gesamtbetrag",
   inUSD: "In USD",
@@ -1465,12 +1678,67 @@ export const de: Translation = {
   advertisingCookies: "Werbe-Cookies",
   functionalCookies: "Funktionale Cookies",
   savePreferences: "Einstellungen speichern",
+
+  // Additional translations for pricing page
+  subscriptionPlansDescription: "Wählen Sie den Plan, der Ihren Anforderungen entspricht. Alle Pläne beinhalten kostenlose Updates und kontinuierliche Verbesserungen.",
+  allFeaturesInFreePlan: "Alle Funktionen des kostenlosen Plans",
+  noAds: "Keine Werbung",
+  limitedFileStorage: "Begrenzter Dateispeicher",
+  oneGBStorage: "1GB Dateispeicher",
+  fiveGBStorage: "5GB Dateispeicher",
+  multipleAccounts: "Mehrere Konten",
+  dedicatedSupport: "Dedizierter 24/7-Support",
+  canCancelAnytime: "Kann ich mein Abonnement jederzeit kündigen?",
+  cancelExplanation: "Ja, Sie können Ihr Abonnement jederzeit kündigen. Sie haben weiterhin Zugriff auf bezahlte Funktionen bis zum Ende Ihres aktuellen Abrechnungszeitraums.",
+  forMoreInfo: "Für weitere Informationen, bitte lesen Sie unsere",
+  and: "und",
+
+  // Currency group translations
+  currencyGroupMENA: "Naher Osten & Nordafrika",
+  currencyGroupAmericasEurope: "Amerika & Europa",
+  currencyGroupAsiaPacific: "Asien & Pazifik",
+  currencyGroupOthers: "Andere",
+
+  // Währungssymbole
+  symbolUSD: "$",
+  symbolEGP: "EGP",
+  symbolAED: "AED",
+  symbolEUR: "€",
+  symbolGBP: "£",
+  symbolSAR: "SAR",
+  symbolJPY: "¥",
+  symbolCNY: "¥",
+  symbolCAD: "C$",
+  symbolAUD: "A$",
+  symbolCHF: "CHF",
+  symbolINR: "₹",
+  symbolRUB: "₽",
+  symbolTRY: "₺",
+  symbolBRL: "R$",
+  symbolKWD: "KWD",
+  symbolQAR: "QAR",
+  symbolMYR: "RM",
+  symbolSGD: "S$",
+  symbolZAR: "R",
+  symbolSEK: "kr",
+  symbolNOK: "kr",
+  symbolDKK: "kr",
+  symbolILS: "₪",
+  symbolJOD: "JOD",
+  symbolBHD: "BHD",
+  symbolOMR: "OMR",
+  symbolMAD: "MAD",
+  symbolTND: "TND",
 }
 
 // تحديث الترجمات الفرنسية
 export const fr: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
+
+  // Refund policy
+  refundPolicyTitle: "Politique de Remboursement",
+  refundPolicyText: "Nous offrons une politique de remboursement équitable pour nos clients.",
 
   // Subscription related
   subscription: "Abonnement",
@@ -1511,7 +1779,7 @@ export const fr: Translation = {
 
   usd: "Dollar américain",
   egp: "Livre égyptienne",
-  aed: "Dirham des EAU",
+  aed: "Dirham des Émirats arabes unis",
   eur: "Euro",
   gbp: "Livre sterling",
   sar: "Riyal saoudien",
@@ -1527,6 +1795,17 @@ export const fr: Translation = {
   kwd: "Dinar koweïtien",
   qar: "Riyal qatari",
   myr: "Ringgit malaisien",
+  sgd: "Dollar singapourien",
+  zar: "Rand sud-africain",
+  sek: "Couronne suédoise",
+  nok: "Couronne norvégienne",
+  dkk: "Couronne danoise",
+  ils: "Shekel israélien",
+  jod: "Dinar jordanien",
+  bhd: "Dinar bahreïni",
+  omr: "Riyal omanais",
+  mad: "Dirham marocain",
+  tnd: "Dinar tunisien",
 
   totalAmount: "Montant total",
   inUSD: "En USD",
@@ -1841,6 +2120,59 @@ export const fr: Translation = {
   advertisingCookies: "Cookies publicitaires",
   functionalCookies: "Cookies fonctionnels",
   savePreferences: "Enregistrer les préférences",
+
+
+
+  // Additional translations for pricing page
+  subscriptionPlansDescription: "Choisissez le plan qui convient à vos besoins. Tous les plans comprennent des mises à jour gratuites et des améliorations continues.",
+  allFeaturesInFreePlan: "Toutes les fonctionnalités du plan gratuit",
+  noAds: "Sans publicité",
+  limitedFileStorage: "Stockage de fichiers limité",
+  oneGBStorage: "Stockage de fichiers 1GB",
+  fiveGBStorage: "Stockage de fichiers 5GB",
+  multipleAccounts: "Comptes multiples",
+  dedicatedSupport: "Support dédié 24/7",
+  canCancelAnytime: "Puis-je annuler mon abonnement à tout moment ?",
+  cancelExplanation: "Oui, vous pouvez annuler votre abonnement à tout moment. Vous continuerez à avoir accès aux fonctionnalités payantes jusqu'à la fin de votre période de facturation en cours.",
+  forMoreInfo: "Pour plus d'informations, veuillez consulter notre",
+  and: "et",
+
+  // Currency group translations
+  currencyGroupMENA: "Moyen-Orient et Afrique du Nord",
+  currencyGroupAmericasEurope: "Amériques et Europe",
+  currencyGroupAsiaPacific: "Asie et Pacifique",
+  currencyGroupOthers: "Autres",
+
+  // Symboles de devises
+  symbolUSD: "$",
+  symbolEGP: "EGP",
+  symbolAED: "AED",
+  symbolEUR: "€",
+  symbolGBP: "£",
+  symbolSAR: "SAR",
+  symbolJPY: "¥",
+  symbolCNY: "¥",
+  symbolCAD: "C$",
+  symbolAUD: "A$",
+  symbolCHF: "CHF",
+  symbolINR: "₹",
+  symbolRUB: "₽",
+  symbolTRY: "₺",
+  symbolBRL: "R$",
+  symbolKWD: "KWD",
+  symbolQAR: "QAR",
+  symbolMYR: "RM",
+  symbolSGD: "S$",
+  symbolZAR: "R",
+  symbolSEK: "kr",
+  symbolNOK: "kr",
+  symbolDKK: "kr",
+  symbolILS: "₪",
+  symbolJOD: "JOD",
+  symbolBHD: "BHD",
+  symbolOMR: "OMR",
+  symbolMAD: "MAD",
+  symbolTND: "TND",
 }
 
 // Export all translations

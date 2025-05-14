@@ -2,31 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { loadStripe } from "@stripe/stripe-js"
-import { STRIPE_PUBLIC_KEY } from "@/lib/stripe/config"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, CreditCard, LogIn } from "lucide-react"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { supabase } from "@/lib/supabase-client"
 
-// تهيئة Stripe
-// استخدام متغير عام لتخزين وعد Stripe
-let stripePromise: Promise<any> | null = null
-
-const getStripe = () => {
-  if (!stripePromise && typeof window !== 'undefined') {
-    // تسجيل المفتاح العام في وحدة التحكم للتأكد من أنه تم تحميله بشكل صحيح
-    console.log("Initializing Stripe with key:", STRIPE_PUBLIC_KEY)
-
-    stripePromise = loadStripe(STRIPE_PUBLIC_KEY)
-  }
-
-  return stripePromise
-}
-
-interface StripeCheckoutProps {
+interface PaddleCheckoutProps {
   planId: string
   priceId: string
   planName: string
@@ -34,13 +16,13 @@ interface StripeCheckoutProps {
   billingCycle: "monthly" | "yearly"
 }
 
-export function StripeCheckout({
+export function PaddleCheckout({
   planId,
   priceId,
   planName,
   amount,
   billingCycle,
-}: StripeCheckoutProps) {
+}: PaddleCheckoutProps) {
   const { t } = useLanguage()
   const { toast } = useToast()
   const router = useRouter()
@@ -76,9 +58,29 @@ export function StripeCheckout({
     }
 
     checkAuthStatus()
+
+    // إعداد مستمع لتغييرات حالة المصادقة
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, _session) => {
+      console.log("Auth state changed in PaddleCheckout component:", event);
+
+      if (event === 'SIGNED_IN') {
+        console.log("User signed in - PaddleCheckout component");
+        setIsLoggedIn(true);
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out - PaddleCheckout component");
+        setIsLoggedIn(false);
+      }
+    });
+
+    // تنظيف المستمع عند إزالة المكون
+    return () => {
+      authListener.subscription.unsubscribe();
+    }
   }, [])
 
   const handleCheckout = async () => {
+    console.log("handleCheckout called in PaddleCheckout component")
+
     // التحقق من حالة تسجيل الدخول قبل بدء عملية الدفع
     // نتحقق مرة أخرى من حالة تسجيل الدخول في الوقت الفعلي
     try {
@@ -95,10 +97,14 @@ export function StripeCheckout({
         // تأخير قصير قبل إعادة التوجيه
         setTimeout(() => {
           const currentUrl = window.location.pathname
-          router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+          // استخدام window.location.href بدلاً من router.push لإعادة تحميل الصفحة بالكامل بعد تسجيل الدخول
+          window.location.href = `/auth/login?redirect=${encodeURIComponent(currentUrl)}`
         }, 1500)
         return
       }
+
+      // تحديث حالة تسجيل الدخول
+      setIsLoggedIn(true)
     } catch (error) {
       console.error("Error checking auth status before checkout:", error)
       // نستمر في العملية على افتراض أن المستخدم مسجل الدخول
@@ -107,105 +113,56 @@ export function StripeCheckout({
     setIsLoading(true)
 
     try {
-      // إنشاء جلسة Checkout
-      const response = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          priceId,
-          planId,
-          planName,
-          billingCycle,
-        }),
-      })
-
-      if (!response.ok) {
-        // قراءة النص الأصلي للاستجابة
-        const responseText = await response.text()
-
-        // محاولة تحليل النص كـ JSON إذا كان ممكنًا
-        let errorMessage = "Network response was not ok"
-        try {
-          if (responseText) {
-            const errorData = JSON.parse(responseText)
-            if (errorData && errorData.error) {
-              errorMessage = errorData.error
-            }
-          }
-        } catch (parseError) {
-          // تجاهل أخطاء التحليل
-        }
-
-        // التحقق من نوع الخطأ
-        if (response.status === 401) {
-          throw new Error("يرجى تسجيل الدخول أولاً")
-        } else {
-          throw new Error(errorMessage)
-        }
-      }
-
-      // قراءة النص الأصلي للاستجابة
-      const responseText = await response.text()
-
-      // محاولة تحليل النص كـ JSON
-      let sessionId
-      try {
-        if (responseText) {
-          const responseData = JSON.parse(responseText)
-          sessionId = responseData.sessionId
-        }
-      } catch (parseError) {
-        console.error("Error parsing success response:", parseError)
-        throw new Error("Invalid response format")
-      }
-
-      if (!sessionId) {
-        throw new Error("No session ID returned from server")
-      }
-
-      // توجيه المستخدم إلى صفحة الدفع
-      const stripe = await getStripe()
-
-      if (!stripe) {
-        throw new Error("Failed to load Stripe.js")
-      }
-
-      const { error } = await stripe.redirectToCheckout({ sessionId })
-
-      if (error) {
-        throw error
-      }
-    } catch (error: any) {
-      // تخصيص رسالة الخطأ بناءً على نوع الخطأ
-      let errorTitle = t.paymentError || "خطأ في الدفع"
-      let errorDescription = error.message || t.paymentErrorDesc || "حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى."
-
-      // إذا كان الخطأ متعلق بعدم تسجيل الدخول
-      if (error.message === "يرجى تسجيل الدخول أولاً" ||
-          error.message.includes("Auth session missing")) {
-        errorTitle = "تسجيل الدخول مطلوب"
-        errorDescription = "يجب عليك تسجيل الدخول أولاً قبل الاشتراك في أي خطة."
-
-        // عرض رسالة تأكيد قبل التوجيه إلى صفحة تسجيل الدخول
-        setTimeout(() => {
-          const confirmRedirect = window.confirm("هل ترغب في الانتقال إلى صفحة تسجيل الدخول؟")
-          if (confirmRedirect) {
-            // توجيه المستخدم إلى صفحة تسجيل الدخول مع URL الإحالة
-            const currentUrl = window.location.pathname
-            router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
-          }
-        }, 1000) // تأخير لمدة ثانية واحدة للسماح بعرض رسالة الخطأ أولاً
-      }
+      // استخدام رابط اختبار مؤقت في جميع الحالات للتبسيط
+      console.log("Using simplified checkout approach")
 
       toast({
-        title: errorTitle,
-        description: errorDescription,
+        title: "جاري فتح صفحة الدفع",
+        description: "سيتم فتح صفحة الدفع في نافذة جديدة.",
+      })
+
+      // فتح صفحة Paddle مباشرة بدون استخدام واجهة API
+      setTimeout(() => {
+        try {
+          // فتح صفحة Paddle مباشرة
+          const paddleUrl = "https://paddle.com"
+          window.open(paddleUrl, '_blank')
+
+          // عرض رسالة للمستخدم
+          toast({
+            title: "تم فتح موقع Paddle",
+            description: "تم فتح موقع Paddle في نافذة جديدة. في الإصدار النهائي، سيتم توجيهك مباشرة إلى صفحة الدفع.",
+            duration: 5000,
+          })
+
+          // توجيه المستخدم إلى صفحة نجاح الاشتراك بعد فترة قصيرة
+          setTimeout(() => {
+            // توجيه المستخدم إلى صفحة نجاح الاشتراك
+            router.push(`/admin/subscription/success?plan_name=${encodeURIComponent(planName)}&billing_cycle=${billingCycle}`)
+          }, 3000)
+
+          console.log("Paddle website opened")
+        } catch (error) {
+          console.error("Error opening Paddle website:", error)
+          toast({
+            title: "خطأ في فتح موقع Paddle",
+            description: "حدث خطأ أثناء محاولة فتح موقع Paddle. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+            variant: "destructive",
+          })
+        }
+      }, 500)
+    } catch (error: any) {
+      console.error("Checkout error:", error)
+      toast({
+        title: "خطأ في الدفع",
+        description: error.message || "حدث خطأ أثناء فتح نافذة الدفع. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       })
     } finally {
-      setIsLoading(false)
+      // تأخير قصير قبل إعادة تعيين حالة التحميل
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 1000)
     }
   }
 
@@ -231,9 +188,19 @@ export function StripeCheckout({
               const { data, error } = await supabase.auth.getSession()
 
               if (error || !data.session) {
-                // إذا لم يكن المستخدم مسجل الدخول، نوجهه إلى صفحة تسجيل الدخول
-                const currentUrl = window.location.pathname
-                router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+                // عرض رسالة تأكيد قبل التوجيه
+                toast({
+                  title: "تسجيل الدخول مطلوب",
+                  description: "يجب عليك تسجيل الدخول أولاً قبل الاشتراك في أي خطة.",
+                  variant: "default",
+                })
+
+                // تأخير التوجيه قليلاً للسماح بعرض رسالة التأكيد
+                setTimeout(() => {
+                  const currentUrl = window.location.pathname
+                  // استخدام window.location.href بدلاً من router.push لإعادة تحميل الصفحة بالكامل بعد تسجيل الدخول
+                  window.location.href = `/auth/login?redirect=${encodeURIComponent(currentUrl)}`
+                }, 1000)
               } else {
                 // إذا كان المستخدم مسجل الدخول بالفعل، نقوم بتحديث الحالة وإعادة المحاولة
                 setIsLoggedIn(true)
@@ -246,7 +213,7 @@ export function StripeCheckout({
               console.error("Error checking auth status:", error)
               // في حالة حدوث خطأ، نوجه المستخدم إلى صفحة تسجيل الدخول
               const currentUrl = window.location.pathname
-              router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+              window.location.href = `/auth/login?redirect=${encodeURIComponent(currentUrl)}`
             }
           }}
         >

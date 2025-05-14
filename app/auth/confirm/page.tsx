@@ -28,6 +28,19 @@ function ConfirmEmailContent() {
         const token = searchParams.get("token")
         const type = searchParams.get("type") || "signup"
 
+        // التحقق من وجود رمز الخطأ في URL
+        const error = searchParams.get("error")
+        const error_code = searchParams.get("error_code")
+        const error_description = searchParams.get("error_description")
+
+        // إذا كان هناك خطأ في URL، نعرضه للمستخدم
+        if (error) {
+          console.error("Error in URL:", { error, error_code, error_description })
+          setErrorMessage(error_description || error || t.emailConfirmationFailed || "فشل تأكيد البريد الإلكتروني")
+          setIsLoading(false)
+          return
+        }
+
         if (!token) {
           setErrorMessage(t.tokenRequired || "رمز التأكيد مطلوب")
           setIsLoading(false)
@@ -40,13 +53,13 @@ function ConfirmEmailContent() {
         if (type === "recovery") {
           // إعادة تعيين كلمة المرور
           result = await supabase.auth.verifyOtp({
-            token_hash: token,
+            token,
             type: "recovery",
           })
         } else {
           // تأكيد البريد الإلكتروني
           result = await supabase.auth.verifyOtp({
-            token_hash: token,
+            token,
             type: "email",
           })
         }
@@ -65,11 +78,41 @@ function ConfirmEmailContent() {
           description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
         })
 
+        // التحقق من وجود معلمة redirect في URL
+        const redirectTo = searchParams.get("redirect_to")
+
         // إذا كان نوع التأكيد هو إعادة تعيين كلمة المرور، توجيه المستخدم إلى صفحة إعادة تعيين كلمة المرور
         if (type === "recovery") {
           setTimeout(() => {
             router.push("/auth/reset-password")
           }, 3000)
+        }
+        // إذا كان هناك URL إعادة توجيه محدد
+        else if (redirectTo) {
+          try {
+            // فك تشفير URL الإعادة التوجيه
+            const decodedRedirect = decodeURIComponent(redirectTo)
+
+            // التحقق مما إذا كان URL الإعادة التوجيه يحتوي على صفحة الاشتراك
+            const shouldRefresh = decodedRedirect.includes("/admin/subscription")
+
+            // إعادة توجيه المستخدم بعد تأخير قصير
+            setTimeout(() => {
+              if (shouldRefresh) {
+                // إضافة معلمة refresh=true إلى URL
+                const separator = decodedRedirect.includes("?") ? "&" : "?"
+                window.location.href = `${decodedRedirect}${separator}refresh=true`
+              } else {
+                router.push(decodedRedirect)
+              }
+            }, 3000)
+          } catch (error) {
+            console.error("Error redirecting after email confirmation:", error)
+            // في حالة حدوث خطأ، نوجه المستخدم إلى صفحة تسجيل الدخول
+            setTimeout(() => {
+              router.push("/auth/login")
+            }, 3000)
+          }
         }
       } catch (error: any) {
         console.error("Error confirming email:", error)

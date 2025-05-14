@@ -28,6 +28,7 @@ import {
   Plus,
   Calculator,
   Settings,
+  CreditCard,
 } from "lucide-react"
 import { TeslaButton } from "@/components/ui/tesla-button"
 import {
@@ -75,6 +76,17 @@ type Currency =
   | "KWD"
   | "QAR"
   | "MYR"
+  | "SGD"
+  | "ZAR"
+  | "SEK"
+  | "NOK"
+  | "DKK"
+  | "ILS"
+  | "JOD"
+  | "BHD"
+  | "OMR"
+  | "MAD"
+  | "TND"
 type Item = {
   id: number
   name: string
@@ -280,6 +292,17 @@ export default function CurrencyCalculator() {
         KWD: 0,
         QAR: 0,
         MYR: 0,
+        SGD: 0,
+        ZAR: 0,
+        SEK: 0,
+        NOK: 0,
+        DKK: 0,
+        ILS: 0,
+        JOD: 0,
+        BHD: 0,
+        OMR: 0,
+        MAD: 0,
+        TND: 0,
       }
 
     const totalInUSD = items.reduce((sum, item) => {
@@ -306,6 +329,17 @@ export default function CurrencyCalculator() {
       KWD: totalInUSD * rates.KWD,
       QAR: totalInUSD * rates.QAR,
       MYR: totalInUSD * rates.MYR,
+      SGD: totalInUSD * rates.SGD,
+      ZAR: totalInUSD * rates.ZAR,
+      SEK: totalInUSD * rates.SEK,
+      NOK: totalInUSD * rates.NOK,
+      DKK: totalInUSD * rates.DKK,
+      ILS: totalInUSD * rates.ILS,
+      JOD: totalInUSD * rates.JOD,
+      BHD: totalInUSD * rates.BHD,
+      OMR: totalInUSD * rates.OMR,
+      MAD: totalInUSD * rates.MAD,
+      TND: totalInUSD * rates.TND,
     }
   }
 
@@ -634,89 +668,92 @@ export default function CurrencyCalculator() {
 
   // Get currency symbol
   const getCurrencySymbol = (currency: Currency): string => {
-    switch (currency) {
-      case "USD":
-        return "$"
-      case "EGP":
-        return "ج.م"
-      case "AED":
-        return "د.إ"
-      case "EUR":
-        return "€"
-      case "GBP":
-        return "£"
-      case "SAR":
-        return "ر.س"
-      case "JPY":
-        return "¥"
-      case "CNY":
-        return "¥"
-      case "CAD":
-        return "C$"
-      case "AUD":
-        return "A$"
-      case "CHF":
-        return "CHF"
-      case "INR":
-        return "₹"
-      case "RUB":
-        return "₽"
-      case "TRY":
-        return "₺"
-      case "BRL":
-        return "R$"
-      case "KWD":
-        return "د.ك"
-      case "QAR":
-        return "ر.ق"
-      case "MYR":
-        return "RM"
-      default:
-        return ""
+    const symbols: Record<Currency, string> = {
+      USD: t.symbolUSD || "$",
+      EGP: t.symbolEGP || "ج.م",
+      AED: t.symbolAED || "د.إ",
+      EUR: t.symbolEUR || "€",
+      GBP: t.symbolGBP || "£",
+      SAR: t.symbolSAR || "ر.س",
+      JPY: t.symbolJPY || "¥",
+      CNY: t.symbolCNY || "¥",
+      CAD: t.symbolCAD || "C$",
+      AUD: t.symbolAUD || "A$",
+      CHF: t.symbolCHF || "CHF",
+      INR: t.symbolINR || "₹",
+      RUB: t.symbolRUB || "₽",
+      TRY: t.symbolTRY || "₺",
+      BRL: t.symbolBRL || "R$",
+      KWD: t.symbolKWD || "د.ك",
+      QAR: t.symbolQAR || "ر.ق",
+      MYR: t.symbolMYR || "RM",
+      SGD: t.symbolSGD || "S$",
+      ZAR: t.symbolZAR || "R",
+      SEK: t.symbolSEK || "kr",
+      NOK: t.symbolNOK || "kr",
+      DKK: t.symbolDKK || "kr",
+      ILS: t.symbolILS || "₪",
+      JOD: t.symbolJOD || "د.أ",
+      BHD: t.symbolBHD || "د.ب",
+      OMR: t.symbolOMR || "ر.ع",
+      MAD: t.symbolMAD || "د.م.",
+      TND: t.symbolTND || "د.ت",
     }
+    return symbols[currency] || ""
   }
 
   // Currency groups
   const currencyGroups = [
     {
-      label: "الشرق الأوسط وشمال أفريقيا",
-      currencies: ["EGP", "AED", "SAR", "KWD", "QAR"],
+      label: t.currencyGroupMENA,
+      currencies: ["EGP", "AED", "SAR", "KWD", "QAR", "JOD", "BHD", "OMR", "MAD", "TND", "ILS"],
     },
     {
-      label: "أمريكا وأوروبا",
-      currencies: ["USD", "EUR", "GBP", "CAD", "CHF"],
+      label: t.currencyGroupAmericasEurope,
+      currencies: ["USD", "EUR", "GBP", "CAD", "CHF", "SEK", "NOK", "DKK"],
     },
     {
-      label: "آسيا والمحيط الهادئ",
-      currencies: ["JPY", "CNY", "AUD", "INR", "MYR"],
+      label: t.currencyGroupAsiaPacific,
+      currencies: ["JPY", "CNY", "AUD", "INR", "MYR", "SGD"],
     },
     {
-      label: "أخرى",
-      currencies: ["RUB", "TRY", "BRL"],
+      label: t.currencyGroupOthers,
+      currencies: ["RUB", "TRY", "BRL", "ZAR"],
     },
   ]
 
   // Get currency name
   const getCurrencyName = (code: Currency): string => {
     const names: Record<Currency, string> = {
-      USD: t.usd,
-      EGP: t.egp,
-      AED: t.aed,
-      EUR: t.eur,
-      GBP: t.gbp,
-      SAR: t.sar,
-      JPY: t.jpy,
-      CNY: t.cny,
-      CAD: t.cad,
-      AUD: t.aud,
-      CHF: t.chf,
-      INR: t.inr,
-      RUB: t.rub,
-      TRY: t.try,
-      BRL: t.brl,
-      KWD: t.kwd,
-      QAR: t.qar,
-      MYR: t.myr,
+      USD: t.usd || "دولار أمريكي",
+      EGP: t.egp || "جنيه مصري",
+      AED: t.aed || "درهم إماراتي",
+      EUR: t.eur || "يورو",
+      GBP: t.gbp || "جنيه إسترليني",
+      SAR: t.sar || "ريال سعودي",
+      JPY: t.jpy || "ين ياباني",
+      CNY: t.cny || "يوان صيني",
+      CAD: t.cad || "دولار كندي",
+      AUD: t.aud || "دولار أسترالي",
+      CHF: t.chf || "فرنك سويسري",
+      INR: t.inr || "روبية هندية",
+      RUB: t.rub || "روبل روسي",
+      TRY: t.try || "ليرة تركية",
+      BRL: t.brl || "ريال برازيلي",
+      KWD: t.kwd || "دينار كويتي",
+      QAR: t.qar || "ريال قطري",
+      MYR: t.myr || "رينغيت ماليزي",
+      SGD: t.sgd || "دولار سنغافوري",
+      ZAR: t.zar || "راند جنوب أفريقي",
+      SEK: t.sek || "كرونة سويدية",
+      NOK: t.nok || "كرونة نرويجية",
+      DKK: t.dkk || "كرونة دنماركية",
+      ILS: t.ils || "شيكل إسرائيلي",
+      JOD: t.jod || "دينار أردني",
+      BHD: t.bhd || "دينار بحريني",
+      OMR: t.omr || "ريال عماني",
+      MAD: t.mad || "درهم مغربي",
+      TND: t.tnd || "دينار تونسي",
     }
     return names[code]
   }
@@ -1076,6 +1113,12 @@ export default function CurrencyCalculator() {
             <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
               <Info className="h-3 w-3 sm:h-4 sm:w-4" />
               {t.aboutUs}
+            </TeslaButton>
+          </Link>
+          <Link href="/pricing">
+            <TeslaButton variant="secondary" size="sm" className="flex items-center gap-1 h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3">
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
+              {t.pricing}
             </TeslaButton>
           </Link>
           <Link href="/privacy">

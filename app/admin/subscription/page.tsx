@@ -10,9 +10,9 @@ import { AppLogo } from "@/components/app-logo"
 import { useToast } from "@/components/ui/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { StripeCheckout } from "@/components/payment/stripe-checkout"
-import { StripeProvider } from "@/components/payment/stripe-provider"
-import { STRIPE_PRODUCTS } from "@/lib/stripe/config"
+import { PaddleCheckout } from "@/components/payment/paddle-checkout"
+import { PaddleProvider } from "@/components/payment/paddle-provider"
+import { PADDLE_PRODUCTS } from "@/lib/paddle/config"
 import { PaymentMethods } from "@/components/payment/payment-methods"
 import { supabase } from "@/lib/supabase-client"
 import { useRouter } from "next/navigation"
@@ -25,6 +25,26 @@ export default function SubscriptionPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
+  // التحقق من وجود معلمة refresh في URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const shouldRefresh = urlParams.get('refresh')
+
+      if (shouldRefresh === 'true') {
+        // إزالة معلمة refresh من URL
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
+
+        // عرض رسالة للمستخدم
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: "يمكنك الآن الاشتراك في الخطة المختارة.",
+        })
+      }
+    }
+  }, [toast])
+
   // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -35,7 +55,17 @@ export default function SubscriptionPage() {
           console.error("Error checking auth status:", error)
           setIsLoggedIn(false)
         } else {
-          setIsLoggedIn(!!data.session)
+          const hasSession = !!data.session
+          setIsLoggedIn(hasSession)
+
+          // إذا كان المستخدم غير مسجل الدخول، نقوم بتوجيهه إلى صفحة تسجيل الدخول مباشرة
+          if (!hasSession) {
+            console.log("User not logged in, redirecting to login page")
+            const currentUrl = window.location.pathname
+            setTimeout(() => {
+              router.push(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`)
+            }, 1000) // تأخير قصير للسماح بعرض حالة التحميل
+          }
         }
       } catch (error) {
         console.error("Error checking auth status:", error)
@@ -46,7 +76,7 @@ export default function SubscriptionPage() {
     }
 
     checkAuthStatus()
-  }, [])
+  }, [router])
 
   // لا نحتاج إلى وظائف معالجة الدفع لأن Stripe Checkout سيتعامل مع عملية الدفع
 
@@ -212,11 +242,11 @@ export default function SubscriptionPage() {
                   </ul>
                 </TeslaCardContent>
                 <TeslaCardFooter>
-                  <StripeCheckout
+                  <PaddleCheckout
                     planId="pro"
-                    priceId={billingCycle === "monthly" ? STRIPE_PRODUCTS.PRO.monthly.priceId : STRIPE_PRODUCTS.PRO.yearly.priceId}
+                    priceId={billingCycle === "monthly" ? PADDLE_PRODUCTS.PRO.monthly.priceId : PADDLE_PRODUCTS.PRO.yearly.priceId}
                     planName={t.proPlan || "Pro Plan"}
-                    amount={billingCycle === "monthly" ? STRIPE_PRODUCTS.PRO.monthly.amount : STRIPE_PRODUCTS.PRO.yearly.amount}
+                    amount={billingCycle === "monthly" ? PADDLE_PRODUCTS.PRO.monthly.amount : PADDLE_PRODUCTS.PRO.yearly.amount}
                     billingCycle={billingCycle}
                   />
                 </TeslaCardFooter>
@@ -262,11 +292,11 @@ export default function SubscriptionPage() {
                   </ul>
                 </TeslaCardContent>
                 <TeslaCardFooter>
-                  <StripeCheckout
+                  <PaddleCheckout
                     planId="business"
-                    priceId={billingCycle === "monthly" ? STRIPE_PRODUCTS.BUSINESS.monthly.priceId : STRIPE_PRODUCTS.BUSINESS.yearly.priceId}
+                    priceId={billingCycle === "monthly" ? PADDLE_PRODUCTS.BUSINESS.monthly.priceId : PADDLE_PRODUCTS.BUSINESS.yearly.priceId}
                     planName={t.businessPlan || "Business Plan"}
-                    amount={billingCycle === "monthly" ? STRIPE_PRODUCTS.BUSINESS.monthly.amount : STRIPE_PRODUCTS.BUSINESS.yearly.amount}
+                    amount={billingCycle === "monthly" ? PADDLE_PRODUCTS.BUSINESS.monthly.amount : PADDLE_PRODUCTS.BUSINESS.yearly.amount}
                     billingCycle={billingCycle}
                   />
                 </TeslaCardFooter>

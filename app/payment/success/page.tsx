@@ -85,7 +85,6 @@ function PaymentSuccessContent() {
             {t.paymentSuccessfulDesc || "شكرًا لاشتراكك! تم تفعيل حسابك المتميز."}
           </TeslaCardDescription>
         </TeslaCardHeader>
-
         <TeslaCardContent>
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -105,7 +104,6 @@ function PaymentSuccessContent() {
 
                     <div className="text-muted-foreground">{t.startDate || "تاريخ البدء"}:</div>
                     <div>{subscriptionDetails.start_date || new Date().toLocaleDateString()}</div>
-
                     <div className="text-muted-foreground">{t.nextBillingDate || "تاريخ الفوترة التالي"}:</div>
                     <div>{subscriptionDetails.next_billing_date || new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString()}</div>
                   </div>
@@ -113,7 +111,6 @@ function PaymentSuccessContent() {
               )}
 
               <Separator />
-
               <div>
                 <h3 className="font-semibold mb-4">{t.featuresUnlocked || "الميزات المتاحة الآن"}</h3>
                 <div className="grid gap-3">
@@ -124,7 +121,6 @@ function PaymentSuccessContent() {
                       <p className="text-sm text-muted-foreground">{t.unlimitedItemsDesc || "يمكنك الآن إضافة عدد غير محدود من العناصر والتقارير."}</p>
                     </div>
                   </div>
-
                   <div className="flex items-start gap-3">
                     <Zap className="h-5 w-5 text-blue-500 mt-0.5" />
                     <div>
@@ -132,7 +128,6 @@ function PaymentSuccessContent() {
                       <p className="text-sm text-muted-foreground">{t.advancedReportsDesc || "الوصول إلى تقارير تحليلية متقدمة ورؤى مفصلة."}</p>
                     </div>
                   </div>
-
                   <div className="flex items-start gap-3">
                     <Shield className="h-5 w-5 text-green-500 mt-0.5" />
                     <div>
@@ -140,7 +135,6 @@ function PaymentSuccessContent() {
                       <p className="text-sm text-muted-foreground">{t.prioritySupportDesc || "الوصول إلى دعم العملاء ذو الأولوية مع أوقات استجابة أسرع."}</p>
                     </div>
                   </div>
-
                   <div className="flex items-start gap-3">
                     <FileText className="h-5 w-5 text-purple-500 mt-0.5" />
                     <div>
@@ -156,14 +150,12 @@ function PaymentSuccessContent() {
               <div className="flex flex-col items-center text-center">
                 <h3 className="font-semibold mb-2">{t.getStarted || "ابدأ الآن"}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{t.getStartedDesc || "استكشف الميزات الجديدة وابدأ في الاستفادة من اشتراكك."}</p>
-
                 <div className="flex flex-wrap gap-3 justify-center">
                   <Link href="/admin">
                     <TeslaButton>
                       {t.goToDashboard || "الذهاب إلى لوحة التحكم"}
                     </TeslaButton>
                   </Link>
-
                   <Link href="/admin/account">
                     <TeslaButton variant="outline">
                       <Settings className="h-4 w-4 mr-2" />
@@ -175,7 +167,6 @@ function PaymentSuccessContent() {
             </div>
           )}
         </TeslaCardContent>
-
         <TeslaCardFooter className="text-center text-sm text-muted-foreground">
           {t.paymentSuccessFooter || "إذا كانت لديك أي أسئلة حول اشتراكك، يرجى الاتصال بفريق الدعم."}
         </TeslaCardFooter>
@@ -187,7 +178,6 @@ function PaymentSuccessContent() {
 // مكون الصفحة الرئيسي
 export default function PaymentSuccessPage() {
   const { dir } = useLanguage()
-
   return (
     <div className="min-h-screen bg-background text-foreground" dir={dir}>
       <Suspense fallback={
