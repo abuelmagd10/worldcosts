@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Files, Settings, Zap } from "lucide-react"
+import { ArrowLeft, Files, Settings, Zap, Mail } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/lib/i18n/language-context"
 import { AppLogo } from "@/components/app-logo"
@@ -53,6 +53,20 @@ export default function AdminPage() {
                     <div>
                       <h3 className="text-base sm:text-lg font-medium">{t.settings}</h3>
                       <p className="text-xs sm:text-sm text-muted-foreground">{t.configureAppSettings}</p>
+                    </div>
+                  </TeslaCardContent>
+                </TeslaCard>
+              </Link>
+
+              <Link href="/admin/smtp" className="block w-full">
+                <TeslaCard className="h-full hover:bg-card/90 transition-colors cursor-pointer">
+                  <TeslaCardContent className="flex items-center gap-3 sm:gap-4 p-4 sm:p-6">
+                    <div className="bg-muted p-2 sm:p-3 rounded-full flex-shrink-0">
+                      <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-tesla-blue" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-medium">إعدادات SMTP</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground">تكوين إعدادات البريد الإلكتروني</p>
                     </div>
                   </TeslaCardContent>
                 </TeslaCard>
