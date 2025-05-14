@@ -1,4 +1,4 @@
--- إنشاء جدول الاشتراكات
+-- Create subscriptions table
 CREATE TABLE IF NOT EXISTS public.user_subscriptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -17,12 +17,12 @@ CREATE TABLE IF NOT EXISTS public.user_subscriptions (
   UNIQUE(user_id, subscription_id)
 );
 
--- إنشاء فهرس للبحث السريع
+-- Create indexes for fast searching
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user_id ON public.user_subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_subscription_id ON public.user_subscriptions(subscription_id);
 CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON public.user_subscriptions(status);
 
--- إنشاء وظيفة لتحديث حقل updated_at
+-- Create function to update updated_at field
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -31,23 +31,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- إنشاء محفز لتحديث حقل updated_at
+-- Create trigger to update updated_at field
 DROP TRIGGER IF EXISTS update_user_subscriptions_updated_at ON public.user_subscriptions;
 CREATE TRIGGER update_user_subscriptions_updated_at
 BEFORE UPDATE ON public.user_subscriptions
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
--- إنشاء سياسات RLS للجدول
+-- Create RLS policies for the table
 ALTER TABLE public.user_subscriptions ENABLE ROW LEVEL SECURITY;
 
--- سياسة للقراءة: يمكن للمستخدمين قراءة اشتراكاتهم فقط
+-- Read policy: Users can only read their own subscriptions
 DROP POLICY IF EXISTS "Users can view their own subscriptions" ON public.user_subscriptions;
 CREATE POLICY "Users can view their own subscriptions"
   ON public.user_subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
--- سياسة للإدارة: يمكن للمسؤولين إدارة جميع الاشتراكات
+-- Admin policy: Admins can manage all subscriptions
 DROP POLICY IF EXISTS "Admins can manage all subscriptions" ON public.user_subscriptions;
 CREATE POLICY "Admins can manage all subscriptions"
   ON public.user_subscriptions
@@ -58,7 +58,7 @@ CREATE POLICY "Admins can manage all subscriptions"
     )
   );
 
--- إنشاء وظيفة للحصول على اشتراك المستخدم الحالي
+-- Create function to get current user subscription
 CREATE OR REPLACE FUNCTION public.get_current_user_subscription()
 RETURNS SETOF public.user_subscriptions
 LANGUAGE sql
@@ -73,7 +73,7 @@ AS $$
   LIMIT 1;
 $$;
 
--- إنشاء وظيفة للتحقق من وجود اشتراك نشط للمستخدم الحالي
+-- Create function to check if current user has active subscription
 CREATE OR REPLACE FUNCTION public.has_active_subscription()
 RETURNS boolean
 LANGUAGE sql

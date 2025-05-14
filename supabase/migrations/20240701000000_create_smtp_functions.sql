@@ -1,4 +1,4 @@
--- إنشاء وظيفة للحصول على إعدادات SMTP
+-- Create function to get SMTP settings
 CREATE OR REPLACE FUNCTION public.get_smtp_settings()
 RETURNS json
 LANGUAGE plpgsql
@@ -6,13 +6,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- التحقق من أن المستخدم لديه صلاحيات المسؤول
+  -- Check if the user has admin privileges
   IF NOT (SELECT is_admin FROM auth.users WHERE id = auth.uid())
   THEN
     RAISE EXCEPTION 'Only administrators can get SMTP settings';
   END IF;
 
-  -- إرجاع إعدادات SMTP من جدول auth.config
+  -- Return SMTP settings from auth.config table
   RETURN (
     SELECT config->'mailer'->'smtp'
     FROM auth.config
@@ -21,7 +21,7 @@ BEGIN
 END;
 $$;
 
--- إنشاء وظيفة لتحديث إعدادات SMTP
+-- Create function to update SMTP settings
 CREATE OR REPLACE FUNCTION public.update_smtp_settings(
   sender_email text,
   sender_name text,
@@ -40,16 +40,16 @@ DECLARE
   current_config json;
   new_config json;
 BEGIN
-  -- التحقق من أن المستخدم لديه صلاحيات المسؤول
+  -- Check if the user has admin privileges
   IF NOT (SELECT is_admin FROM auth.users WHERE id = auth.uid())
   THEN
     RAISE EXCEPTION 'Only administrators can update SMTP settings';
   END IF;
 
-  -- الحصول على التكوين الحالي
+  -- Get current configuration
   SELECT config INTO current_config FROM auth.config LIMIT 1;
 
-  -- إنشاء تكوين SMTP جديد
+  -- Create new SMTP configuration
   SELECT json_build_object(
     'sender_email', sender_email,
     'sender_name', sender_name,
@@ -62,7 +62,7 @@ BEGIN
     'min_interval_seconds', min_interval_seconds
   ) INTO new_config;
 
-  -- تحديث التكوين
+  -- Update configuration
   UPDATE auth.config
   SET config = jsonb_set(
     jsonb_set(config, '{mailer,smtp}', new_config::jsonb),
