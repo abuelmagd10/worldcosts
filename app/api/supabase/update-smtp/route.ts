@@ -51,7 +51,7 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     // Check for required environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
@@ -71,15 +71,24 @@ export async function POST() {
       )
     }
 
+    // Get request body or use default values
+    let smtpSettings;
+    try {
+      smtpSettings = await request.json();
+    } catch (e) {
+      // If no body is provided, use default values
+      smtpSettings = {};
+    }
+
     // Update SMTP settings with English numerals
     const { data, error } = await supabaseAdmin.rpc('update_smtp_settings', {
-      sender_email: 'info@worldcosts.com',
-      sender_name: 'World Costs',
-      host: 'smtpout.secureserver.net',
-      port: 465, // Using English numerals
-      username: 'info@worldcosts.com',
-      password: process.env.SMTP_PASSWORD || undefined,
-      min_interval_seconds: 60 // Using English numerals
+      sender_email: smtpSettings.sender_email || 'info@worldcosts.com',
+      sender_name: smtpSettings.sender_name || 'World Costs',
+      host: smtpSettings.host || 'smtpout.secureserver.net',
+      port: smtpSettings.port || 465, // Using English numerals (confirmed)
+      username: smtpSettings.username || 'info@worldcosts.com', // Confirmed
+      password: smtpSettings.password || process.env.SMTP_PASSWORD || 'Max@101010', // Use provided password or env var
+      min_interval_seconds: smtpSettings.min_interval_seconds || 60 // Using English numerals
     })
 
     if (error) {
