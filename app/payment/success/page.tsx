@@ -36,7 +36,8 @@ function PaymentSuccessContent() {
   // جلب تفاصيل الاشتراك من الخادم
   const fetchSubscriptionDetails = async (session_id: string) => {
     try {
-      const response = await fetch(`/api/stripe/subscription-details?session_id=${session_id}`, {
+      // جلب تفاصيل الاشتراك من Paddle
+      const response = await fetch(`/api/paddle/checkout-details?session_id=${session_id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -49,6 +50,11 @@ function PaymentSuccessContent() {
 
       const data = await response.json()
       setSubscriptionDetails(data)
+
+      // حفظ تفاصيل الاشتراك في قاعدة البيانات
+      if (data && data.subscription_id) {
+        await saveSubscriptionToDatabase(data)
+      }
     } catch (error) {
       console.error("Error fetching subscription details:", error)
       toast({
@@ -58,6 +64,56 @@ function PaymentSuccessContent() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // حفظ تفاصيل الاشتراك في قاعدة البيانات
+  const saveSubscriptionToDatabase = async (subscriptionData: any) => {
+    try {
+      // التحقق من تسجيل الدخول
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        console.error("User not logged in")
+        toast({
+          title: t.error || "خطأ",
+          description: t.userNotLoggedIn || "يجب تسجيل الدخول لحفظ تفاصيل الاشتراك",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // إعداد بيانات الاشتراك
+      const subscriptionDetails = {
+        user_id: user.id,
+        subscription_id: subscriptionData.subscription_id,
+        customer_id: subscriptionData.customer_id,
+        plan_id: subscriptionData.plan_id,
+        plan_name: subscriptionData.plan_name,
+        billing_cycle: subscriptionData.billing_cycle,
+        status: subscriptionData.status || 'active',
+        current_period_start: subscriptionData.current_period_start || new Date().toISOString(),
+        current_period_end: subscriptionData.current_period_end || new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+        cancel_at_period_end: false,
+        metadata: subscriptionData
+      }
+
+      // حفظ الاشتراك في قاعدة البيانات
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .upsert(subscriptionDetails, {
+          onConflict: 'user_id,subscription_id',
+          returning: 'representation'
+        })
+
+      if (error) {
+        throw error
+      }
+
+      console.log("Subscription saved to database:", data)
+    } catch (error) {
+      console.error("Error saving subscription to database:", error)
+      // لا نعرض رسالة خطأ للمستخدم هنا لأن هذه العملية تتم في الخلفية
     }
   }
 

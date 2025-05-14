@@ -127,32 +127,52 @@ export function PaddleCheckout({
       })
 
       // إنشاء جلسة دفع باستخدام API
-      const response = await fetch('/api/paddle/create-checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId,
-          planId,
-          planName,
-          billingCycle,
-        }),
-      })
+      let response
+      try {
+        response = await fetch('/api/paddle/create-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            priceId,
+            planId,
+            planName,
+            billingCycle,
+          }),
+        })
 
-      console.log("API response status:", response.status)
+        console.log("API response status:", response.status)
+      } catch (fetchError: any) {
+        console.error("Network error during API call:", fetchError)
+        throw new Error("خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.")
+      }
 
       // قراءة بيانات الاستجابة
-      const responseData = await response.json()
-      console.log("API response data:", responseData)
+      let responseData
+      try {
+        responseData = await response.json()
+        console.log("API response data:", responseData)
+      } catch (jsonError) {
+        console.error("Error parsing API response:", jsonError)
+        throw new Error("خطأ في تحليل استجابة الخادم. يرجى المحاولة مرة أخرى.")
+      }
 
       if (!response.ok) {
-        throw new Error(responseData.error || 'فشل في إنشاء جلسة الدفع')
+        // التعامل مع أخطاء الخادم المختلفة
+        if (response.status === 401) {
+          throw new Error("انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.")
+        } else if (response.status === 400) {
+          throw new Error(responseData.error || "بيانات غير صالحة. يرجى التحقق من المعلومات المدخلة.")
+        } else {
+          throw new Error(responseData.error || 'فشل في إنشاء جلسة الدفع. يرجى المحاولة مرة أخرى.')
+        }
       }
 
       // التحقق من وجود رابط الدفع
       if (!responseData.checkoutUrl) {
-        throw new Error('لم يتم العثور على رابط الدفع في الاستجابة')
+        console.error("Missing checkout URL in response:", responseData)
+        throw new Error('لم يتم العثور على رابط الدفع في الاستجابة. يرجى المحاولة مرة أخرى.')
       }
 
       // عرض رسالة للمستخدم

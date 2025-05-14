@@ -133,27 +133,80 @@ export async function POST(request: NextRequest) {
       }
 
       // إرسال الطلب إلى Paddle API
-      const response = await fetch(paddleApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify(requestData)
-      })
-
-      // التحقق من استجابة Paddle
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Paddle API error:", errorData)
+      let response
+      try {
+        response = await fetch(paddleApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(requestData)
+        })
+      } catch (fetchError: any) {
+        console.error("Network error calling Paddle API:", fetchError)
         return NextResponse.json(
-          { error: "Error creating checkout session" },
-          { status: response.status }
+          { error: "Network error connecting to payment provider" },
+          { status: 500 }
         )
       }
 
-      // قراءة بيانات الاستجابة
-      const data = await response.json()
+      // التحقق من استجابة Paddle
+      let errorData
+      let data
+
+      try {
+        // محاولة قراءة الاستجابة كـ JSON
+        const responseText = await response.text()
+
+        try {
+          // محاولة تحليل النص كـ JSON
+          data = JSON.parse(responseText)
+        } catch (parseError) {
+          console.error("Error parsing Paddle API response:", parseError)
+          console.error("Response text:", responseText)
+          return NextResponse.json(
+            { error: "Invalid response from payment provider" },
+            { status: 500 }
+          )
+        }
+
+        if (!response.ok) {
+          errorData = data
+          console.error("Paddle API error:", errorData)
+
+          // التعامل مع أنواع الأخطاء المختلفة
+          let errorMessage = "Error creating checkout session"
+
+          if (errorData.error && errorData.error.type) {
+            switch (errorData.error.type) {
+              case "authentication_error":
+                errorMessage = "Authentication error with payment provider"
+                break
+              case "invalid_request_error":
+                errorMessage = "Invalid request to payment provider"
+                break
+              case "api_error":
+                errorMessage = "Payment provider API error"
+                break
+              default:
+                errorMessage = errorData.error.message || "Error creating checkout session"
+            }
+          }
+
+          return NextResponse.json(
+            { error: errorMessage },
+            { status: response.status }
+          )
+        }
+      } catch (responseError: any) {
+        console.error("Error reading Paddle API response:", responseError)
+        return NextResponse.json(
+          { error: "Error processing payment provider response" },
+          { status: 500 }
+        )
+      }
+
       console.log("Paddle API response:", data)
 
       // التحقق من وجود رابط الدفع في الاستجابة
