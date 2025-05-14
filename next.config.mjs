@@ -9,6 +9,10 @@ const nextConfig = {
       }
     ];
   },
+  // Permitir que la página de confirmación reciba el token en la URL
+  experimental: {
+    scrollRestoration: true,
+  },
   // Eliminar la configuración de webpack
   webpack: (config, { isServer }) => {
     return config;
