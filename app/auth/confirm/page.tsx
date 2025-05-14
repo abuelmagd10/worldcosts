@@ -25,11 +25,9 @@ function ConfirmEmailContent() {
     const confirmEmail = async () => {
       try {
         // طباعة معلومات التصحيح
-        if (process.env.NODE_ENV === 'development') {
-          console.log("URL:", window.location.href);
-          console.log("Search params:", Object.fromEntries(searchParams.entries()));
-          console.log("Hash:", window.location.hash);
-        }
+        console.log("URL:", window.location.href);
+        console.log("Search params:", Object.fromEntries(searchParams.entries()));
+        console.log("Hash:", window.location.hash);
 
         // الحصول على رمز التأكيد من معلمات البحث أو من الهاش
         let token = searchParams.get("token") || null;
@@ -43,9 +41,7 @@ function ConfirmEmailContent() {
         
         // إذا لم يتم العثور على المعلمات في searchParams، نحاول استخراجها من الهاش
         if (window.location.hash) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log("Trying to extract parameters from hash:", window.location.hash);
-          }
+          console.log("Trying to extract parameters from hash:", window.location.hash);
           
           // تنظيف الهاش
           const hashString = window.location.hash.startsWith('#') 
@@ -56,9 +52,7 @@ function ConfirmEmailContent() {
           try {
             // محاولة تحليل الهاش كـ JSON
             const hashData = JSON.parse(decodeURIComponent(hashString));
-            if (process.env.NODE_ENV === 'development') {
-              console.log("Hash parsed as JSON:", hashData);
-            }
+            console.log("Hash parsed as JSON:", hashData);
             
             // استخراج المعلمات من كائن JSON
             token = token || hashData.token;
@@ -68,12 +62,11 @@ function ConfirmEmailContent() {
             error_code = error_code || hashData.error_code;
             error_description = error_description || hashData.error_description;
           } catch (jsonError) {
+            console.log("Failed to parse hash as JSON, trying URLSearchParams");
             // إذا فشل تحليل JSON، نحاول استخدام URLSearchParams
             try {
               const hashParams = new URLSearchParams(hashString);
-              if (process.env.NODE_ENV === 'development') {
-                console.log("Hash parsed as URLSearchParams:", Object.fromEntries(hashParams.entries()));
-              }
+              console.log("Hash parsed as URLSearchParams:", Object.fromEntries(hashParams.entries()));
               
               token = token || hashParams.get("token");
               type = type || hashParams.get("type") || "signup";
@@ -88,9 +81,7 @@ function ConfirmEmailContent() {
         }
         
         // طباعة المعلمات المستخرجة
-        if (process.env.NODE_ENV === 'development') {
-          console.log("Extracted parameters:", { token, type, redirectTo, error, error_code, error_description });
-        }
+        console.log("Extracted parameters:", { token, type, redirectTo, error, error_code, error_description });
 
         // إذا كان هناك خطأ في URL، نعرضه للمستخدم
         if (error) {
@@ -104,15 +95,23 @@ function ConfirmEmailContent() {
         if (!token) {
           // محاولة استخراج الرمز من URL كاملة
           const urlString = window.location.href;
-          const urlObj = new URL(urlString);
+          console.log("Trying to extract token from full URL:", urlString);
           
-          // التحقق من وجود رمز في المسار
-          const pathSegments = urlObj.pathname.split('/');
-          const lastSegment = pathSegments[pathSegments.length - 1];
+          // محاولة استخراج الرمز من URL باستخدام تعبير منتظم
+          const tokenRegex = /[?&#]token=([^&]+)/;
+          const tokenMatch = urlString.match(tokenRegex);
           
-          if (lastSegment && lastSegment !== 'confirm') {
-            token = lastSegment;
-            if (process.env.NODE_ENV === 'development') {
+          if (tokenMatch && tokenMatch[1]) {
+            token = tokenMatch[1];
+            console.log("Extracted token using regex:", token);
+          } else {
+            // محاولة استخراج الرمز من المسار
+            const urlObj = new URL(urlString);
+            const pathSegments = urlObj.pathname.split('/');
+            const lastSegment = pathSegments[pathSegments.length - 1];
+            
+            if (lastSegment && lastSegment !== 'confirm') {
+              token = lastSegment;
               console.log("Extracted token from URL path:", token);
             }
           }
@@ -134,9 +133,7 @@ function ConfirmEmailContent() {
           verifyType = 'signup';
         }
         
-        if (process.env.NODE_ENV === 'development') {
-          console.log("Verifying token with type:", verifyType);
-        }
+        console.log("Verifying token with type:", verifyType);
 
         // تأكيد البريد الإلكتروني باستخدام Supabase
         const { error: resultError } = await supabase.auth.verifyOtp({
@@ -145,9 +142,11 @@ function ConfirmEmailContent() {
         });
         
         if (resultError) {
+          console.error("Error verifying token:", resultError);
           throw resultError;
         }
         
+        console.log("Email confirmed successfully!");
         setIsSuccess(true);
         setIsLoading(false);
         
