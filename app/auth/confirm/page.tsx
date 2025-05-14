@@ -64,10 +64,10 @@ function ConfirmEmailContent() {
           })
         }
 
-        const { error } = result
+        const { error: resultError } = result
 
-        if (error) {
-          throw error
+        if (resultError) {
+          throw resultError
         }
 
         setIsSuccess(true)
