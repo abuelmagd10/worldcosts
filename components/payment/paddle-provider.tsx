@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode, useEffect, useState, createContext, useContext } from "react"
-import { PADDLE_VENDOR_ID } from "@/lib/paddle/config"
+import { PADDLE_VENDOR_ID, PADDLE_PUBLIC_KEY } from "@/lib/paddle/config"
 
 // إنشاء سياق Paddle
 interface PaddleContextType {
@@ -32,7 +32,9 @@ declare global {
 export function PaddleProvider({ children }: PaddleProviderProps) {
   const [isClient, setIsClient] = useState(false)
   const [isPaddleLoaded, setIsPaddleLoaded] = useState(false)
-  const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'live_2b9f03bdaa5802aaaf87b06640f'
+  const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || PADDLE_PUBLIC_KEY
+
+  console.log("PaddleProvider initialized with token:", clientToken)
 
   useEffect(() => {
     setIsClient(true)

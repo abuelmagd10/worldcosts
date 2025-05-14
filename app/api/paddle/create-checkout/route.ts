@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { PADDLE_API_KEY, SUCCESS_URL, CANCEL_URL } from "@/lib/paddle/config"
 
 // تعريف نوع البيانات المرسلة في الطلب
 interface RequestBody {
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // إنشاء طلب إلى Paddle API
-    const apiKey = process.env.PADDLE_API_KEY
+    const apiKey = PADDLE_API_KEY
 
     if (!apiKey) {
       console.error("Paddle API key is missing")
@@ -82,6 +83,8 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    console.log("Using Paddle API key:", apiKey.substring(0, 10) + "...")
 
     // بناء عنوان URL للنجاح والإلغاء
     const origin = request.headers.get("origin") || "http://localhost:3000"
@@ -103,7 +106,8 @@ export async function POST(request: NextRequest) {
       })
 
       // إعداد بيانات الطلب لـ Paddle API
-      const paddleApiUrl = 'https://api.paddle.com/checkout/custom'
+      // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle
+      const paddleApiUrl = 'https://api.paddle.com/v2/transactions/create'
 
       const requestData = {
         items: [
@@ -112,16 +116,20 @@ export async function POST(request: NextRequest) {
             quantity: 1
           }
         ],
-        customer_email: userEmail,
         customer_id: user.id,
+        customer: {
+          email: userEmail,
+          name: user.user_metadata?.full_name || userEmail.split('@')[0]
+        },
         custom_data: {
           userId: user.id,
           planId,
           planName,
           billingCycle
         },
-        success_url: successUrl,
-        cancel_url: cancelUrl
+        return_url: successUrl,
+        cancel_url: cancelUrl,
+        locale: 'ar'
       }
 
       // إرسال الطلب إلى Paddle API
@@ -146,10 +154,20 @@ export async function POST(request: NextRequest) {
 
       // قراءة بيانات الاستجابة
       const data = await response.json()
+      console.log("Paddle API response:", data)
+
+      // التحقق من وجود رابط الدفع في الاستجابة
+      if (!data.data || !data.data.url) {
+        console.error("Paddle API response missing checkout URL:", data)
+        return NextResponse.json(
+          { error: "Invalid response from payment provider" },
+          { status: 500 }
+        )
+      }
 
       // إرجاع رابط الدفع
       return NextResponse.json({
-        checkoutUrl: data.url
+        checkoutUrl: data.data.url
       })
     } catch (error: any) {
       console.error("Error calling Paddle API:", error)

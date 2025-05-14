@@ -114,7 +114,12 @@ export function PaddleCheckout({
 
     try {
       // استخدام Paddle API لإنشاء جلسة دفع
-      console.log("Creating Paddle checkout session")
+      console.log("Creating Paddle checkout session with:", {
+        priceId,
+        planId,
+        planName,
+        billingCycle
+      })
 
       toast({
         title: "جاري إنشاء جلسة الدفع",
@@ -135,12 +140,20 @@ export function PaddleCheckout({
         }),
       })
 
+      console.log("API response status:", response.status)
+
+      // قراءة بيانات الاستجابة
+      const responseData = await response.json()
+      console.log("API response data:", responseData)
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'فشل في إنشاء جلسة الدفع')
+        throw new Error(responseData.error || 'فشل في إنشاء جلسة الدفع')
       }
 
-      const { checkoutUrl } = await response.json()
+      // التحقق من وجود رابط الدفع
+      if (!responseData.checkoutUrl) {
+        throw new Error('لم يتم العثور على رابط الدفع في الاستجابة')
+      }
 
       // عرض رسالة للمستخدم
       toast({
@@ -149,7 +162,8 @@ export function PaddleCheckout({
       })
 
       // فتح صفحة الدفع
-      window.open(checkoutUrl, '_blank')
+      console.log("Opening checkout URL:", responseData.checkoutUrl)
+      window.open(responseData.checkoutUrl, '_blank')
 
       console.log("Paddle checkout opened")
     } catch (error: any) {
