@@ -8,6 +8,19 @@ export type Translation = {
   refundPolicyTitle: string
   refundPolicyText: string
 
+  // Email confirmation
+  confirmingEmail: string
+  emailConfirmed: string
+  emailConfirmationFailed: string
+  pleaseWait: string
+  emailConfirmedDesc: string
+  emailConfirmationFailedDesc: string
+  tokenRequired: string
+  tryAgain: string
+  emailConfirmedFooter: string
+  emailConfirmationFailedFooter: string
+  login: string
+
   // Form labels
   itemName: string
   itemValue: string
@@ -430,6 +443,19 @@ export type Translation = {
 export const ar: Translation = {
   appTitle: "WorldCosts",
   appDescription: "احسب تكلفة منتجاتك بدقة وبعملات مختلفة مع إمكانية احتساب الشحن والضرائب والجمارك",
+
+  // Email confirmation
+  confirmingEmail: "جاري تأكيد البريد الإلكتروني...",
+  emailConfirmed: "تم تأكيد البريد الإلكتروني",
+  emailConfirmationFailed: "فشل تأكيد البريد الإلكتروني",
+  pleaseWait: "يرجى الانتظار بينما نتحقق من بريدك الإلكتروني...",
+  emailConfirmedDesc: "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
+  emailConfirmationFailedDesc: "حدث خطأ أثناء تأكيد بريدك الإلكتروني. يرجى المحاولة مرة أخرى.",
+  tokenRequired: "رمز التأكيد مطلوب",
+  tryAgain: "المحاولة مرة أخرى",
+  emailConfirmedFooter: "شكرًا لتأكيد بريدك الإلكتروني. يمكنك الآن الاستمتاع بجميع ميزات التطبيق.",
+  emailConfirmationFailedFooter: "إذا استمرت المشكلة، يرجى الاتصال بفريق الدعم.",
+  login: "تسجيل الدخول",
 
   // Refund policy
   refundPolicyTitle: "سياسة الاسترداد",
@@ -861,6 +887,19 @@ export const ar: Translation = {
 export const en: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Add items with currency selection and calculate totals in different currencies",
+
+  // Email confirmation
+  confirmingEmail: "Confirming Email...",
+  emailConfirmed: "Email Confirmed",
+  emailConfirmationFailed: "Email Confirmation Failed",
+  pleaseWait: "Please wait while we verify your email...",
+  emailConfirmedDesc: "Your email has been successfully confirmed. You can now log in.",
+  emailConfirmationFailedDesc: "An error occurred while confirming your email. Please try again.",
+  tokenRequired: "Confirmation token is required",
+  tryAgain: "Try Again",
+  emailConfirmedFooter: "Thank you for confirming your email. You can now enjoy all the features of the application.",
+  emailConfirmationFailedFooter: "If the problem persists, please contact our support team.",
+  login: "Login",
 
   // Refund policy
   refundPolicyTitle: "Refund Policy",
@@ -1294,6 +1333,19 @@ export const en: Translation = {
 export const de: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Fügen Sie Artikel mit Währungsauswahl hinzu und berechnen Sie Summen in verschiedenen Währungen",
+
+  // Email confirmation
+  confirmingEmail: "E-Mail wird bestätigt...",
+  emailConfirmed: "E-Mail bestätigt",
+  emailConfirmationFailed: "E-Mail-Bestätigung fehlgeschlagen",
+  pleaseWait: "Bitte warten Sie, während wir Ihre E-Mail überprüfen...",
+  emailConfirmedDesc: "Ihre E-Mail wurde erfolgreich bestätigt. Sie können sich jetzt anmelden.",
+  emailConfirmationFailedDesc: "Bei der Bestätigung Ihrer E-Mail ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+  tokenRequired: "Bestätigungstoken ist erforderlich",
+  tryAgain: "Erneut versuchen",
+  emailConfirmedFooter: "Vielen Dank für die Bestätigung Ihrer E-Mail. Sie können jetzt alle Funktionen der Anwendung nutzen.",
+  emailConfirmationFailedFooter: "Wenn das Problem weiterhin besteht, kontaktieren Sie bitte unser Support-Team.",
+  login: "Anmelden",
 
   // Refund policy
   refundPolicyTitle: "Rückerstattungsrichtlinie",
@@ -1735,6 +1787,19 @@ export const de: Translation = {
 export const fr: Translation = {
   appTitle: "WorldCosts",
   appDescription: "Ajoutez des articles avec sélection de devise et calculez les totaux en différentes devises",
+
+  // Email confirmation
+  confirmingEmail: "Confirmation de l'e-mail...",
+  emailConfirmed: "E-mail confirmé",
+  emailConfirmationFailed: "Échec de la confirmation de l'e-mail",
+  pleaseWait: "Veuillez patienter pendant que nous vérifions votre e-mail...",
+  emailConfirmedDesc: "Votre e-mail a été confirmé avec succès. Vous pouvez maintenant vous connecter.",
+  emailConfirmationFailedDesc: "Une erreur s'est produite lors de la confirmation de votre e-mail. Veuillez réessayer.",
+  tokenRequired: "Le jeton de confirmation est requis",
+  tryAgain: "Réessayer",
+  emailConfirmedFooter: "Merci d'avoir confirmé votre e-mail. Vous pouvez maintenant profiter de toutes les fonctionnalités de l'application.",
+  emailConfirmationFailedFooter: "Si le problème persiste, veuillez contacter notre équipe de support.",
+  login: "Connexion",
 
   // Refund policy
   refundPolicyTitle: "Politique de Remboursement",

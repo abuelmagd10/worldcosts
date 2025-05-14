@@ -156,69 +156,8 @@ function ConfirmEmailContent() {
           description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
         });
         
-        // إنشاء مكون لعرض رسالة النجاح
-        const SuccessDialog = () => (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-background p-6 rounded-lg max-w-md w-full">
-              <div className="flex flex-col items-center justify-center mb-4">
-                <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-2">{t.emailConfirmed || "تم تأكيد البريد الإلكتروني بنجاح!"}</h3>
-                <p className="text-center mb-4">
-                  {t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول إلى حسابك."}
-                </p>
-              </div>
-              <div className="flex justify-center">
-                <button
-                  className="bg-primary text-white px-4 py-2 rounded-md"
-                  onClick={() => {
-                    document.getElementById('success-dialog')?.remove();
-                    
-                    // إعادة التوجيه إلى صفحة تسجيل الدخول
-                    if (redirectTo) {
-                      try {
-                        const decodedRedirect = decodeURIComponent(redirectTo);
-                        const shouldRefresh = decodedRedirect.includes("/admin/subscription");
-                        
-                        if (shouldRefresh) {
-                          const separator = decodedRedirect.includes("?") ? "&" : "?";
-                          window.location.href = `${decodedRedirect}${separator}refresh=true`;
-                        } else {
-                          window.location.href = decodedRedirect;
-                        }
-                      } catch (error) {
-                        console.error("Error redirecting after email confirmation:", error);
-                        window.location.href = "/auth/login";
-                      }
-                    } else {
-                      window.location.href = "/auth/login";
-                    }
-                  }}
-                >
-                  {t.login || "تسجيل الدخول"}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-        
-        // إضافة مكون النجاح إلى الصفحة
-        const dialogContainer = document.createElement('div');
-        dialogContainer.id = 'success-dialog';
-        document.body.appendChild(dialogContainer);
-        
-        // استخدام ReactDOM.render لعرض المكون
-        const ReactDOM = require('react-dom');
-        ReactDOM.render(<SuccessDialog />, dialogContainer);
-        
         // إعادة توجيه المستخدم بعد تأخير
         setTimeout(() => {
-          // إزالة مكون النجاح
-          document.getElementById('success-dialog')?.remove();
-          
           // إعادة التوجيه إلى صفحة تسجيل الدخول
           if (redirectTo) {
             try {
@@ -238,7 +177,7 @@ function ConfirmEmailContent() {
           } else {
             window.location.href = "/auth/login";
           }
-        }, 5000);
+        }, 3000);
       } catch (error: any) {
         console.error("Error confirming email:", error);
         
