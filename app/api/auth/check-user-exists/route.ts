@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Error checking user existence:", error)
-
+      
       // في حالة حدوث خطأ، نحاول طريقة أخرى
       try {
         // محاولة تسجيل الدخول باستخدام OTP بدون إنشاء مستخدم جديد
@@ -81,10 +81,11 @@ export async function POST(request: Request) {
 
     // التحقق من وجود المستخدم
     const userExists = data.users.length > 0
+    const emailConfirmed = userExists ? data.users[0].email_confirmed_at !== null : false
 
     return NextResponse.json({
       exists: userExists,
-      emailConfirmed: userExists ? data.users[0].email_confirmed_at !== null : false
+      emailConfirmed: emailConfirmed
     })
   } catch (error: any) {
     console.error("Error checking user existence:", error)

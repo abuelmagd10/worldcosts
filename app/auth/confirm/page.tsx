@@ -77,37 +77,37 @@ function ConfirmEmailContent() {
           return
         }
 
-        // تأكيد البريد الإلكتروني باستخدام Supabase
-        let result
+        // تحديد نوع التأكيد المناسب
+        let verifyType: 'email' | 'recovery' | 'signup' = 'signup';
         
-        if (type === "recovery") {
-          // إعادة تعيين كلمة المرور
-          result = await supabase.auth.verifyOtp({
-            token,
-            type: "recovery",
-          })
-        } else {
-          // تأكيد البريد الإلكتروني
-          result = await supabase.auth.verifyOtp({
-            token,
-            type: "email",
-          })
+        if (type === 'recovery') {
+          verifyType = 'recovery';
+        } else if (type === 'email' || type === 'signup') {
+          verifyType = 'signup';
         }
         
-        const { error: resultError } = result
+        if (process.env.NODE_ENV === 'development') {
+          console.log("Verifying token with type:", verifyType);
+        }
+
+        // تأكيد البريد الإلكتروني باستخدام Supabase
+        const { error: resultError } = await supabase.auth.verifyOtp({
+          token,
+          type: verifyType,
+        });
         
         if (resultError) {
-          throw resultError
+          throw resultError;
         }
         
-        setIsSuccess(true)
-        setIsLoading(false)
+        setIsSuccess(true);
+        setIsLoading(false);
         
         // عرض رسالة نجاح
         toast({
           title: t.emailConfirmed || "تم تأكيد البريد الإلكتروني",
           description: t.emailConfirmedDesc || "تم تأكيد بريدك الإلكتروني بنجاح. يمكنك الآن تسجيل الدخول.",
-        })
+        });
         
         // إنشاء مكون لعرض رسالة النجاح
         const SuccessDialog = () => (

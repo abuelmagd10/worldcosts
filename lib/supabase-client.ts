@@ -54,44 +54,113 @@ const supabaseOptions = {
 // إنشاء عميل Supabase للاستخدام في جانب العميل
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, supabaseOptions);
 
-// وظيفة للتحقق من وجود المستخدم
+// وظيفة للتحقق من وجود المستخدم في جانب العميل
 export async function checkUserExists(email: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase.auth.admin.listUsers({
-      filter: {
-        email: email
-      }
+    // استخدام API للتحقق من وجود المستخدم بدلاً من استخدام admin API
+    const response = await fetch('/api/auth/check-user-exists', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
     });
 
-    if (error) {
-      console.error('Error checking user existence:', error);
+    if (!response.ok) {
+      console.error("Error checking user existence:", await response.text());
+      
       // في حالة حدوث خطأ، نحاول طريقة أخرى
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: false
-        }
-      });
+      try {
+        // محاولة تسجيل الدخول باستخدام OTP بدون إنشاء مستخدم جديد
+        const { error: signInError } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            shouldCreateUser: false,
+          },
+        });
 
-      if (signInError) {
         // إذا كان الخطأ يشير إلى أن المستخدم غير موجود
-        if (signInError.message.includes('user not found')) {
+        if (signInError && signInError.message.includes('user not found')) {
           return false;
         }
-        // إذا كان الخطأ لسبب آخر، نفترض أن المستخدم موجود
-        return true;
-      }
 
-      // إذا نجحت العملية، فهذا يعني أن المستخدم موجود
-      return true;
+        // إذا لم يكن هناك خطأ أو كان الخطأ لسبب آخر، نفترض أن المستخدم موجود
+        return true;
+      } catch (fallbackError) {
+        console.error('Fallback error checking user existence:', fallbackError);
+        return false; // نفترض أن المستخدم غير موجود في حالة حدوث خطأ
+      }
     }
 
-    // التحقق من وجود مستخدمين في البيانات
-    return data && data.users && data.users.length > 0;
+    const data = await response.json();
+    return data.exists;
   } catch (error) {
     console.error('Unexpected error checking user existence:', error);
-    // في حالة حدوث خطأ غير متوقع، نفترض أن المستخدم غير موجود
-    return false;
+    
+    // في حالة حدوث خطأ غير متوقع، نحاول طريقة أخرى
+    try {
+      // محاولة تسجيل الدخول باستخدام OTP بدون إنشاء مستخدم جديد
+      const { error: signInError } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
+
+      // إذا كان الخطأ يشير إلى أن المستخدم غير موجود
+      if (signInError && signInError.message.includes('user not found')) {
+        return false;
+      }
+
+      // إذا لم يكن هناك خطأ أو كان الخطأ لسبب آخر، نفترض أن المستخدم موجود
+      return true;
+    } catch (fallbackError) {
+      console.error('Fallback error checking user existence:', fallbackError);
+      return false; // نفترض أن المستخدم غير موجود في حالة حدوث خطأ
+    }
+  }
+}
+
+// وظيفة لإعادة إرسال رابط تأكيد البريد الإلكتروني
+export async function resendConfirmationEmail(email: string, redirectTo?: string): Promise<{ success: boolean; error?: any }> {
+  try {
+    // التحقق من وجود المستخدم أولاً
+    const userExists = await checkUserExists(email);
+    
+    if (!userExists) {
+      return { 
+        success: false, 
+        error: { 
+          message: 'المستخدم غير موجود', 
+          code: 'user_not_found' 
+        } 
+      };
+    }
+    
+    // إعداد URL إعادة التوجيه
+    let emailRedirectTo = `${window.location.origin}/auth/confirm`;
+    
+    if (redirectTo) {
+      emailRedirectTo += `?redirect_to=${encodeURIComponent(redirectTo)}`;
+    }
+    
+    // إعادة إرسال رابط تأكيد البريد الإلكتروني
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo,
+      },
+    });
+    
+    if (error) {
+      return { success: false, error };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error resending confirmation email:', error);
+    return { success: false, error };
   }
 }
 
