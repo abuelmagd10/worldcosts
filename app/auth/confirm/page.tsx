@@ -108,11 +108,27 @@ function ConfirmEmailContent() {
             // محاولة استخراج الرمز من المسار
             const urlObj = new URL(urlString);
             const pathSegments = urlObj.pathname.split('/');
-            const lastSegment = pathSegments[pathSegments.length - 1];
             
-            if (lastSegment && lastSegment !== 'confirm') {
-              token = lastSegment;
-              console.log("Extracted token from URL path:", token);
+            // التحقق من وجود رمز في المسار
+            for (let i = 0; i < pathSegments.length; i++) {
+              const segment = pathSegments[i];
+              if (segment && segment !== 'confirm' && segment !== 'auth' && segment.length > 10) {
+                token = segment;
+                console.log("Extracted token from URL path segment:", token);
+                break;
+              }
+            }
+            
+            // إذا لم يتم العثور على الرمز في المسار، نحاول استخراجه من الرابط كاملًا
+            if (!token) {
+              // محاولة استخراج الرمز من الرابط كاملًا باستخدام تعبير منتظم آخر
+              const fullUrlTokenRegex = /\/confirm\/([^/?&#]+)/;
+              const fullUrlTokenMatch = urlString.match(fullUrlTokenRegex);
+              
+              if (fullUrlTokenMatch && fullUrlTokenMatch[1]) {
+                token = fullUrlTokenMatch[1];
+                console.log("Extracted token from full URL path:", token);
+              }
             }
           }
         }
