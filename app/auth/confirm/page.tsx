@@ -28,6 +28,19 @@ function ConfirmEmailContent() {
         const token = searchParams.get("token")
         const type = searchParams.get("type") || "signup"
 
+        // التحقق من وجود رمز الخطأ في URL
+        const error = searchParams.get("error")
+        const error_code = searchParams.get("error_code")
+        const error_description = searchParams.get("error_description")
+
+        // إذا كان هناك خطأ في URL، نعرضه للمستخدم
+        if (error) {
+          console.error("Error in URL:", { error, error_code, error_description })
+          setErrorMessage(error_description || error || t.emailConfirmationFailed || "فشل تأكيد البريد الإلكتروني")
+          setIsLoading(false)
+          return
+        }
+
         if (!token) {
           setErrorMessage(t.tokenRequired || "رمز التأكيد مطلوب")
           setIsLoading(false)
@@ -40,13 +53,13 @@ function ConfirmEmailContent() {
         if (type === "recovery") {
           // إعادة تعيين كلمة المرور
           result = await supabase.auth.verifyOtp({
-            token_hash: token,
+            token,
             type: "recovery",
           })
         } else {
           // تأكيد البريد الإلكتروني
           result = await supabase.auth.verifyOtp({
-            token_hash: token,
+            token,
             type: "email",
           })
         }
