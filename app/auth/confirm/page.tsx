@@ -147,8 +147,7 @@ function ConfirmEmailContent() {
         const ReactDOM = require('react-dom');
         ReactDOM.render(<SuccessDialog />, dialogContainer);
 
-        // التحقق من وجود معلمة redirect في URL
-        const redirectTo = searchParams.get("redirect_to")
+        // استخدام متغير redirectTo الذي تم تعريفه سابقًا
 
         // تحديث زر تسجيل الدخول في مكون النجاح
         const loginButton = document.querySelector('#success-dialog button');
