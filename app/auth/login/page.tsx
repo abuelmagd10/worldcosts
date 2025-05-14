@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isResendingEmail, setIsResendingEmail] = useState(false)
   const [cooldownTime, setCooldownTime] = useState(0)
   const [isInCooldown, setIsInCooldown] = useState(false)
 
@@ -74,15 +75,43 @@ export default function LoginPage() {
       return
     }
 
+    setIsResendingEmail(true)
+
     try {
+      // التحقق من وجود المستخدم قبل إرسال رابط التأكيد
+      const userExists = await checkUserExists(email)
+
+      if (!userExists) {
+        toast({
+          title: "المستخدم غير موجود",
+          description: "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟",
+          variant: "destructive",
+          action: (
+            <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+              <button className="bg-primary text-white px-3 py-1 rounded-md text-xs">
+                إنشاء حساب جديد
+              </button>
+            </Link>
+          ),
+        })
+        setIsResendingEmail(false)
+        return
+      }
+
       // إضافة معلمة redirect_to إذا كانت موجودة
       const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
+      const emailRedirectTo = `${window.location.origin}/auth/confirm${redirectParam}`
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Resending confirmation email to:", email)
+        console.log("Email redirect URL:", emailRedirectTo)
+      }
 
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm${redirectParam}`,
+          emailRedirectTo: emailRedirectTo,
         }
       })
 
@@ -94,6 +123,45 @@ export default function LoginPage() {
         title: "تم إرسال رابط التأكيد",
         description: "تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني. يرجى التحقق من بريدك الإلكتروني.",
       })
+
+      // إنشاء مكون لعرض معلومات التأكيد
+      const ConfirmationDialog = () => (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">تأكيد البريد الإلكتروني</h3>
+            <p className="mb-4">
+              تم إرسال رابط تأكيد إلى بريدك الإلكتروني <strong>{email}</strong>. يرجى التحقق من بريدك الإلكتروني والنقر على الرابط لتأكيد حسابك.
+            </p>
+            <p className="mb-4 text-sm text-muted-foreground">
+              ملاحظة: لن تتمكن من تسجيل الدخول حتى تقوم بتأكيد بريدك الإلكتروني.
+            </p>
+            <div className="flex justify-center">
+              <button
+                className="bg-primary text-white px-4 py-2 rounded-md"
+                onClick={() => {
+                  document.getElementById('confirmation-dialog')?.remove();
+                }}
+              >
+                فهمت
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+
+      // إضافة مكون التأكيد إلى الصفحة
+      const dialogContainer = document.createElement('div');
+      dialogContainer.id = 'confirmation-dialog';
+      document.body.appendChild(dialogContainer);
+
+      // استخدام ReactDOM.render لعرض المكون
+      const ReactDOM = require('react-dom');
+      ReactDOM.render(<ConfirmationDialog />, dialogContainer);
+
+      // إزالة مكون التأكيد بعد 30 ثانية
+      setTimeout(() => {
+        document.getElementById('confirmation-dialog')?.remove();
+      }, 30000);
     } catch (error: any) {
       console.error("Resend confirmation error:", error)
 
@@ -101,7 +169,7 @@ export default function LoginPage() {
       let errorTitle = "خطأ في إرسال رابط التأكيد"
 
       // التحقق من نوع الخطأ
-      if (error.message.includes("For security purposes, you can only request this after")) {
+      if (error.message && error.message.includes("For security purposes, you can only request this after")) {
         // استخراج عدد الثواني من رسالة الخطأ
         const secondsMatch = error.message.match(/after (\d+) seconds/)
         const seconds = secondsMatch ? parseInt(secondsMatch[1]) : 60
@@ -111,6 +179,27 @@ export default function LoginPage() {
 
         // بدء عداد تنازلي
         startCooldownTimer(seconds)
+      } else if (error.message && error.message.includes("user not found")) {
+        errorTitle = "المستخدم غير موجود"
+        errorMessage = "لا يوجد حساب مسجل بهذا البريد الإلكتروني. هل ترغب في إنشاء حساب جديد؟"
+
+        toast({
+          title: errorTitle,
+          description: errorMessage,
+          variant: "destructive",
+          action: (
+            <Link href={`/auth/register?email=${encodeURIComponent(email)}`}>
+              <button className="bg-primary text-white px-3 py-1 rounded-md text-xs">
+                إنشاء حساب جديد
+              </button>
+            </Link>
+          ),
+        })
+        setIsResendingEmail(false)
+        return
+      } else if (error.message && error.message.includes("network")) {
+        errorTitle = "خطأ في الاتصال بالشبكة"
+        errorMessage = "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
       }
 
       toast({
@@ -118,6 +207,8 @@ export default function LoginPage() {
         description: errorMessage,
         variant: "destructive",
       })
+    } finally {
+      setIsResendingEmail(false)
     }
   }
 
@@ -248,47 +339,29 @@ export default function LoginPage() {
   const checkUserExists = async (email: string) => {
     try {
       console.log("Checking if user exists:", email)
-      console.log("Supabase client:", supabase ? "Initialized" : "Not initialized")
-      console.log("Supabase auth:", supabase.auth ? "Available" : "Not available")
 
-      // إضافة معلمة redirect_to إذا كانت موجودة
-      const redirectParam = redirectUrl ? `?redirect_to=${encodeURIComponent(redirectUrl)}` : ''
-      const emailRedirectTo = `${window.location.origin}/auth/confirm${redirectParam}`
-
-      console.log("Email redirect URL for user check:", emailRedirectTo)
-
-      // استخدام signInWithOtp بدلاً من resetPasswordForEmail للتحقق من وجود المستخدم
-      // هذه الطريقة أكثر موثوقية للتحقق من وجود المستخدم
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false, // لا تقم بإنشاء مستخدم جديد إذا لم يكن موجودًا
-          emailRedirectTo: emailRedirectTo,
+      // استخدام طريقة أكثر موثوقية للتحقق من وجود المستخدم
+      // نستخدم API مخصص للتحقق من وجود المستخدم بدلاً من محاولة تسجيل الدخول
+      const response = await fetch('/api/auth/check-user-exists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ email }),
       })
 
-      console.log("Sign in with OTP response:", error ? `Error: ${error.message}` : "Success", data)
+      const data = await response.json()
+      console.log("Check user exists response:", data)
 
-      // إذا كان هناك خطأ يشير إلى أن المستخدم غير موجود
-      if (error && (
-        (error.message && error.message.includes("user not found")) ||
-        (error.message && error.message.includes("Invalid login credentials")) ||
-        (error.message && error.message.includes("Email not confirmed"))
-      )) {
-        console.log("User does not exist or email not confirmed")
-        return false
+      if (!response.ok) {
+        // في حالة حدوث خطأ في الخادم
+        console.error("Server error checking user existence:", data.error)
+        return true // نفترض أن المستخدم موجود في حالة حدوث خطأ في الخادم
       }
 
-      // في حالة عدم وجود خطأ أو خطأ آخر، نفترض أن المستخدم موجود
-      return true
+      return data.exists
     } catch (error: any) {
       console.error("Error checking user existence:", error)
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        status: error.status,
-        stack: error.stack
-      })
 
       // في حالة حدوث خطأ في الشبكة، نعرض رسالة خطأ
       if (error.message && error.message.includes("network")) {

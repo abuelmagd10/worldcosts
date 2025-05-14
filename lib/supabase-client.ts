@@ -16,16 +16,21 @@ if (typeof window !== 'undefined') {
   }
 
   // طباعة معلومات التكوين للتصحيح (سيتم إزالتها في الإنتاج)
-  console.log('Supabase URL:', supabaseUrl);
-  console.log('Supabase Anon Key:', supabaseAnonKey ? 'Configured' : 'Missing');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Supabase URL:', supabaseUrl);
+    console.log('Supabase Anon Key:', supabaseAnonKey ? 'Configured' : 'Missing');
+  }
 }
 
-// إنشاء عميل Supabase للاستخدام في جانب العميل
-export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+// تكوين خيارات Supabase
+const supabaseOptions = {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     storageKey: 'worldcosts-auth', // مفتاح تخزين محدد لتجنب التداخل مع التطبيقات الأخرى
+    detectSessionInUrl: true, // اكتشاف جلسة في URL تلقائيًا
+    flowType: 'pkce', // استخدام PKCE لتحسين الأمان
+    debug: process.env.NODE_ENV === 'development', // تمكين وضع التصحيح في بيئة التطوير فقط
   },
   global: {
     fetch: (...args) => {
@@ -34,8 +39,20 @@ export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
         throw err;
       });
     }
+  },
+  // تكوين إعادة المحاولة لتحسين الاتصال في حالة فشل الشبكة
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  },
+  db: {
+    schema: 'public'
   }
-});
+};
+
+// إنشاء عميل Supabase للاستخدام في جانب العميل
+export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, supabaseOptions);
 
 // إنشاء عميل Supabase
 export function createClient(cookieStore?: any) {
