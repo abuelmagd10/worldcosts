@@ -54,6 +54,47 @@ const supabaseOptions = {
 // إنشاء عميل Supabase للاستخدام في جانب العميل
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, supabaseOptions);
 
+// وظيفة للتحقق من وجود المستخدم
+export async function checkUserExists(email: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.auth.admin.listUsers({
+      filter: {
+        email: email
+      }
+    });
+
+    if (error) {
+      console.error('Error checking user existence:', error);
+      // في حالة حدوث خطأ، نحاول طريقة أخرى
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: false
+        }
+      });
+
+      if (signInError) {
+        // إذا كان الخطأ يشير إلى أن المستخدم غير موجود
+        if (signInError.message.includes('user not found')) {
+          return false;
+        }
+        // إذا كان الخطأ لسبب آخر، نفترض أن المستخدم موجود
+        return true;
+      }
+
+      // إذا نجحت العملية، فهذا يعني أن المستخدم موجود
+      return true;
+    }
+
+    // التحقق من وجود مستخدمين في البيانات
+    return data && data.users && data.users.length > 0;
+  } catch (error) {
+    console.error('Unexpected error checking user existence:', error);
+    // في حالة حدوث خطأ غير متوقع، نفترض أن المستخدم غير موجود
+    return false;
+  }
+}
+
 // إنشاء عميل Supabase
 export function createClient(cookieStore?: any) {
   // استخدام عميل Supabase العادي بغض النظر عن وجود ملفات تعريف الارتباط

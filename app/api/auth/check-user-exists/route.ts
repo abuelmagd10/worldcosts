@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-// إنشاء عميل Supabase
+// إنشاء عميل Supabase باستخدام مفتاح الخدمة
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
 )
 
 export async function POST(request: Request) {
@@ -46,10 +52,31 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Error checking user existence:", error)
-      return NextResponse.json(
-        { error: "Failed to check user existence", details: error.message },
-        { status: 500 }
-      )
+
+      // في حالة حدوث خطأ، نحاول طريقة أخرى
+      try {
+        // محاولة تسجيل الدخول باستخدام OTP بدون إنشاء مستخدم جديد
+        const { error: signInError } = await supabaseAdmin.auth.signInWithOtp({
+          email: email,
+          options: {
+            shouldCreateUser: false,
+          },
+        });
+
+        // إذا كان الخطأ يشير إلى أن المستخدم غير موجود
+        if (signInError && signInError.message.includes('user not found')) {
+          return NextResponse.json({ exists: false });
+        }
+
+        // إذا لم يكن هناك خطأ أو كان الخطأ لسبب آخر، نفترض أن المستخدم موجود
+        return NextResponse.json({ exists: true });
+      } catch (fallbackError) {
+        console.error('Fallback error checking user existence:', fallbackError);
+        return NextResponse.json(
+          { error: 'حدث خطأ أثناء التحقق من وجود المستخدم' },
+          { status: 500 }
+        );
+      }
     }
 
     // التحقق من وجود المستخدم
