@@ -21,15 +21,17 @@ const checkEnvVars = () => {
 };
 
 // إنشاء عميل Supabase
-const getSupabaseAdmin = () => {
+const getSupabaseAdmin = async () => {
   const missingVars = checkEnvVars();
 
   if (missingVars.length > 0) {
     throw new Error(`Missing environment variables: ${missingVars.join(', ')}`);
   }
 
+  console.log("Creating Supabase admin client with URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+
   // إنشاء عميل Supabase مع الإعدادات المناسبة
-  return createClient<Database>(
+  const supabaseAdmin = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
@@ -39,6 +41,42 @@ const getSupabaseAdmin = () => {
       },
     }
   );
+
+  // التحقق من صحة الاتصال
+  try {
+    console.log("Testing Supabase connection...");
+    const { data, error } = await supabaseAdmin.from('_rpc').select('*').limit(1);
+
+    if (error) {
+      console.error("Error testing Supabase connection:", error);
+      throw new Error(`Failed to connect to Supabase: ${error.message}`);
+    }
+
+    console.log("Supabase connection successful");
+    return supabaseAdmin;
+  } catch (error) {
+    console.error("Error testing Supabase connection:", error);
+
+    // محاولة طريقة بديلة للتحقق من الاتصال
+    try {
+      console.log("Testing Supabase connection using auth.getUser()...");
+      const { data, error } = await supabaseAdmin.auth.getUser();
+
+      if (error) {
+        console.error("Error testing Supabase connection using auth.getUser():", error);
+        throw new Error(`Failed to connect to Supabase using auth.getUser(): ${error.message}`);
+      }
+
+      console.log("Supabase connection successful using auth.getUser()");
+      return supabaseAdmin;
+    } catch (authError) {
+      console.error("Error testing Supabase connection using auth.getUser():", authError);
+
+      // إذا فشلت جميع المحاولات، نعيد عميل Supabase على أي حال
+      console.warn("Returning Supabase client despite connection test failures");
+      return supabaseAdmin;
+    }
+  }
 };
 
 // تعريف SQL لإنشاء الجداول
@@ -391,9 +429,12 @@ const setupPolicies = async (supabaseAdmin: any) => {
 // وظيفة مشتركة لإعداد قاعدة البيانات
 async function setupDatabase() {
   try {
+    console.log("Starting database setup...");
+
     // التحقق من متغيرات البيئة
     const missingVars = checkEnvVars();
     if (missingVars.length > 0) {
+      console.error("Missing environment variables:", missingVars);
       return NextResponse.json(
         {
           error: "Missing environment variables",
@@ -403,8 +444,11 @@ async function setupDatabase() {
       );
     }
 
+    console.log("Environment variables check passed");
+
     // إنشاء عميل Supabase
-    const supabaseAdmin = getSupabaseAdmin();
+    console.log("Getting Supabase admin client...");
+    const supabaseAdmin = await getSupabaseAdmin();
 
     // تنفيذ عمليات الإعداد
     await createTables(supabaseAdmin);
@@ -439,9 +483,40 @@ async function setupDatabase() {
     });
   } catch (error) {
     console.error("Error setting up database:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    // تحسين معالجة الأخطاء لعرض المزيد من التفاصيل
+    let errorMessage = "Unknown error";
+    let errorDetails = null;
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+
+      // محاولة استخراج المزيد من التفاصيل
+      if ('cause' in error) {
+        errorDetails = JSON.stringify(error.cause);
+      }
+
+      // محاولة استخراج تتبع المكدس
+      if ('stack' in error) {
+        console.error("Error stack:", error.stack);
+      }
+    } else if (typeof error === 'object' && error !== null) {
+      // محاولة تحويل الكائن إلى سلسلة نصية
+      try {
+        errorMessage = JSON.stringify(error);
+      } catch (e) {
+        errorMessage = "Error object could not be stringified";
+      }
+    }
+
     return NextResponse.json(
-      { error: "Failed to setup database", details: errorMessage },
+      {
+        error: "Failed to setup database",
+        details: errorMessage,
+        errorDetails: errorDetails,
+        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+      },
       { status: 500 }
     );
   }
