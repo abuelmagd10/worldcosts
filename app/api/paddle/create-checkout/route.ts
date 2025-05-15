@@ -124,184 +124,34 @@ export async function POST(request: NextRequest) {
     const successUrl = `${origin}/admin/subscription/success?plan_name=${encodeURIComponent(planName)}&billing_cycle=${billingCycle}`
     const cancelUrl = `${origin}/admin/subscription/cancel`
 
-    try {
-      // استخدام Paddle API لإنشاء جلسة دفع
+    // طباعة معلومات الطلب للتصحيح
+    console.log("Creating checkout with:", {
+      priceId,
+      userEmail,
+      successUrl,
+      cancelUrl,
+      userId,
+      planId,
+      billingCycle
+    })
 
-      // طباعة معلومات الطلب للتصحيح
-      console.log("Creating checkout with:", {
-        priceId,
-        userEmail,
-        successUrl,
-        cancelUrl,
-        userId,
-        planId,
-        billingCycle
-      })
+    // طباعة معلومات إضافية للتشخيص
+    console.log("Price ID received:", priceId)
+    console.log("API Key being used:", apiKey)
 
-      // طباعة معلومات إضافية للتشخيص
-      console.log("Price ID received:", priceId);
-      console.log("API Key being used:", apiKey);
+    // استخدام معرف معاملة ثابت للتجربة
+    const transactionId = "txn_01hgk4aer7mejqsgzs8bgvp1ke"
+    console.log("Using fixed transaction ID for testing:", transactionId)
 
-      // إعداد بيانات الطلب لـ Paddle API
-      // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle Billing v2
-      // تحديث عنوان API حسب توثيق Paddle الحالي
+    // إنشاء رابط الدفع باستخدام معرف المعاملة
+    const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`
+    console.log("Paddle checkout URL:", checkoutUrl)
 
-      // أولاً، إنشاء العميل إذا لم يكن موجودًا
-      console.log("Creating customer if not exists...");
-
-      // إنشاء العميل
-      const createCustomerUrl = 'https://api.paddle.com/customers';
-      let customerId;
-
-      try {
-        // تجاوز التحقق من العميل واستخدام معرف المستخدم مباشرة
-        // هذا حل مؤقت للتجربة
-        console.log("Using guest customer ID for testing");
-        customerId = "guest_customer";
-
-        // إنشاء عميل جديد في كل مرة للتجربة
-        try {
-          const createCustomerResponse = await fetch(createCustomerUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              email: userEmail || "guest@worldcosts.com",
-              name: (userEmail || "guest@worldcosts.com").split('@')[0]
-            })
-          });
-
-          if (!createCustomerResponse.ok) {
-            const errorText = await createCustomerResponse.text();
-            console.error("Error response from Paddle API:", errorText);
-            throw new Error(`Error creating customer: HTTP ${createCustomerResponse.status} - ${errorText}`);
-          }
-
-          const createCustomerData = await createCustomerResponse.json();
-          console.log("Create customer response:", createCustomerData);
-
-          if (createCustomerData.error) {
-            throw new Error(`Error creating customer: ${createCustomerData.error.message || JSON.stringify(createCustomerData.error)}`);
-          }
-
-          if (!createCustomerData.data || !createCustomerData.data.id) {
-            throw new Error(`Error creating customer: No customer ID returned - ${JSON.stringify(createCustomerData)}`);
-          }
-
-          customerId = createCustomerData.data.id;
-          console.log("Created new customer with ID:", customerId);
-        } catch (createError: any) {
-          console.error("Detailed error creating customer:", createError);
-
-          // Usar un ID de cliente de prueba para continuar con el flujo
-          customerId = "ctm_01hgk4aer7mejqsgzs8bgvp1ke";
-          console.warn("Using fallback customer ID:", customerId);
-        }
-      } catch (customerError: any) {
-        console.error("Error in customer creation flow:", customerError);
-        return NextResponse.json(
-          { error: `Error creating customer: ${customerError.message || "Unknown error"}` },
-          { status: 500 }
-        );
-      }
-
-      // ثانيًا، إنشاء عنوان للعميل
-      console.log("Creating address for customer...");
-
-      let addressId;
-      try {
-        // استخدام معرف عنوان ثابت للتجربة
-        addressId = "add_01h848pep46enq8y372x7maj0p";
-        console.log("Using fixed address ID for testing:", addressId);
-
-        // تجاوز إنشاء العنوان للتجربة
-        /*
-        const createAddressUrl = 'https://api.paddle.com/addresses';
-        const createAddressResponse = await fetch(createAddressUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            customer_id: customerId,
-            country_code: 'EG', // يمكن تغييره حسب بلد المستخدم
-            postal_code: '00000' // يمكن تغييره حسب الرمز البريدي للمستخدم
-          })
-        });
-
-        if (!createAddressResponse.ok) {
-          const errorText = await createAddressResponse.text();
-          console.error("Error response from Paddle API for address:", errorText);
-          throw new Error(`Error creating address: HTTP ${createAddressResponse.status} - ${errorText}`);
-        }
-
-        const createAddressData = await createAddressResponse.json();
-        console.log("Create address response:", createAddressData);
-
-        if (createAddressData.error) {
-          throw new Error(`Error creating address: ${createAddressData.error.message || JSON.stringify(createAddressData.error)}`);
-        }
-
-        if (!createAddressData.data || !createAddressData.data.id) {
-          throw new Error(`Error creating address: No address ID returned - ${JSON.stringify(createAddressData)}`);
-        }
-
-        addressId = createAddressData.data.id;
-        console.log("Created address with ID:", addressId);
-        */
-      } catch (addressError: any) {
-        console.error("Error creating address:", addressError);
-        return NextResponse.json(
-          { error: `Error creating address: ${addressError.message || "Unknown error"}` },
-          { status: 500 }
-        );
-      }
-
-      // ثالثًا، إنشاء معاملة أو استخدام معرف ثابت للتجربة
-      console.log("Creating transaction or using fixed ID...");
-
-      // استخدام معرف معاملة ثابت للتجربة
-      const transactionId = "txn_01hgk4aer7mejqsgzs8bgvp1ke";
-      console.log("Using fixed transaction ID for testing:", transactionId);
-
-      // إنشاء رابط الدفع باستخدام معرف المعاملة
-      const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`;
-      console.log("Paddle checkout URL:", checkoutUrl);
-
-      // إرجاع رابط الدفع مباشرة
-      return NextResponse.json({
-        checkoutUrl: checkoutUrl,
-        transactionId: transactionId
-      });
-
-      /*
-      // الكود الأصلي لإنشاء معاملة
-      const createTransactionUrl = 'https://api.paddle.com/transactions';
-
-      // إعداد بيانات الطلب بتنسيق JSON
-      const requestData = {
-        items: [
-          {
-            price_id: priceId,
-            quantity: 1
-          }
-        ],
-        customer_id: customerId,
-        address_id: addressId,
-        custom_data: {
-          userId: userId,
-          planId: planId,
-          planName: planName,
-          billingCycle: billingCycle
-        }
-      }
-      */
-
-      // Este código ha sido reemplazado por una solución más simple para pruebas
-      // El código original está comentado en las secciones anteriores
+    // إرجاع رابط الدفع مباشرة
+    return NextResponse.json({
+      checkoutUrl: checkoutUrl,
+      transactionId: transactionId
+    })
   } catch (error: any) {
     console.error("Unexpected error:", error)
     return NextResponse.json(
