@@ -40,7 +40,8 @@ self.addEventListener("fetch", (event) => {
     "googleads.g.doubleclick.net",
     "tpc.googlesyndication.com",
     "www.google-analytics.com",
-    "ep1.adtrafficquality.google"
+    "ep1.adtrafficquality.google",
+    "ep2.adtrafficquality.google"
   ];
 
   // Verificar si la URL es de un dominio permitido
