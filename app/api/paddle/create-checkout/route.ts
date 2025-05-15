@@ -145,7 +145,98 @@ export async function POST(request: NextRequest) {
       // إعداد بيانات الطلب لـ Paddle API
       // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle Billing v2
       // تحديث عنوان API حسب توثيق Paddle الحالي
-      const paddleApiUrl = 'https://api.paddle.com/transactions'
+
+      // أولاً، إنشاء العميل إذا لم يكن موجودًا
+      console.log("Creating customer if not exists...");
+
+      // إنشاء العميل
+      const createCustomerUrl = 'https://api.paddle.com/customers';
+      let customerId;
+
+      try {
+        // التحقق مما إذا كان العميل موجودًا بالفعل
+        const checkCustomerUrl = `https://api.paddle.com/customers?email=${encodeURIComponent(userEmail)}`;
+        const checkCustomerResponse = await fetch(checkCustomerUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+
+        const checkCustomerData = await checkCustomerResponse.json();
+        console.log("Check customer response:", checkCustomerData);
+
+        if (checkCustomerData.data && checkCustomerData.data.length > 0) {
+          // العميل موجود بالفعل
+          customerId = checkCustomerData.data[0].id;
+          console.log("Customer already exists with ID:", customerId);
+        } else {
+          // إنشاء عميل جديد
+          const createCustomerResponse = await fetch(createCustomerUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              email: userEmail,
+              name: userEmail.split('@')[0]
+            })
+          });
+
+          const createCustomerData = await createCustomerResponse.json();
+          console.log("Create customer response:", createCustomerData);
+
+          if (createCustomerData.error) {
+            throw new Error(`Error creating customer: ${createCustomerData.error.message}`);
+          }
+
+          customerId = createCustomerData.data.id;
+          console.log("Created new customer with ID:", customerId);
+        }
+      } catch (customerError) {
+        console.error("Error creating/checking customer:", customerError);
+        throw customerError;
+      }
+
+      // ثانيًا، إنشاء عنوان للعميل
+      console.log("Creating address for customer...");
+
+      let addressId;
+      try {
+        const createAddressUrl = 'https://api.paddle.com/addresses';
+        const createAddressResponse = await fetch(createAddressUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            customer_id: customerId,
+            country_code: 'EG', // يمكن تغييره حسب بلد المستخدم
+            postal_code: '00000' // يمكن تغييره حسب الرمز البريدي للمستخدم
+          })
+        });
+
+        const createAddressData = await createAddressResponse.json();
+        console.log("Create address response:", createAddressData);
+
+        if (createAddressData.error) {
+          throw new Error(`Error creating address: ${createAddressData.error.message}`);
+        }
+
+        addressId = createAddressData.data.id;
+        console.log("Created address with ID:", addressId);
+      } catch (addressError) {
+        console.error("Error creating address:", addressError);
+        throw addressError;
+      }
+
+      // ثالثًا، إنشاء معاملة
+      console.log("Creating transaction...");
+
+      const createTransactionUrl = 'https://api.paddle.com/transactions';
 
       // إعداد بيانات الطلب بتنسيق JSON
       const requestData = {
@@ -155,19 +246,14 @@ export async function POST(request: NextRequest) {
             quantity: 1
           }
         ],
-        customer_id: userId,
+        customer_id: customerId,
+        address_id: addressId,
         custom_data: {
           userId: userId,
           planId: planId,
           planName: planName,
           billingCycle: billingCycle
-        },
-        customer: {
-          email: userEmail,
-          name: userEmail.split('@')[0]
-        },
-        success_url: successUrl,
-        cancel_url: cancelUrl
+        }
       }
 
       console.log("Request data prepared for Paddle API");
@@ -179,14 +265,14 @@ export async function POST(request: NextRequest) {
       console.log("Success URL:", successUrl);
       console.log("Cancel URL:", cancelUrl);
 
-      // إرسال الطلب إلى Paddle API
-      let response
+      // إرسال الطلب إلى Paddle API لإنشاء معاملة
+      let transactionResponse
       try {
-        console.log("Sending request to Paddle API...");
-        console.log("Request data:", JSON.stringify(requestData, null, 2));
+        console.log("Sending transaction request to Paddle API...");
+        console.log("Transaction request data:", JSON.stringify(requestData, null, 2));
 
         // استخدام JSON بدلاً من FormData
-        response = await fetch(paddleApiUrl, {
+        transactionResponse = await fetch(createTransactionUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -195,9 +281,9 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify(requestData)
         })
 
-        console.log("Paddle API response status:", response.status);
+        console.log("Paddle API transaction response status:", transactionResponse.status);
       } catch (fetchError: any) {
-        console.error("Network error calling Paddle API:", fetchError);
+        console.error("Network error calling Paddle API for transaction:", fetchError);
         console.error("Fetch error details:", fetchError);
         return NextResponse.json(
           { error: "Network error connecting to payment provider", details: fetchError.message },
@@ -205,67 +291,56 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // التحقق من استجابة Paddle
-      let data
+      // التحقق من استجابة Paddle للمعاملة
+      let transactionData;
 
       try {
         // محاولة قراءة الاستجابة كـ JSON
-        const responseText = await response.text()
-        console.log("Paddle API response text:", responseText)
+        const transactionResponseText = await transactionResponse.text();
+        console.log("Paddle API transaction response text:", transactionResponseText);
 
         try {
           // محاولة تحليل النص كـ JSON
-          data = JSON.parse(responseText)
-          console.log("Paddle API response parsed:", data)
+          transactionData = JSON.parse(transactionResponseText);
+          console.log("Paddle API transaction response parsed:", transactionData);
         } catch (parseError) {
-          console.error("Error parsing Paddle API response:", parseError)
-          console.error("Response text:", responseText)
-
-          // إذا كان النص يحتوي على "success" و "redirect"، فقد يكون بتنسيق مختلف
-          if (responseText.includes("success") && responseText.includes("redirect")) {
-            // محاولة استخراج رابط إعادة التوجيه من النص
-            const match = responseText.match(/redirect\"\s*:\s*\"([^\"]+)/)
-            if (match && match[1]) {
-              console.log("Extracted redirect URL from response:", match[1])
-              return NextResponse.json({
-                checkoutUrl: match[1]
-              })
-            }
-          }
-
+          console.error("Error parsing Paddle API transaction response:", parseError);
+          console.error("Transaction response text:", transactionResponseText);
           return NextResponse.json(
-            { error: "Invalid response from payment provider", responseText },
+            { error: "Invalid response from payment provider", responseText: transactionResponseText },
             { status: 500 }
-          )
+          );
         }
 
         // التحقق من نجاح الاستجابة حسب تنسيق Paddle Billing v2
-        if (data.error) {
-          console.error("Paddle API error:", data)
+        if (transactionData.error) {
+          console.error("Paddle API transaction error:", transactionData.error);
           return NextResponse.json(
-            { error: data.error.message || "Error creating checkout session" },
+            { error: transactionData.error.message || "Error creating transaction" },
             { status: 400 }
-          )
+          );
         }
 
         // التحقق من وجود معرف المعاملة في الاستجابة
-        if (data.data && data.data.id) {
-          const transactionId = data.data.id
-          console.log("Paddle transaction ID:", transactionId)
+        if (transactionData.data && transactionData.data.id) {
+          const transactionId = transactionData.data.id;
+          console.log("Paddle transaction ID:", transactionId);
 
           // إنشاء رابط الدفع باستخدام معرف المعاملة
-          const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`
-          console.log("Paddle checkout URL:", checkoutUrl)
+          // استخدام رابط الدفع الافتراضي
+          const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`;
+          console.log("Paddle checkout URL:", checkoutUrl);
 
           return NextResponse.json({
-            checkoutUrl: checkoutUrl
-          })
+            checkoutUrl: checkoutUrl,
+            transactionId: transactionId
+          });
         } else {
-          console.error("Paddle API response missing transaction ID:", data)
+          console.error("Paddle API response missing transaction ID:", transactionData);
           return NextResponse.json(
-            { error: "Invalid response from payment provider", response: data },
+            { error: "Invalid response from payment provider", response: transactionData },
             { status: 500 }
-          )
+          );
         }
       } catch (responseError: any) {
         console.error("Error reading Paddle API response:", responseError)
