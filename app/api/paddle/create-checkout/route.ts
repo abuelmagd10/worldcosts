@@ -145,46 +145,50 @@ export async function POST(request: NextRequest) {
       // إعداد بيانات الطلب لـ Paddle API
       // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle
       // تحديث عنوان API حسب توثيق Paddle الحالي
-      const paddleApiUrl = 'https://sandbox-checkout.paddle.com/api/1.0/order/create'
+      const paddleApiUrl = 'https://api.paddle.com/checkout/custom'
 
-      // إعداد بيانات الطلب بتنسيق FormData بدلاً من JSON
-      const formData = new FormData()
-      formData.append('vendor_id', '01jv7k0rhqaajrsgcbc8fnkade')
-      formData.append('vendor_auth_code', apiKey)
-      formData.append('product_id', priceId)
-      formData.append('customer_email', userEmail)
-      formData.append('customer_country', 'EG') // يمكن تغييره حسب بلد المستخدم
-      formData.append('customer_postcode', '00000') // يمكن تغييره حسب الرمز البريدي للمستخدم
-      formData.append('currency', 'USD')
-      formData.append('title', `${planName} - ${billingCycle}`)
-      formData.append('webhook_url', `${process.env.NEXT_PUBLIC_APP_URL || origin}/api/paddle/webhook`)
-      formData.append('return_url', successUrl)
-      formData.append('cancel_url', cancelUrl)
-      formData.append('passthrough', JSON.stringify({
-        userId,
-        planId,
-        planName,
-        billingCycle
-      }))
+      // إعداد بيانات الطلب بتنسيق JSON
+      const requestData = {
+        items: [
+          {
+            priceId: priceId,
+            quantity: 1
+          }
+        ],
+        customData: {
+          userId: userId,
+          planId: planId,
+          planName: planName,
+          billingCycle: billingCycle
+        },
+        customerEmail: userEmail,
+        successUrl: successUrl,
+        cancelUrl: cancelUrl
+      }
 
-      console.log("FormData prepared for Paddle API");
+      console.log("Request data prepared for Paddle API");
 
-      // للتشخيص، نطبع بعض القيم من FormData
+      // للتشخيص، نطبع بعض القيم من البيانات
       console.log("Vendor ID:", '01jv7k0rhqaajrsgcbc8fnkade');
-      console.log("Product ID:", priceId);
+      console.log("Price ID:", priceId);
       console.log("Customer Email:", userEmail);
-      console.log("Return URL:", successUrl);
+      console.log("Success URL:", successUrl);
       console.log("Cancel URL:", cancelUrl);
 
       // إرسال الطلب إلى Paddle API
       let response
       try {
         console.log("Sending request to Paddle API...");
+        console.log("Request data:", JSON.stringify(requestData, null, 2));
 
-        // استخدام FormData بدلاً من JSON
+        // استخدام JSON بدلاً من FormData
         response = await fetch(paddleApiUrl, {
           method: 'POST',
-          body: formData
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify(requestData)
         })
 
         console.log("Paddle API response status:", response.status);
