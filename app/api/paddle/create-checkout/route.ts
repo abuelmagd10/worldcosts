@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
-import { PADDLE_API_KEY, SUCCESS_URL, CANCEL_URL } from "@/lib/paddle/config"
+import { PADDLE_API_KEY, PADDLE_VENDOR_ID, SUCCESS_URL, CANCEL_URL } from "@/lib/paddle/config"
 
 // تعريف نوع البيانات المرسلة في الطلب
 interface RequestBody {
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
       // إعداد بيانات الطلب بتنسيق FormData
       const formData = new FormData()
-      formData.append('vendor_id', process.env.PADDLE_VENDOR_ID || PADDLE_VENDOR_ID) // استخدام معرف البائع من التكوين
+      formData.append('vendor_id', PADDLE_VENDOR_ID) // استخدام معرف البائع من التكوين
       formData.append('vendor_auth_code', apiKey)
       formData.append('product_id', priceId)
       formData.append('customer_email', userEmail)
@@ -162,7 +162,10 @@ export async function POST(request: NextRequest) {
       // إضافة خيارات إضافية
       formData.append('title', `${planName} - ${billingCycle}`) // عنوان الدفع
       formData.append('webhook_url', `${process.env.NEXT_PUBLIC_APP_URL || origin}/api/paddle/webhook`) // عنوان webhook
-      formData.append('prices', JSON.stringify([{ currency: 'USD' }])) // تحديد العملة
+
+      // طباعة معلومات إضافية للتشخيص
+      console.log("Vendor ID:", PADDLE_VENDOR_ID)
+      console.log("Product ID:", priceId)
 
       console.log("Sending request to Paddle Checkout API...")
 
