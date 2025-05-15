@@ -293,10 +293,51 @@ export default function SettingsPage() {
               <div className="text-center py-6">
                 <p className="text-muted-foreground mb-4">{t.notSubscribed}</p>
                 <Badge variant="outline" className="mb-4">{t.freeUser}</Badge>
-                <div>
+                <div className="flex flex-col gap-2 items-center">
                   <Link href="/admin/subscription">
                     <TeslaButton variant="default">{t.upgradeNow}</TeslaButton>
                   </Link>
+
+                  {/* زر لإنشاء بيانات اختبارية للاشتراك - للتطوير فقط */}
+                  {userProfile && (
+                    <TeslaButton
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          const response = await fetch(`/api/setup-test-data?userId=${userProfile.id}`);
+                          const data = await response.json();
+
+                          if (data.success) {
+                            toast({
+                              title: "تم إنشاء بيانات اختبارية",
+                              description: "تم إنشاء بيانات اختبارية للاشتراك بنجاح. قم بتحديث الصفحة لرؤية التغييرات.",
+                            });
+
+                            // تحديث الصفحة بعد ثانيتين
+                            setTimeout(() => {
+                              window.location.reload();
+                            }, 2000);
+                          } else {
+                            toast({
+                              title: "خطأ",
+                              description: data.error || "حدث خطأ أثناء إنشاء بيانات اختبارية للاشتراك",
+                              variant: "destructive",
+                            });
+                          }
+                        } catch (error) {
+                          console.error("Error creating test data:", error);
+                          toast({
+                            title: "خطأ",
+                            description: "حدث خطأ أثناء إنشاء بيانات اختبارية للاشتراك",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      إنشاء بيانات اختبارية للاشتراك
+                    </TeslaButton>
+                  )}
                 </div>
               </div>
             )}
