@@ -136,8 +136,8 @@ export function PaddleCheckout({
           billingCycle,
         })
 
-        // استخدام عنوان API الصحيح مع التأكد من وجود / في النهاية
-        response = await fetch('/api/paddle/create-checkout/', {
+        // استخدام عنوان API الصحيح بدون / في النهاية لتجنب إعادة التوجيه
+        response = await fetch('/api/paddle/create-checkout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export function PaddleCheckout({
         console.log("API response status:", response.status)
 
         // طباعة عنوان URL الكامل للتشخيص
-        console.log("Full API URL:", window.location.origin + '/api/paddle/create-checkout/')
+        console.log("Full API URL:", window.location.origin + '/api/paddle/create-checkout')
       } catch (fetchError: any) {
         console.error("Network error during API call:", fetchError)
         console.error("Fetch error details:", fetchError)
