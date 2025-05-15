@@ -105,123 +105,138 @@ export async function POST(request: NextRequest) {
         billingCycle
       })
 
+      // طباعة معلومات إضافية للتشخيص
+      console.log("Price ID received:", priceId);
+      console.log("API Key being used:", apiKey);
+
       // إعداد بيانات الطلب لـ Paddle API
       // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle
-      const paddleApiUrl = 'https://api.paddle.com/v2/transactions/create'
+      // تحديث عنوان API حسب توثيق Paddle الحالي
+      const paddleApiUrl = 'https://sandbox-checkout.paddle.com/api/1.0/order/create'
 
-      const requestData = {
-        items: [
-          {
-            price_id: priceId,
-            quantity: 1
-          }
-        ],
-        customer_id: user.id,
-        customer: {
-          email: userEmail,
-          name: user.user_metadata?.full_name || userEmail.split('@')[0]
-        },
-        custom_data: {
-          userId: user.id,
-          planId,
-          planName,
-          billingCycle
-        },
-        return_url: successUrl,
-        cancel_url: cancelUrl,
-        locale: 'ar'
-      }
+      // إعداد بيانات الطلب بتنسيق FormData بدلاً من JSON
+      const formData = new FormData()
+      formData.append('vendor_id', '01jv7k0rhqaajrsgcbc8fnkade')
+      formData.append('vendor_auth_code', apiKey)
+      formData.append('product_id', priceId)
+      formData.append('customer_email', userEmail)
+      formData.append('customer_country', 'EG') // يمكن تغييره حسب بلد المستخدم
+      formData.append('customer_postcode', '00000') // يمكن تغييره حسب الرمز البريدي للمستخدم
+      formData.append('currency', 'USD')
+      formData.append('title', `${planName} - ${billingCycle}`)
+      formData.append('webhook_url', `${process.env.NEXT_PUBLIC_APP_URL || origin}/api/paddle/webhook`)
+      formData.append('return_url', successUrl)
+      formData.append('cancel_url', cancelUrl)
+      formData.append('passthrough', JSON.stringify({
+        userId: user.id,
+        planId,
+        planName,
+        billingCycle
+      }))
+
+      console.log("FormData prepared for Paddle API");
+
+      // للتشخيص، نطبع بعض القيم من FormData
+      console.log("Vendor ID:", '01jv7k0rhqaajrsgcbc8fnkade');
+      console.log("Product ID:", priceId);
+      console.log("Customer Email:", userEmail);
+      console.log("Return URL:", successUrl);
+      console.log("Cancel URL:", cancelUrl);
 
       // إرسال الطلب إلى Paddle API
       let response
       try {
+        console.log("Sending request to Paddle API...");
+
+        // استخدام FormData بدلاً من JSON
         response = await fetch(paddleApiUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify(requestData)
+          body: formData
         })
+
+        console.log("Paddle API response status:", response.status);
       } catch (fetchError: any) {
-        console.error("Network error calling Paddle API:", fetchError)
+        console.error("Network error calling Paddle API:", fetchError);
+        console.error("Fetch error details:", fetchError);
         return NextResponse.json(
-          { error: "Network error connecting to payment provider" },
+          { error: "Network error connecting to payment provider", details: fetchError.message },
           { status: 500 }
         )
       }
 
       // التحقق من استجابة Paddle
-      let errorData
       let data
 
       try {
         // محاولة قراءة الاستجابة كـ JSON
         const responseText = await response.text()
+        console.log("Paddle API response text:", responseText)
 
         try {
           // محاولة تحليل النص كـ JSON
           data = JSON.parse(responseText)
+          console.log("Paddle API response parsed:", data)
         } catch (parseError) {
           console.error("Error parsing Paddle API response:", parseError)
           console.error("Response text:", responseText)
-          return NextResponse.json(
-            { error: "Invalid response from payment provider" },
-            { status: 500 }
-          )
-        }
 
-        if (!response.ok) {
-          errorData = data
-          console.error("Paddle API error:", errorData)
-
-          // التعامل مع أنواع الأخطاء المختلفة
-          let errorMessage = "Error creating checkout session"
-
-          if (errorData.error && errorData.error.type) {
-            switch (errorData.error.type) {
-              case "authentication_error":
-                errorMessage = "Authentication error with payment provider"
-                break
-              case "invalid_request_error":
-                errorMessage = "Invalid request to payment provider"
-                break
-              case "api_error":
-                errorMessage = "Payment provider API error"
-                break
-              default:
-                errorMessage = errorData.error.message || "Error creating checkout session"
+          // إذا كان النص يحتوي على "success" و "redirect"، فقد يكون بتنسيق مختلف
+          if (responseText.includes("success") && responseText.includes("redirect")) {
+            // محاولة استخراج رابط إعادة التوجيه من النص
+            const match = responseText.match(/redirect\"\s*:\s*\"([^\"]+)/)
+            if (match && match[1]) {
+              console.log("Extracted redirect URL from response:", match[1])
+              return NextResponse.json({
+                checkoutUrl: match[1]
+              })
             }
           }
 
           return NextResponse.json(
-            { error: errorMessage },
-            { status: response.status }
+            { error: "Invalid response from payment provider", responseText },
+            { status: 500 }
+          )
+        }
+
+        // التحقق من نجاح الاستجابة حسب تنسيق Paddle
+        if (data.success === false) {
+          console.error("Paddle API error:", data)
+          return NextResponse.json(
+            { error: data.error?.message || "Error creating checkout session" },
+            { status: 400 }
+          )
+        }
+
+        // التحقق من وجود رابط إعادة التوجيه في الاستجابة
+        if (data.success && data.redirect) {
+          console.log("Paddle checkout URL:", data.redirect)
+          return NextResponse.json({
+            checkoutUrl: data.redirect
+          })
+        } else if (data.success && data.url) {
+          console.log("Paddle checkout URL:", data.url)
+          return NextResponse.json({
+            checkoutUrl: data.url
+          })
+        } else if (data.data && data.data.url) {
+          console.log("Paddle checkout URL:", data.data.url)
+          return NextResponse.json({
+            checkoutUrl: data.data.url
+          })
+        } else {
+          console.error("Paddle API response missing checkout URL:", data)
+          return NextResponse.json(
+            { error: "Invalid response from payment provider", response: data },
+            { status: 500 }
           )
         }
       } catch (responseError: any) {
         console.error("Error reading Paddle API response:", responseError)
         return NextResponse.json(
-          { error: "Error processing payment provider response" },
+          { error: "Error processing payment provider response", details: responseError.message },
           { status: 500 }
         )
       }
-
-      console.log("Paddle API response:", data)
-
-      // التحقق من وجود رابط الدفع في الاستجابة
-      if (!data.data || !data.data.url) {
-        console.error("Paddle API response missing checkout URL:", data)
-        return NextResponse.json(
-          { error: "Invalid response from payment provider" },
-          { status: 500 }
-        )
-      }
-
-      // إرجاع رابط الدفع
-      return NextResponse.json({
-        checkoutUrl: data.data.url
-      })
     } catch (error: any) {
       console.error("Error calling Paddle API:", error)
       return NextResponse.json(

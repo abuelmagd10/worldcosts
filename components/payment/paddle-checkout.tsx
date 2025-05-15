@@ -129,7 +129,15 @@ export function PaddleCheckout({
       // إنشاء جلسة دفع باستخدام API
       let response
       try {
-        response = await fetch('/api/paddle/create-checkout', {
+        console.log("Sending request to API with data:", {
+          priceId,
+          planId,
+          planName,
+          billingCycle,
+        })
+
+        // استخدام عنوان API الصحيح مع التأكد من وجود / في النهاية
+        response = await fetch('/api/paddle/create-checkout/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -143,8 +151,12 @@ export function PaddleCheckout({
         })
 
         console.log("API response status:", response.status)
+
+        // طباعة عنوان URL الكامل للتشخيص
+        console.log("Full API URL:", window.location.origin + '/api/paddle/create-checkout/')
       } catch (fetchError: any) {
         console.error("Network error during API call:", fetchError)
+        console.error("Fetch error details:", fetchError)
         throw new Error("خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.")
       }
 
