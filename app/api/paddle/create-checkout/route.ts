@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
 
       // إعداد بيانات الطلب بتنسيق FormData
       const formData = new FormData()
-      formData.append('vendor_id', '01jv7k0rhqaajrsgcbc8fnkade') // استبدل بمعرف البائع الخاص بك
+      formData.append('vendor_id', process.env.PADDLE_VENDOR_ID || PADDLE_VENDOR_ID) // استخدام معرف البائع من التكوين
       formData.append('vendor_auth_code', apiKey)
       formData.append('product_id', priceId)
       formData.append('customer_email', userEmail)
@@ -158,6 +158,11 @@ export async function POST(request: NextRequest) {
       }))
       formData.append('return_url', successUrl)
       formData.append('cancel_url', cancelUrl)
+
+      // إضافة خيارات إضافية
+      formData.append('title', `${planName} - ${billingCycle}`) // عنوان الدفع
+      formData.append('webhook_url', `${process.env.NEXT_PUBLIC_APP_URL || origin}/api/paddle/webhook`) // عنوان webhook
+      formData.append('prices', JSON.stringify([{ currency: 'USD' }])) // تحديد العملة
 
       console.log("Sending request to Paddle Checkout API...")
 
