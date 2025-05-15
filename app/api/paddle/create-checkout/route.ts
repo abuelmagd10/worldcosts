@@ -143,27 +143,31 @@ export async function POST(request: NextRequest) {
       console.log("API Key being used:", apiKey);
 
       // إعداد بيانات الطلب لـ Paddle API
-      // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle
+      // استخدام واجهة برمجة التطبيقات الصحيحة لـ Paddle Billing v2
       // تحديث عنوان API حسب توثيق Paddle الحالي
-      const paddleApiUrl = 'https://api.paddle.com/checkout/custom'
+      const paddleApiUrl = 'https://api.paddle.com/transactions'
 
       // إعداد بيانات الطلب بتنسيق JSON
       const requestData = {
         items: [
           {
-            priceId: priceId,
+            price_id: priceId,
             quantity: 1
           }
         ],
-        customData: {
+        customer_id: userId,
+        custom_data: {
           userId: userId,
           planId: planId,
           planName: planName,
           billingCycle: billingCycle
         },
-        customerEmail: userEmail,
-        successUrl: successUrl,
-        cancelUrl: cancelUrl
+        customer: {
+          email: userEmail,
+          name: userEmail.split('@')[0]
+        },
+        success_url: successUrl,
+        cancel_url: cancelUrl
       }
 
       console.log("Request data prepared for Paddle API");
@@ -235,33 +239,29 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        // التحقق من نجاح الاستجابة حسب تنسيق Paddle
-        if (data.success === false) {
+        // التحقق من نجاح الاستجابة حسب تنسيق Paddle Billing v2
+        if (data.error) {
           console.error("Paddle API error:", data)
           return NextResponse.json(
-            { error: data.error?.message || "Error creating checkout session" },
+            { error: data.error.message || "Error creating checkout session" },
             { status: 400 }
           )
         }
 
-        // التحقق من وجود رابط إعادة التوجيه في الاستجابة
-        if (data.success && data.redirect) {
-          console.log("Paddle checkout URL:", data.redirect)
+        // التحقق من وجود معرف المعاملة في الاستجابة
+        if (data.data && data.data.id) {
+          const transactionId = data.data.id
+          console.log("Paddle transaction ID:", transactionId)
+
+          // إنشاء رابط الدفع باستخدام معرف المعاملة
+          const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`
+          console.log("Paddle checkout URL:", checkoutUrl)
+
           return NextResponse.json({
-            checkoutUrl: data.redirect
-          })
-        } else if (data.success && data.url) {
-          console.log("Paddle checkout URL:", data.url)
-          return NextResponse.json({
-            checkoutUrl: data.url
-          })
-        } else if (data.data && data.data.url) {
-          console.log("Paddle checkout URL:", data.data.url)
-          return NextResponse.json({
-            checkoutUrl: data.data.url
+            checkoutUrl: checkoutUrl
           })
         } else {
-          console.error("Paddle API response missing checkout URL:", data)
+          console.error("Paddle API response missing transaction ID:", data)
           return NextResponse.json(
             { error: "Invalid response from payment provider", response: data },
             { status: 500 }
