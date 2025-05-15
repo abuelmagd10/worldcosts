@@ -35,7 +35,12 @@ self.addEventListener("fetch", (event) => {
     "api.exchangerate-api.com",
     "mhrgktbewfojpspigkkg.supabase.co",
     "supabase.co",
-    "supabase.in"
+    "supabase.in",
+    "pagead2.googlesyndication.com",
+    "googleads.g.doubleclick.net",
+    "tpc.googlesyndication.com",
+    "www.google-analytics.com",
+    "ep1.adtrafficquality.google"
   ];
 
   // Verificar si la URL es de un dominio permitido
