@@ -4,32 +4,32 @@
 // مفتاح Paddle العام (للاستخدام في جانب العميل)
 export const PADDLE_PUBLIC_KEY = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PADDLE_PUBLIC_KEY
   ? process.env.NEXT_PUBLIC_PADDLE_PUBLIC_KEY
-  : 'live_2b9f03bdaa5802aaaf87b06640f';
+  : 'test_892d87a8114ead3ff8a607f65d5';
 
 // مفتاح Paddle السري (للاستخدام في جانب الخادم فقط)
-export const PADDLE_API_KEY = process.env.PADDLE_API_KEY || 'pdl_live_apikey_01jv7k0rhqaajrsgcbc8fnkade_zBFncFKY28HZ6E29BccyDb_AHY';
-export const PADDLE_VENDOR_ID = process.env.PADDLE_VENDOR_ID || '01jv7k0rhqaajrsgcbc8fnkade';
+export const PADDLE_API_KEY = process.env.PADDLE_API_KEY || 'apikey_01jtv6j2s6ty15ze20bvmznrms';
+export const PADDLE_VENDOR_ID = process.env.PADDLE_VENDOR_ID || '01jtv6j2s6ty15ze20bvmznrms';
 
 // تكوين المنتجات والأسعار
 // تم تحديث هذه المعرفات بمعرفات حقيقية من لوحة تحكم Paddle
 export const PADDLE_PRODUCTS = {
   PRO: {
     monthly: {
-      priceId: process.env.PADDLE_PRO_MONTHLY_PRICE_ID || 'pri_01jtv4ywt5pz6e4fje5337sf96', // معرف المنتج الشهري Pro
+      priceId: process.env.PADDLE_PRO_MONTHLY_PRICE_ID || 'pro_01jv9jam0v5f15y7z6vd7ndskp', // معرف المنتج الشهري Pro
       amount: 9.99,
     },
     yearly: {
-      priceId: process.env.PADDLE_PRO_YEARLY_PRICE_ID || 'pri_01jtv4ywt5pz6e4fje5337sf96', // معرف المنتج السنوي Pro
+      priceId: process.env.PADDLE_PRO_YEARLY_PRICE_ID || 'pro_01jv9j7zdep1zzn2nb14h8bbsp', // معرف المنتج السنوي Pro
       amount: 95.88,
     },
   },
   BUSINESS: {
     monthly: {
-      priceId: process.env.PADDLE_BUSINESS_MONTHLY_PRICE_ID || 'pri_01jtv58mywa30w0h6asj787j3f', // معرف المنتج الشهري Business
+      priceId: process.env.PADDLE_BUSINESS_MONTHLY_PRICE_ID || 'pro_01jv9hyjq4af19xjgtenaf2p01', // معرف المنتج الشهري Business
       amount: 19.99,
     },
     yearly: {
-      priceId: process.env.PADDLE_BUSINESS_YEARLY_PRICE_ID || 'pri_01jtv58mywa30w0h6asj787j3f', // معرف المنتج السنوي Business
+      priceId: process.env.PADDLE_BUSINESS_YEARLY_PRICE_ID || 'pro_01jv9hsyse3w88ym16yyzattx1', // معرف المنتج السنوي Business
       amount: 191.88,
     },
   },
