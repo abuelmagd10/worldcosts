@@ -302,20 +302,6 @@ export async function POST(request: NextRequest) {
 
       // Este código ha sido reemplazado por una solución más simple para pruebas
       // El código original está comentado en las secciones anteriores
-      } catch (responseError: any) {
-        console.error("Error reading Paddle API response:", responseError)
-        return NextResponse.json(
-          { error: "Error processing payment provider response", details: responseError.message },
-          { status: 500 }
-        )
-      }
-    } catch (error: any) {
-      console.error("Error calling Paddle API:", error)
-      return NextResponse.json(
-        { error: error.message || "Error creating checkout session" },
-        { status: 500 }
-      )
-    }
   } catch (error: any) {
     console.error("Unexpected error:", error)
     return NextResponse.json(
