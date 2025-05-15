@@ -4,11 +4,11 @@
 // مفتاح Paddle العام (للاستخدام في جانب العميل)
 export const PADDLE_PUBLIC_KEY = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_PADDLE_PUBLIC_KEY
   ? process.env.NEXT_PUBLIC_PADDLE_PUBLIC_KEY
-  : 'test_892d87a8114ead3ff8a607f65d5';
+  : 'live_2b9f03bdaa5802aaaf87b06640f';
 
 // مفتاح Paddle السري (للاستخدام في جانب الخادم فقط)
-export const PADDLE_API_KEY = process.env.PADDLE_API_KEY || 'apikey_01jtv6j2s6ty15ze20bvmznrms';
-export const PADDLE_VENDOR_ID = process.env.PADDLE_VENDOR_ID || '01jtv6j2s6ty15ze20bvmznrms';
+export const PADDLE_API_KEY = process.env.PADDLE_API_KEY || 'apikey_01jv7k0rhqaajrsgcbc8fnkade';
+export const PADDLE_VENDOR_ID = process.env.PADDLE_VENDOR_ID || '01jv7k0rhqaajrsgcbc8fnkade';
 
 // تكوين المنتجات والأسعار
 // تم تحديث هذه المعرفات بمعرفات حقيقية من لوحة تحكم Paddle
