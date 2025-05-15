@@ -528,6 +528,141 @@ export async function POST() {
 }
 
 // وظيفة GET الرئيسية
-export async function GET() {
+export async function GET(request: Request) {
+  // التحقق من وجود معلمة test في URL
+  const url = new URL(request.url);
+  const testMode = url.searchParams.get('test');
+
+  if (testMode === 'connection') {
+    // اختبار الاتصال بـ Supabase فقط
+    try {
+      console.log("Testing Supabase connection...");
+
+      // التحقق من متغيرات البيئة
+      const missingVars = checkEnvVars();
+      if (missingVars.length > 0) {
+        console.error("Missing environment variables:", missingVars);
+        return NextResponse.json(
+          {
+            error: "Missing environment variables",
+            details: `Required environment variables are missing: ${missingVars.join(', ')}`
+          },
+          { status: 500 }
+        );
+      }
+
+      console.log("Environment variables check passed");
+      console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log("Has Service Role Key:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+      // إنشاء عميل Supabase
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        }
+      );
+
+      // اختبار الاتصال باستخدام عدة طرق
+      const results = {
+        envVars: {
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+          hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+        },
+        tests: {
+          auth: { success: false, error: null },
+          tables: { success: false, error: null },
+          rpc: { success: false, error: null }
+        }
+      };
+
+      // اختبار Auth
+      try {
+        console.log("Testing Auth connection...");
+        const { data, error } = await supabaseAdmin.auth.getUser();
+
+        if (error) {
+          console.error("Error testing Auth connection:", error);
+          results.tests.auth.error = error.message;
+        } else {
+          console.log("Auth connection successful");
+          results.tests.auth.success = true;
+        }
+      } catch (error: any) {
+        console.error("Error testing Auth connection:", error);
+        results.tests.auth.error = error.message || "Unknown error";
+      }
+
+      // اختبار الجداول
+      try {
+        console.log("Testing tables connection...");
+        const { data, error } = await supabaseAdmin.from('_rpc').select('*').limit(1);
+
+        if (error) {
+          console.error("Error testing tables connection:", error);
+          results.tests.tables.error = error.message;
+        } else {
+          console.log("Tables connection successful");
+          results.tests.tables.success = true;
+        }
+      } catch (error: any) {
+        console.error("Error testing tables connection:", error);
+        results.tests.tables.error = error.message || "Unknown error";
+      }
+
+      // اختبار RPC
+      try {
+        console.log("Testing RPC connection...");
+        const { data, error } = await supabaseAdmin.rpc('get_service_role');
+
+        if (error) {
+          console.error("Error testing RPC connection:", error);
+          results.tests.rpc.error = error.message;
+        } else {
+          console.log("RPC connection successful");
+          results.tests.rpc.success = true;
+        }
+      } catch (error: any) {
+        console.error("Error testing RPC connection:", error);
+        results.tests.rpc.error = error.message || "Unknown error";
+      }
+
+      return NextResponse.json(results);
+    } catch (error: any) {
+      console.error("Error testing Supabase connection:", error);
+      return NextResponse.json(
+        {
+          error: "Failed to test Supabase connection",
+          details: error.message || "Unknown error",
+          stack: error.stack
+        },
+        { status: 500 }
+      );
+    }
+  } else if (testMode === 'info') {
+    // إرجاع معلومات حول البيئة
+    return NextResponse.json({
+      environment: {
+        nodeEnv: process.env.NODE_ENV,
+        vercelEnv: process.env.VERCEL_ENV,
+        region: process.env.VERCEL_REGION
+      },
+      supabase: {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      },
+      system: {
+        timestamp: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      }
+    });
+  }
+
+  // إذا لم يتم تحديد وضع الاختبار، قم بإعداد قاعدة البيانات
   return setupDatabase();
 }
