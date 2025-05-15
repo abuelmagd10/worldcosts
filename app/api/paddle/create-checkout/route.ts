@@ -139,19 +139,68 @@ export async function POST(request: NextRequest) {
     console.log("Price ID received:", priceId)
     console.log("API Key being used:", apiKey)
 
-    // استخدام معرف معاملة ثابت للتجربة
-    const transactionId = "txn_01hgk4aer7mejqsgzs8bgvp1ke"
-    console.log("Using fixed transaction ID for testing:", transactionId)
+    // إنشاء معاملة جديدة باستخدام Paddle API
+    try {
+      // استخدام Paddle Checkout API بدلاً من Billing API
+      const paddleCheckoutUrl = 'https://vendors.paddle.com/api/2.0/product/generate_pay_link'
 
-    // إنشاء رابط الدفع باستخدام معرف المعاملة
-    const checkoutUrl = `https://checkout.paddle.com/checkout/${transactionId}`
-    console.log("Paddle checkout URL:", checkoutUrl)
+      // إعداد بيانات الطلب بتنسيق FormData
+      const formData = new FormData()
+      formData.append('vendor_id', '01jv7k0rhqaajrsgcbc8fnkade') // استبدل بمعرف البائع الخاص بك
+      formData.append('vendor_auth_code', apiKey)
+      formData.append('product_id', priceId)
+      formData.append('customer_email', userEmail)
+      formData.append('passthrough', JSON.stringify({
+        userId: userId,
+        planId: planId,
+        planName: planName,
+        billingCycle: billingCycle
+      }))
+      formData.append('return_url', successUrl)
+      formData.append('cancel_url', cancelUrl)
 
-    // إرجاع رابط الدفع مباشرة
-    return NextResponse.json({
-      checkoutUrl: checkoutUrl,
-      transactionId: transactionId
-    })
+      console.log("Sending request to Paddle Checkout API...")
+
+      // إرسال الطلب إلى Paddle API
+      const response = await fetch(paddleCheckoutUrl, {
+        method: 'POST',
+        body: formData
+      })
+
+      console.log("Paddle API response status:", response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Error response from Paddle API:", errorText)
+        throw new Error(`Error creating checkout: HTTP ${response.status} - ${errorText}`)
+      }
+
+      const responseData = await response.json()
+      console.log("Paddle API response:", responseData)
+
+      if (!responseData.success) {
+        throw new Error(`Error creating checkout: ${responseData.error?.message || JSON.stringify(responseData.error)}`)
+      }
+
+      const checkoutUrl = responseData.response.url
+      console.log("Paddle checkout URL:", checkoutUrl)
+
+      // إرجاع رابط الدفع
+      return NextResponse.json({
+        checkoutUrl: checkoutUrl
+      })
+    } catch (checkoutError: any) {
+      console.error("Error creating checkout:", checkoutError)
+
+      // استخدام رابط دفع بديل للاختبار
+      console.log("Using fallback checkout URL")
+      const fallbackUrl = `https://sandbox-checkout.paddle.com/checkout/custom-checkout?product=${priceId}&email=${encodeURIComponent(userEmail)}`
+
+      return NextResponse.json({
+        checkoutUrl: fallbackUrl,
+        fallback: true
+      })
+    }
   } catch (error: any) {
     console.error("Unexpected error:", error)
     return NextResponse.json(

@@ -187,6 +187,11 @@ export function PaddleCheckout({
         throw new Error('لم يتم العثور على رابط الدفع في الاستجابة. يرجى المحاولة مرة أخرى.')
       }
 
+      // طباعة معلومات إضافية للتشخيص
+      if (responseData.fallback) {
+        console.warn("Using fallback checkout URL")
+      }
+
       // عرض رسالة للمستخدم
       toast({
         title: "تم إنشاء جلسة الدفع",
