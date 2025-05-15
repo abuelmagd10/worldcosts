@@ -65,6 +65,25 @@ const CREATE_TABLES_SQL = `
     public_url TEXT NOT NULL,
     supabase_path TEXT NOT NULL UNIQUE
   );
+
+  -- Create user_subscriptions table
+  CREATE TABLE IF NOT EXISTS user_subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    subscription_id TEXT NOT NULL,
+    customer_id TEXT NOT NULL,
+    plan_id TEXT NOT NULL,
+    plan_name TEXT NOT NULL,
+    billing_cycle TEXT NOT NULL,
+    status TEXT NOT NULL,
+    current_period_start TIMESTAMP WITH TIME ZONE,
+    current_period_end TIMESTAMP WITH TIME ZONE,
+    cancel_at_period_end BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    metadata JSONB,
+    UNIQUE(user_id, subscription_id)
+  );
 `;
 
 // تعريف SQL لإعداد سياسات الأمان
@@ -94,6 +113,22 @@ const SETUP_POLICIES_SQL = `
 
   DROP POLICY IF EXISTS "anyone can delete files" ON files;
   CREATE POLICY "anyone can delete files" ON files FOR DELETE USING (true);
+
+  -- Enable RLS on user_subscriptions
+  ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
+
+  -- Set up user_subscriptions policies
+  DROP POLICY IF EXISTS "Users can view their own subscriptions" ON user_subscriptions;
+  CREATE POLICY "Users can view their own subscriptions"
+    ON user_subscriptions
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+  DROP POLICY IF EXISTS "Service role can manage subscriptions" ON user_subscriptions;
+  CREATE POLICY "Service role can manage subscriptions"
+    ON user_subscriptions
+    USING (true)
+    WITH CHECK (true);
 `;
 
 // وظيفة إنشاء الجداول
@@ -134,8 +169,8 @@ const setupPolicies = async (supabaseAdmin: any) => {
   }
 };
 
-// وظيفة POST الرئيسية
-export async function POST() {
+// وظيفة مشتركة لإعداد قاعدة البيانات
+async function setupDatabase() {
   try {
     // التحقق من متغيرات البيئة
     const missingVars = checkEnvVars();
@@ -156,8 +191,21 @@ export async function POST() {
     await createTables(supabaseAdmin);
     await setupPolicies(supabaseAdmin);
 
+    // التحقق من وجود جدول الاشتراكات
+    const { data: subscriptionsTable, error: checkTableError } = await supabaseAdmin
+      .from('user_subscriptions')
+      .select('id')
+      .limit(1);
+
+    if (checkTableError) {
+      console.warn('Warning checking user_subscriptions table:', checkTableError);
+    }
+
     return NextResponse.json({
-      message: "تم إعداد قاعدة البيانات بنجاح"
+      message: "تم إعداد قاعدة البيانات بنجاح",
+      tables: {
+        user_subscriptions: checkTableError ? false : true
+      }
     });
   } catch (error) {
     console.error("Error setting up database:", error);
@@ -167,4 +215,14 @@ export async function POST() {
       { status: 500 }
     );
   }
+}
+
+// وظيفة POST الرئيسية
+export async function POST() {
+  return setupDatabase();
+}
+
+// وظيفة GET الرئيسية
+export async function GET() {
+  return setupDatabase();
 }
