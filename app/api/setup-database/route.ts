@@ -84,6 +84,25 @@ const CREATE_TABLES_SQL = `
     metadata JSONB,
     UNIQUE(user_id, subscription_id)
   );
+
+  -- Create subscriptions table (alternative table name)
+  CREATE TABLE IF NOT EXISTS subscriptions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    subscription_id TEXT NOT NULL,
+    customer_id TEXT NOT NULL,
+    plan_id TEXT NOT NULL,
+    plan_name TEXT NOT NULL,
+    billing_cycle TEXT NOT NULL,
+    status TEXT NOT NULL,
+    current_period_start TIMESTAMP WITH TIME ZONE,
+    current_period_end TIMESTAMP WITH TIME ZONE,
+    cancel_at_period_end BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    metadata JSONB,
+    UNIQUE(user_id, subscription_id)
+  );
 `;
 
 // تعريف SQL لإعداد سياسات الأمان
@@ -129,20 +148,49 @@ const SETUP_POLICIES_SQL = `
     ON user_subscriptions
     USING (true)
     WITH CHECK (true);
+
+  -- Enable RLS on subscriptions
+  ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+  -- Set up subscriptions policies
+  DROP POLICY IF EXISTS "Users can view their own subscriptions" ON subscriptions;
+  CREATE POLICY "Users can view their own subscriptions"
+    ON subscriptions
+    FOR SELECT
+    USING (auth.uid() = user_id);
+
+  DROP POLICY IF EXISTS "Service role can manage subscriptions" ON subscriptions;
+  CREATE POLICY "Service role can manage subscriptions"
+    ON subscriptions
+    USING (true)
+    WITH CHECK (true);
 `;
 
 // وظيفة إنشاء الجداول
 const createTables = async (supabaseAdmin: any) => {
   try {
-    const { error } = await supabaseAdmin
-      .from('_postgres')
-      .select('*')
-      .eq('query', CREATE_TABLES_SQL)
-      .single();
+    // استخدام rpc لتنفيذ استعلامات SQL مباشرة
+    const { error } = await supabaseAdmin.rpc('exec_sql', { sql: CREATE_TABLES_SQL });
 
     if (error) {
       console.error('Error creating tables:', error);
-      throw error;
+
+      // محاولة استخدام طريقة بديلة
+      try {
+        const { error: error2 } = await supabaseAdmin
+          .from('_exec_sql')
+          .select('*')
+          .eq('query', CREATE_TABLES_SQL)
+          .single();
+
+        if (error2) {
+          console.error('Error creating tables (alternative method):', error2);
+          throw error2;
+        }
+      } catch (error2) {
+        console.error('Failed to create tables (alternative method):', error2);
+        throw error2;
+      }
     }
   } catch (error) {
     console.error('Failed to create tables:', error);
@@ -153,15 +201,28 @@ const createTables = async (supabaseAdmin: any) => {
 // وظيفة إعداد سياسات الأمان
 const setupPolicies = async (supabaseAdmin: any) => {
   try {
-    const { error } = await supabaseAdmin
-      .from('_postgres')
-      .select('*')
-      .eq('query', SETUP_POLICIES_SQL)
-      .single();
+    // استخدام rpc لتنفيذ استعلامات SQL مباشرة
+    const { error } = await supabaseAdmin.rpc('exec_sql', { sql: SETUP_POLICIES_SQL });
 
     if (error) {
       console.warn('Policy setup warning:', error);
-      // نستمر حتى لو كانت هناك أخطاء، لأن بعض السياسات قد تكون موجودة بالفعل
+
+      // محاولة استخدام طريقة بديلة
+      try {
+        const { error: error2 } = await supabaseAdmin
+          .from('_exec_sql')
+          .select('*')
+          .eq('query', SETUP_POLICIES_SQL)
+          .single();
+
+        if (error2) {
+          console.warn('Policy setup warning (alternative method):', error2);
+          // نستمر حتى لو كانت هناك أخطاء، لأن بعض السياسات قد تكون موجودة بالفعل
+        }
+      } catch (error2) {
+        console.warn('Failed to setup policies (alternative method):', error2);
+        // نستمر حتى لو كانت هناك أخطاء
+      }
     }
   } catch (error) {
     console.warn('Failed to setup policies:', error);
@@ -191,20 +252,31 @@ async function setupDatabase() {
     await createTables(supabaseAdmin);
     await setupPolicies(supabaseAdmin);
 
-    // التحقق من وجود جدول الاشتراكات
-    const { data: subscriptionsTable, error: checkTableError } = await supabaseAdmin
+    // التحقق من وجود جدول user_subscriptions
+    const { data: userSubscriptionsTable, error: checkUserSubscriptionsError } = await supabaseAdmin
       .from('user_subscriptions')
       .select('id')
       .limit(1);
 
-    if (checkTableError) {
-      console.warn('Warning checking user_subscriptions table:', checkTableError);
+    if (checkUserSubscriptionsError) {
+      console.warn('Warning checking user_subscriptions table:', checkUserSubscriptionsError);
+    }
+
+    // التحقق من وجود جدول subscriptions
+    const { data: subscriptionsTable, error: checkSubscriptionsError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id')
+      .limit(1);
+
+    if (checkSubscriptionsError) {
+      console.warn('Warning checking subscriptions table:', checkSubscriptionsError);
     }
 
     return NextResponse.json({
       message: "تم إعداد قاعدة البيانات بنجاح",
       tables: {
-        user_subscriptions: checkTableError ? false : true
+        user_subscriptions: checkUserSubscriptionsError ? false : true,
+        subscriptions: checkSubscriptionsError ? false : true
       }
     });
   } catch (error) {
